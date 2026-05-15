@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>業務改善のペンギン | 現場×AIで働き方を変える</title>
+  <meta name="description" content="製造業・倉庫業の現場から、AIを使った業務改善を発信中。非IT系の現場人間が作ったルーチン業務管理ツールも公開中。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --orange: #FF6B35;
+      --yellow: #FFD700;
+      --navy: #1a1a2e;
+      --dark: #2d2d2d;
+      --light: #f8f4ef;
+      --white: #ffffff;
+      --gray: #888;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--light);
+      color: var(--dark);
+      line-height: 1.7;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, var(--navy) 0%, #2a2a5a 100%);
+      color: var(--white);
+      text-align: center;
+      padding: 60px 20px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 300px; height: 300px;
+      background: var(--orange);
+      border-radius: 50%;
+      opacity: 0.08;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -80px; left: -40px;
+      width: 250px; height: 250px;
+      background: var(--yellow);
+      border-radius: 50%;
+      opacity: 0.07;
+    }
+
+    .hero-icon {
+      font-size: 80px;
+      margin-bottom: 16px;
+      display: block;
+      filter: drop-shadow(0 4px 12px rgba(255,107,53,0.4));
+    }
+
+    .hero h1 {
+      font-size: clamp(22px, 5vw, 36px);
+      font-weight: 900;
+      margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+
+    .hero h1 span {
+      color: var(--yellow);
+    }
+
+    .hero-sub {
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 20px;
+      letter-spacing: 0.06em;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .hero-tags span {
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--white);
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    /* ===== SECTION共通 ===== */
+    .section {
+      padding: 56px 20px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: inline-block;
+      background: var(--orange);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 4px 12px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .section h2 {
+      font-size: clamp(20px, 4vw, 28px);
+      font-weight: 900;
+      margin-bottom: 24px;
+      line-height: 1.4;
+    }
+
+    /* ===== ABOUT ===== */
+    .about-bg {
+      background: var(--white);
+    }
+
+    .profile-card {
+      background: var(--light);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    .profile-avatar {
+      font-size: 56px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .profile-info h3 {
+      font-size: 18px;
+      font-weight: 900;
+      margin-bottom: 4px;
+    }
+
+    .profile-id {
+      font-size: 13px;
+      color: var(--gray);
+      margin-bottom: 12px;
+    }
+
+    .profile-info p {
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .about-list {
+      list-style: none;
+      display: grid;
+      gap: 12px;
+    }
+
+    .about-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      padding: 12px 16px;
+      background: var(--light);
+      border-radius: 10px;
+      border-left: 3px solid var(--orange);
+    }
+
+    .about-list li .icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ===== APP紹介 ===== */
+    .app-bg {
+      background: linear-gradient(180deg, var(--light) 0%, #fff8f0 100%);
+    }
+
+    .app-card {
+      background: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, var(--orange), #e8521e);
+      color: var(--white);
+      padding: 28px 28px 24px;
+    }
+
+    .app-header h3 {
+      font-size: 20px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .app-header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .app-body {
+      padding: 28px;
+    }
+
+    .app-features {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .app-features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .app-features li::before {
+      content: '✅';
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .app-badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      background: #fff3ec;
+      color: var(--orange);
+      border: 1px solid #ffd4c2;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .app-note {
+      font-size: 13px;
+      color: var(--gray);
+      background: var(--light);
+      padding: 12px 16px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: block;
+      text-align: center;
+      padding: 14px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--orange), #e8521e);
+      color: var(--white);
+      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
+    }
+
+    .btn-outline {
+      border: 2px solid var(--orange);
+      color: var(--orange);
+      background: var(--white);
+    }
+
+    /* ===== SNSリンク ===== */
+    .sns-bg {
+      background: var(--white);
+    }
+
+    .sns-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .sns-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+      border-radius: 14px;
+      text-decoration: none;
+      color: var(--dark);
+      font-weight: 700;
+      transition: transform 0.15s, box-shadow 0.15s;
+      border: 2px solid transparent;
+    }
+
+    .sns-card:active { transform: scale(0.97); }
+
+    .sns-card.x {
+      background: #000;
+      color: #fff;
+    }
+
+    .sns-card.instagram {
+      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      color: #fff;
+    }
+
+    .sns-card.note {
+      background: #41c9b4;
+      color: #fff;
+    }
+
+    .sns-icon { font-size: 28px; flex-shrink: 0; }
+
+    .sns-info .label { font-size: 12px; opacity: 0.8; font-weight: 400; }
+    .sns-info .name { font-size: 16px; font-weight: 900; }
+
+    .sns-arrow { margin-left: auto; opacity: 0.7; font-size: 18px; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      background: var(--navy);
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      padding: 32px 20px;
+      font-size: 12px;
+    }
+
+    footer .footer-icon { font-size: 32px; margin-bottom: 8px; display: block; }
+    footer strong { color: var(--white); }
+
+    /* ===== DIVIDER ===== */
+    .wave {
+      width: 100%;
+      overflow: hidden;
+      line-height: 0;
+    }
+
+    /* ===== MOBILE調整 ===== */
+    @media (max-width: 480px) {
+      .profile-card { flex-direction: column; gap: 12px; }
+      .profile-avatar { font-size: 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== HERO ===== -->
+  <header class="hero">
+    <span class="hero-icon">🐧</span>
+    <h1>業務改善の<span>ペンギン</span></h1>
+    <p class="hero-sub">現場 × AI で働き方を変える</p>
+    <div class="hero-tags">
+      <span>🏭 製造業・倉庫業</span>
+      <span>🤖 生成AI活用</span>
+      <span>📋 業務改善</span>
+      <span>👨‍👩‍👧‍👦 32歳・五人家族</span>
+    </div>
+  </header>
+
+  <!-- ===== ABOUT ===== -->
+  <div class="about-bg">
+    <div class="section">
+      <span class="section-label">ABOUT</span>
+      <h2>自分のことを<br>少し紹介します</h2>
+
+      <div class="profile-card">
+        <div class="profile-avatar">🐧</div>
+        <div class="profile-info">
+          <h3>業務改善のペンギン</h3>
+          <p class="profile-id">@pengo_365</p>
+          <p>地方に住んで工場・倉庫で働く32歳。<br>三人の子どもを持つ五人家族のパパです。<br>現場の「慣れてしまってる無駄」をAIで解決中。</p>
+        </div>
+      </div>
+
+      <ul class="about-list">
+        <li>
+          <span class="icon">🏭</span>
+          <span>正社員として製造業務・倉庫業務・在庫管理に従事。現場歴10年以上。</span>
+        </li>
+        <li>
+          <span class="icon">🤖</span>
+          <span>ChatGPT・Gemini・Copilot・Claude Codeを使って実務を効率化。IT会社でもプログラマーでもない、ずっと現場側の人間。</span>
+        </li>
+        <li>
+          <span class="icon">💡</span>
+          <span>「現場の負担を少しでも軽くしたい」その思いで、自分が使えるツールを自分で作り始めた。</span>
+        </li>
+        <li>
+          <span class="icon">🔥</span>
+          <span>現場経験 × AI。この組み合わせがかなり強い時代になると思ってる。</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== APP紹介 ===== -->
+  <div class="app-bg">
+    <div class="section">
+      <span class="section-label">TOOL</span>
+      <h2>現場で自分が作った<br>ツールを公開中</h2>
+
+      <div class="app-card">
+        <div class="app-header">
+          <h3>📋 ルーチン業務管理アプリ</h3>
+          <p>毎日・毎週の繰り返し業務を、ブラウザだけで管理できるツール</p>
+        </div>
+        <div class="app-body">
+          <ul class="app-features">
+            <li>インストール不要。ブラウザで開くだけ</li>
+            <li>点検・清掃・記録などの繰り返し業務を管理</li>
+            <li>入力データはそのままExcelに出力</li>
+            <li>パソコンが苦手な人でも使える</li>
+            <li>スマホ・タブレットにも対応</li>
+          </ul>
+
+          <div class="app-badge-row">
+            <span class="badge">HTML単一ファイル</span>
+            <span class="badge">インストール不要</span>
+            <span class="badge">Excel出力</span>
+            <span class="badge">無料</span>
+          </div>
+
+          <p class="app-note">💬 「Excelでやってたけど、これの方が簡単だった」という声をいただいています。まだ試作段階ですが、ぜひ試してみてください。</p>
+
+          <!-- ツールのリンクができたらここに追加 -->
+          <a href="#sns" class="btn btn-primary">📩 DMで問い合わせる</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SNSリンク ===== -->
+  <div class="sns-bg" id="sns">
+    <div class="section">
+      <span class="section-label">SNS</span>
+      <h2>各SNSで<br>発信しています</h2>
+
+      <div class="sns-grid">
+        <a href="https://twitter.com/YOUR_X_ID" class="sns-card x" target="_blank" rel="noopener">
+          <span class="sns-icon">𝕏</span>
+          <div class="sns-info">
+            <div class="label">X (Twitter)</div>
+            <div class="name">業務改善のペンギン</div>
+          </div>
+          <span class="sns-arrow">→</span>
+        </a>
+
+        <a href="https://www.instagram.com/pengo_365/" class="sns-card instagram" target="_blank" rel="noopener">
+          <span class="sns-icon">📷</span>
+          <div class="sns-info">
+            <div class="label">Instagram</div>
+            <div class="name">@pengo_365</div>
+          </div>
+          <span class="sns-arrow">→</span>
+        </a>
+
+        <a href="https://note.com/YOUR_NOTE_ID" class="sns-card note" target="_blank" rel="noopener">
+          <span class="sns-icon">📝</span>
+          <div class="sns-info">
+            <div class="label">note</div>
+            <div class="name">業務改善のペンギン</div>
+          </div>
+          <span class="sns-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <span class="footer-icon">🐧</span>
+    <p><strong>業務改善のペンギン</strong></p>
+    <p style="margin-top:6px;">現場 × AI で、もっと働きやすい毎日を。</p>
+  </footer>
+
+</body>
+</html>
