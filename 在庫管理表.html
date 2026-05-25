@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<!-- saved from url=(0049)file:///C:/Users/User/Downloads/zairyo_kanri.html -->
+<html lang="ja"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>在庫管理表</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hiragino Sans','Yu Gothic',sans-serif;font-size:14px;background:#f5f5f0;color:#1a1a1a}
+header{background:#1a1a1a;color:#fff;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+header h1{font-size:15px;font-weight:500;letter-spacing:0.05em}
+.toolbar{padding:12px 16px;display:flex;gap:8px;flex-wrap:wrap;background:#fff;border-bottom:1px solid #e0e0d8}
+button{padding:9px 16px;border:1px solid #ccc;border-radius:6px;background:#fff;color:#1a1a1a;font-size:13px;font-family:inherit;cursor:pointer;white-space:nowrap}
+button:active{transform:scale(0.97)}
+button.primary{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+button.a-btn{background:#e8f4ff;border-color:#b3d4f0;color:#1a5a8a}
+button.b-btn{background:#fff4e8;border-color:#f0d4b3;color:#8a4a1a}
+button.del-btn{background:#fff0f0;border-color:#f0b3b3;color:#8a1a1a;padding:6px 10px;font-size:12px}
+.scroll-wrap{overflow-x:auto;padding:16px}
+table{border-collapse:collapse;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+th,td{border:1px solid #e0e0d8;padding:0;text-align:center;vertical-align:middle}
+th{background:#f0efe8;font-weight:500;font-size:12px;color:#555;padding:8px 10px;white-space:nowrap}
+th.a-group{background:#ddeeff;color:#1a5a8a}
+th.b-group{background:#ffeedd;color:#8a4a1a}
+th.a-sub{background:#eef6ff;color:#1a5a8a;font-weight:400}
+th.b-sub{background:#fff6ee;color:#8a4a1a;font-weight:400}
+td{min-width:90px}
+td.fixed{min-width:unset}
+td input[type="text"],td input[type="date"]{border:none;background:transparent;width:100%;text-align:center;font-size:13px;font-family:inherit;color:#1a1a1a;outline:none;padding:8px 6px}
+td input[type="number"]{border:none;background:transparent;width:80px;text-align:center;font-size:14px;font-family:inherit;color:#1a1a1a;outline:none;padding:8px 4px}
+td input:focus{background:#f0f7ff}
+td.remain-cell{font-size:16px;font-weight:600;padding:8px 12px;min-width:70px}
+td.remain-ok{color:#1D9E75;background:#f0fff8}
+td.remain-low{color:#cc7700;background:#fffaed}
+td.remain-zero{color:#cc2200;background:#fff0ee}
+td.lot-cell input{width:110px}
+tr:hover td{background:#fafaf7}
+tr:hover td.remain-ok{background:#eafff4}
+tr:hover td.remain-low{background:#fff7e0}
+tr:hover td.remain-zero{background:#ffe8e5}
+.ship-cell{padding:4px 6px;min-width:90px}
+.ship-cell input{display:block;width:100%;margin:2px 0}
+.ship-date{font-size:12px;color:#555;padding:4px 4px 2px}
+.ship-qty{font-size:14px;font-weight:500;padding:2px 4px 4px}
+.empty-msg{text-align:center;padding:32px;color:#888;font-size:14px;background:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🐧 在庫管理表</h1>
+  <span id="update-time" style="font-size:11px;opacity:0.6">23:29:52</span>
+</header>
+
+<div class="toolbar">
+  <button class="primary" onclick="addRow()">＋ ロット追加</button>
+  <button class="a-btn" onclick="addDateCol(&#39;A&#39;)">A社 ＋出荷日追加</button>
+  <button class="b-btn" onclick="addDateCol(&#39;B&#39;)">B社 ＋出荷日追加</button>
+</div>
+
+<div class="scroll-wrap">
+  <div id="table-wrap"><table><thead>
+    <tr>
+      <th rowspan="2" style="min-width:90px">日付</th>
+      <th rowspan="2" style="min-width:110px">ロット番号</th>
+      <th rowspan="2" style="min-width:70px">数量</th>
+      <th rowspan="2" style="min-width:90px">入庫日</th>
+      <th rowspan="2" style="min-width:70px">残数</th>
+      <th colspan="3" class="a-group">A社</th>
+      <th colspan="3" class="b-group">B社</th>
+      <th rowspan="2" style="min-width:50px"></th>
+    </tr>
+    <tr><th class="a-sub" style="min-width:90px">出荷1</th><th class="a-sub" style="min-width:90px">出荷2</th><th class="a-sub" style="min-width:90px">出荷3</th><th class="b-sub" style="min-width:90px">出荷1</th><th class="b-sub" style="min-width:90px">出荷2</th><th class="b-sub" style="min-width:90px">出荷3</th></tr></thead><tbody><tr>
+      <td class="fixed"><input type="date" value="2025/05/21" onchange="setField(1,&#39;date&#39;,this.value)" title="05/21"></td>
+      <td class="lot-cell"><input type="text" value="abcefg" onchange="setField(1,&#39;lot&#39;,this.value)" placeholder="LOT-001" style="width:110px"></td>
+      <td class="fixed"><input type="number" value="20" onchange="setField(1,&#39;qty&#39;,this.value)" placeholder="0" style="width:70px"></td>
+      <td class="fixed"><input type="date" value="2025/05/21" onchange="setField(1,&#39;inDate&#39;,this.value)" title="05/21"></td>
+      <td class="remain-cell remain-zero">-20</td><td class="ship-cell">
+        <input type="date" value="2025/05/21" class="ship-date" onchange="setShip(1,&#39;A&#39;,0,&#39;date&#39;,this.value)" title="05/21">
+        <input type="number" value="10" class="ship-qty" onchange="setShip(1,&#39;A&#39;,0,&#39;qty&#39;,this.value)" placeholder="0">
+      </td><td class="ship-cell">
+        <input type="date" value="2025/05/22" class="ship-date" onchange="setShip(1,&#39;A&#39;,1,&#39;date&#39;,this.value)" title="05/22">
+        <input type="number" value="10" class="ship-qty" onchange="setShip(1,&#39;A&#39;,1,&#39;qty&#39;,this.value)" placeholder="0">
+      </td><td class="ship-cell">
+        <input type="date" value="" class="ship-date" onchange="setShip(1,&#39;A&#39;,2,&#39;date&#39;,this.value)" title="日付">
+        <input type="number" value="" class="ship-qty" onchange="setShip(1,&#39;A&#39;,2,&#39;qty&#39;,this.value)" placeholder="0">
+      </td><td class="ship-cell">
+        <input type="date" value="2025/05/21" class="ship-date" onchange="setShip(1,&#39;B&#39;,0,&#39;date&#39;,this.value)" title="05/21">
+        <input type="number" value="10" class="ship-qty" onchange="setShip(1,&#39;B&#39;,0,&#39;qty&#39;,this.value)" placeholder="0">
+      </td><td class="ship-cell">
+        <input type="date" value="2025/05/21" class="ship-date" onchange="setShip(1,&#39;B&#39;,1,&#39;date&#39;,this.value)" title="05/21">
+        <input type="number" value="10" class="ship-qty" onchange="setShip(1,&#39;B&#39;,1,&#39;qty&#39;,this.value)" placeholder="0">
+      </td><td class="ship-cell">
+        <input type="date" value="" class="ship-date" onchange="setShip(1,&#39;B&#39;,2,&#39;date&#39;,this.value)" title="日付">
+        <input type="number" value="" class="ship-qty" onchange="setShip(1,&#39;B&#39;,2,&#39;qty&#39;,this.value)" placeholder="0">
+      </td><td class="fixed"><button class="del-btn" onclick="delRow(1)">削除</button></td></tr></tbody></table></div>
+</div>
+
+<script>
+let colsA = 3;
+let colsB = 3;
+let nextId = 2;
+
+let rows = [{
+  id: 1,
+  date: '2025/05/21',
+  lot: 'abcefg',
+  qty: 20,
+  inDate: '2025/05/21',
+  shipA: [{date:'2025/05/21',qty:10},{date:'2025/05/22',qty:10},{date:'',qty:''}],
+  shipB: [{date:'2025/05/21',qty:10},{date:'2025/05/21',qty:10},{date:'',qty:''}]
+}];
+
+function addRow() {
+  rows.push({
+    id: nextId++,
+    date: '',
+    lot: '',
+    qty: '',
+    inDate: '',
+    shipA: Array(colsA).fill(null).map(() => ({date:'',qty:''})),
+    shipB: Array(colsB).fill(null).map(() => ({date:'',qty:''}))
+  });
+  render();
+  setTimeout(() => {
+    const inputs = document.querySelectorAll('td input[type="date"]');
+    if (inputs.length > 0) inputs[inputs.length - colsA * 2 - colsB * 2 - 4].focus();
+  }, 50);
+}
+
+function addDateCol(co) {
+  if (co === 'A') {
+    colsA++;
+    rows.forEach(r => { r.shipA.push({date:'',qty:''}); });
+  } else {
+    colsB++;
+    rows.forEach(r => { r.shipB.push({date:'',qty:''}); });
+  }
+  render();
+}
+
+function delRow(id) {
+  if (rows.length === 1) { alert('最後の行は削除できません'); return; }
+  rows = rows.filter(r => r.id !== id);
+  render();
+}
+
+function calcRemain(r) {
+  let out = 0;
+  r.shipA.forEach(s => { const v = parseInt(s.qty); if (!isNaN(v) && v > 0) out += v; });
+  r.shipB.forEach(s => { const v = parseInt(s.qty); if (!isNaN(v) && v > 0) out += v; });
+  return (parseInt(r.qty) || 0) - out;
+}
+
+function remainClass(v) {
+  if (v <= 0) return 'remain-zero';
+  if (v <= 5) return 'remain-low';
+  return 'remain-ok';
+}
+
+function fmtDate(val) {
+  if (!val) return '';
+  const m = val.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+  if (m) return m[2] + '/' + m[3];
+  const m2 = val.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m2) return m2[2].replace(/^0/,'') + '/' + m2[3].replace(/^0/,'');
+  return val;
+}
+
+function render() {
+  const wrap = document.getElementById('table-wrap');
+
+  let h = `<table><thead>
+    <tr>
+      <th rowspan="2" style="min-width:90px">日付</th>
+      <th rowspan="2" style="min-width:110px">ロット番号</th>
+      <th rowspan="2" style="min-width:70px">数量</th>
+      <th rowspan="2" style="min-width:90px">入庫日</th>
+      <th rowspan="2" style="min-width:70px">残数</th>
+      <th colspan="${colsA}" class="a-group">A社</th>
+      <th colspan="${colsB}" class="b-group">B社</th>
+      <th rowspan="2" style="min-width:50px"></th>
+    </tr>
+    <tr>`;
+  for (let i = 0; i < colsA; i++) h += `<th class="a-sub" style="min-width:90px">出荷${i+1}</th>`;
+  for (let i = 0; i < colsB; i++) h += `<th class="b-sub" style="min-width:90px">出荷${i+1}</th>`;
+  h += `</tr></thead><tbody>`;
+
+  rows.forEach(r => {
+    const remain = calcRemain(r);
+    const rcls = remainClass(remain);
+    h += `<tr>
+      <td class="fixed"><input type="date" value="${r.date}" onchange="setField(${r.id},'date',this.value)" title="${fmtDate(r.date)||'日付'}"></td>
+      <td class="lot-cell"><input type="text" value="${r.lot}" onchange="setField(${r.id},'lot',this.value)" placeholder="LOT-001" style="width:110px"></td>
+      <td class="fixed"><input type="number" value="${r.qty}" onchange="setField(${r.id},'qty',this.value)" placeholder="0" style="width:70px"></td>
+      <td class="fixed"><input type="date" value="${r.inDate}" onchange="setField(${r.id},'inDate',this.value)" title="${fmtDate(r.inDate)||'入庫日'}"></td>
+      <td class="remain-cell ${rcls}">${remain}</td>`;
+
+    for (let i = 0; i < colsA; i++) {
+      const s = r.shipA[i] || {date:'',qty:''};
+      h += `<td class="ship-cell">
+        <input type="date" value="${s.date}" class="ship-date" onchange="setShip(${r.id},'A',${i},'date',this.value)" title="${fmtDate(s.date)||'日付'}">
+        <input type="number" value="${s.qty}" class="ship-qty" onchange="setShip(${r.id},'A',${i},'qty',this.value)" placeholder="0">
+      </td>`;
+    }
+    for (let i = 0; i < colsB; i++) {
+      const s = r.shipB[i] || {date:'',qty:''};
+      h += `<td class="ship-cell">
+        <input type="date" value="${s.date}" class="ship-date" onchange="setShip(${r.id},'B',${i},'date',this.value)" title="${fmtDate(s.date)||'日付'}">
+        <input type="number" value="${s.qty}" class="ship-qty" onchange="setShip(${r.id},'B',${i},'qty',this.value)" placeholder="0">
+      </td>`;
+    }
+    h += `<td class="fixed"><button class="del-btn" onclick="delRow(${r.id})">削除</button></td></tr>`;
+  });
+
+  h += `</tbody></table>`;
+  wrap.innerHTML = h;
+
+  document.getElementById('update-time').textContent = new Date().toLocaleTimeString('ja-JP');
+}
+
+function setField(id, field, val) {
+  const r = rows.find(r => r.id === id);
+  if (r) {
+    r[field] = val;
+    updateRemainCell(id);
+  }
+}
+
+function setShip(id, co, idx, field, val) {
+  const r = rows.find(r => r.id === id);
+  if (r) {
+    if (co === 'A') r.shipA[idx][field] = val;
+    else r.shipB[idx][field] = val;
+    updateRemainCell(id);
+  }
+}
+
+function updateRemainCell(id) {
+  const r = rows.find(r => r.id === id);
+  if (!r) return;
+  const remain = calcRemain(r);
+  const rcls = remainClass(remain);
+  const allRemainCells = document.querySelectorAll('td.remain-cell');
+  rows.forEach((row, i) => {
+    if (row.id === id && allRemainCells[i]) {
+      allRemainCells[i].textContent = remain;
+      allRemainCells[i].className = 'remain-cell ' + rcls;
+    }
+  });
+}
+
+render();
+</script>
+
+
+</body></html>
