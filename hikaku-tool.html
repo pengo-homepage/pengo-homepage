@@ -775,7 +775,7 @@ const SITES = [
 { id: 'amazon', name: 'Amazon', emoji: '📦', url: (q, min, max) => { let u = `https://www.amazon.co.jp/s?k=${enc(q)}&s=review-rank`; if (max > 0) u += `&rh=p_36%3A${min*100}-${max*100}`; return u; } },
 { id: 'rakuten', name: '楽天市場', emoji: '🛍️', url: (q, min, max) => { let u = `https://search.rakuten.co.jp/search/mall/${enc(q)}/?s=4`; if (min > 0) u += `&min=${min}`; if (max > 0) u += `&max=${max}`; return u; } },
 { id: 'yahoo', name: 'Yahoo!ショッピング', emoji: '🟣', url: (q, min, max) => { let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}&sort=review`; if (min > 0) u += `&pricefrom=${min}`; if (max > 0) u += `&priceto=${max}`; return u; } },
-{ id: 'kakaku', name: '価格.com', emoji: '💴', url: (q, min, max) => { let u = `https://kakaku.com/search_results/${enc(q)}/?sort=Trevinum`; if (min > 0) u += `&pricemin=${min}`; if (max > 0) u += `&pricemax=${max}`; return u; } },
+{ id: 'kakaku', name: '価格.com', emoji: '💴', url: (q, min, max) => { let u = `https://kakaku.com/search_results/${enc(q)}/`; if (min > 0 || max > 0) u += `?min=${min}&max=${max}`; return u; } },
 { id: 'monotaro', name: 'モノタロウ', emoji: '🔧', url: (q, min, max) => { let u = `https://www.monotaro.com/s/pages/productList/?searchname=${enc(q)}`; if (min > 0) u += `&price_min=${min}`; if (max > 0) u += `&price_max=${max}`; return u; } },
 { id: 'yodobashi', name: 'ヨドバシ', emoji: '🏬', url: (q) => `https://www.yodobashi.com/?word=${enc(q)}&order=4` },
 { id: 'mercari', name: 'メルカリ', emoji: '♻️', url: (q, min, max) => { let u = `https://jp.mercari.com/search?keyword=${enc(q)}&sort=num_likes_desc`; if (min > 0) u += `&price_min=${min}`; if (max > 0) u += `&price_max=${max}`; return u; } },

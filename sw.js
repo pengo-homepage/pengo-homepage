@@ -1,5 +1,9 @@
-const CACHE_NAME = 'hikaku-v1';
-const CACHE_URLS = ['./hikaku-tool.html', './manifest.json', './icon.svg'];
+const CACHE_NAME = 'hikaku-v2';
+const CACHE_URLS = [
+  '/pengo-homepage/hikaku-tool.html',
+  '/pengo-homepage/manifest.json',
+  '/pengo-homepage/icon.svg'
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(
