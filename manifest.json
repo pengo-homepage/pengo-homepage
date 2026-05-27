@@ -2,8 +2,8 @@
   "name": "かんたん比較ツール",
   "short_name": "比較ツール",
   "description": "Amazon・楽天・Yahoo!など複数サイトを一気に比較できるツール",
-  "start_url": "./hikaku-tool.html",
-  "scope": "./",
+  "start_url": "/pengo-homepage/hikaku-tool.html",
+  "scope": "/pengo-homepage/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0d1117",
@@ -11,7 +11,7 @@
   "lang": "ja",
   "icons": [
     {
-      "src": "icon.svg",
+      "src": "/pengo-homepage/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"
