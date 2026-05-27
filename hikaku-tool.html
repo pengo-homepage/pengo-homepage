@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐧 かんたん比較ツール | 業務改善のペンギン</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e90ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="比較ツール">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+
+:root {
+--bg: #0d1117;
+--surface: #161b22;
+--surface2: #21262d;
+--border: #30363d;
+--accent: #1e90ff;
+--accent2: #00d4aa;
+--accent3: #ff6b35;
+--text: #e6edf3;
+--text-mid: #c9d1d9;
+--text-muted: #8b949e;
+--penguin: #58a6ff;
+--radius: 14px;
+--shadow: 0 4px 24px rgba(30,144,255,.12);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+background: var(--bg);
+color: var(--text);
+font-family: 'Noto Sans JP', sans-serif;
+font-size: 17px;
+line-height: 1.7;
+overflow-x: hidden;
+}
+
+.header {
+background: var(--surface);
+border-bottom: 1px solid var(--border);
+padding: 16px 24px;
+display: flex;
+align-items: center;
+gap: 12px;
+position: sticky;
+top: 0;
+z-index: 200;
+box-shadow: 0 2px 16px rgba(0,0,0,.4);
+}
+.header-icon { font-size: 2rem; animation: float 3s ease-in-out infinite; }
+@keyframes float {
+0%,100% { transform: translateY(0); }
+50% { transform: translateY(-6px); }
+}
+.header-title {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: 1.2rem;
+font-weight: 900;
+color: var(--text);
+line-height: 1.2;
+}
+.header-sub { font-size: 0.82rem; color: var(--text-muted); }
+
+.hero {
+padding: 64px 24px 56px;
+text-align: center;
+position: relative;
+overflow: hidden;
+}
+.hero::before {
+content: '';
+position: absolute;
+inset: 0;
+background:
+radial-gradient(ellipse 60% 50% at 30% 20%, rgba(30,144,255,.16) 0%, transparent 60%),
+radial-gradient(ellipse 50% 40% at 75% 80%, rgba(0,212,170,.12) 0%, transparent 55%);
+pointer-events: none;
+}
+.grid-bg {
+position: absolute;
+inset: 0;
+background-image:
+linear-gradient(rgba(48,54,61,.35) 1px, transparent 1px),
+linear-gradient(90deg, rgba(48,54,61,.35) 1px, transparent 1px);
+background-size: 40px 40px;
+pointer-events: none;
+opacity: .5;
+}
+.hero-badge {
+display: inline-block;
+padding: 5px 16px;
+border: 1px solid var(--accent);
+border-radius: 20px;
+font-size: .85rem;
+color: var(--accent);
+letter-spacing: .06em;
+margin-bottom: 22px;
+background: rgba(30,144,255,.08);
+position: relative;
+}
+.hero h1 {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: clamp(2rem, 6vw, 3.4rem);
+font-weight: 900;
+line-height: 1.25;
+margin-bottom: 18px;
+position: relative;
+}
+.hero h1 span {
+background: linear-gradient(90deg, var(--accent), var(--accent2));
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+.hero-sub {
+font-size: clamp(1rem, 2.4vw, 1.15rem);
+color: var(--text-mid);
+max-width: 580px;
+margin: 0 auto 40px;
+position: relative;
+}
+
+.section { padding: 64px 24px; }
+.section-dark { background: var(--surface); }
+.container { max-width: 900px; margin: 0 auto; }
+.section-label {
+font-size: .8rem;
+letter-spacing: .15em;
+color: var(--accent2);
+text-transform: uppercase;
+margin-bottom: 8px;
+display: block;
+font-weight: 700;
+}
+.section-title {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: clamp(1.6rem, 4vw, 2.2rem);
+font-weight: 900;
+margin-bottom: 36px;
+line-height: 1.3;
+}
+
+.tool-card {
+background: var(--surface2);
+border: 1px solid rgba(30,144,255,.25);
+border-radius: var(--radius);
+padding: 32px 28px;
+box-shadow: var(--shadow);
+position: relative;
+}
+.tool-card-inner { max-width: 860px; margin: 0 auto; }
+
+.search-label {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: 1.1rem;
+font-weight: 900;
+color: var(--text);
+margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.search-row { display: flex; gap: 10px; margin-bottom: 10px; }
+.search-input {
+flex: 1;
+padding: 15px 18px;
+background: var(--surface);
+border: 1.5px solid var(--border);
+border-radius: 10px;
+font-size: 1.05rem;
+font-family: 'Noto Sans JP', sans-serif;
+color: var(--text);
+outline: none;
+transition: border-color .2s, box-shadow .2s;
+}
+.search-input:focus {
+border-color: var(--accent);
+box-shadow: 0 0 0 3px rgba(30,144,255,.18);
+}
+.search-input::placeholder { color: var(--text-muted); }
+
+.btn-primary {
+padding: 15px 26px;
+background: linear-gradient(135deg, var(--accent), #0070d8);
+color: #fff;
+border: none;
+border-radius: 10px;
+font-size: 1rem;
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-weight: 900;
+cursor: pointer;
+white-space: nowrap;
+transition: opacity .15s, transform .1s;
+text-decoration: none;
+display: inline-flex;
+align-items: center;
+gap: 6px;
+}
+.btn-primary:hover { opacity: .88; transform: translateY(-1px); }
+.btn-primary:active { transform: scale(.97); }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+.btn-ghost {
+padding: 15px 26px;
+border: 1px solid var(--border);
+color: var(--text);
+border-radius: 10px;
+font-size: 1rem;
+cursor: pointer;
+text-decoration: none;
+transition: border-color .2s, background .2s;
+background: transparent;
+font-family: 'Noto Sans JP', sans-serif;
+}
+.btn-ghost:hover { border-color: var(--accent); background: rgba(30,144,255,.08); }
+.search-hint { font-size: .84rem; color: var(--text-muted); margin-bottom: 28px; }
+
+.tool-divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+.filter-title {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: 1rem;
+font-weight: 900;
+color: var(--text);
+margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.chip {
+padding: 9px 18px;
+border: 1.5px solid var(--border);
+border-radius: 30px;
+font-size: .95rem;
+font-weight: 700;
+color: var(--text-mid);
+background: var(--surface);
+cursor: pointer;
+transition: all .15s;
+-webkit-user-select: none;
+user-select: none;
+font-family: 'Noto Sans JP', sans-serif;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.active { border-color: var(--accent); color: #fff; background: var(--accent); }
+
+.custom-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.price-input {
+padding: 10px 14px;
+background: var(--surface);
+border: 1.5px solid var(--border);
+border-radius: 8px;
+font-size: 1rem;
+color: var(--text);
+width: 130px;
+outline: none;
+transition: border-color .2s;
+font-family: 'Noto Sans JP', sans-serif;
+}
+.price-input:focus { border-color: var(--accent); }
+.price-label { font-size: 1rem; color: var(--text-mid); font-weight: 700; }
+.btn-apply {
+padding: 10px 18px;
+background: var(--accent2);
+color: #0d1117;
+border: none;
+border-radius: 8px;
+font-size: .95rem;
+font-weight: 700;
+cursor: pointer;
+font-family: 'Zen Kaku Gothic New', sans-serif;
+transition: opacity .15s;
+}
+.btn-apply:hover { opacity: .85; }
+
+.sites-label {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: 1rem;
+font-weight: 900;
+color: var(--text);
+margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.sites-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+gap: 10px;
+margin-bottom: 28px;
+}
+.site-card {
+background: var(--surface);
+border: 1.5px solid var(--border);
+border-radius: 12px;
+padding: 16px 10px;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 6px;
+cursor: pointer;
+transition: border-color .15s, background .15s, transform .1s;
+-webkit-user-select: none;
+user-select: none;
+position: relative;
+}
+.site-card:hover { border-color: var(--penguin); transform: translateY(-2px); }
+.site-card.on { border-color: var(--accent); background: rgba(30,144,255,.1); }
+.site-check {
+position: absolute;
+top: 8px; right: 8px;
+width: 20px; height: 20px;
+border-radius: 50%;
+border: 1.5px solid var(--border);
+background: var(--surface2);
+display: flex; align-items: center; justify-content: center;
+font-size: .7rem; color: transparent;
+transition: all .15s;
+}
+.site-card.on .site-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+.site-emoji { font-size: 1.9rem; }
+.site-name { font-size: .9rem; font-weight: 700; color: var(--text-mid); text-align: center; }
+
+.btn-open-all {
+width: 100%;
+padding: 20px;
+background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+color: #fff;
+border: none;
+border-radius: var(--radius);
+font-size: 1.2rem;
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-weight: 900;
+cursor: pointer;
+box-shadow: 0 6px 32px rgba(30,144,255,.3);
+transition: opacity .15s, transform .1s;
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 10px;
+letter-spacing: .04em;
+margin-bottom: 20px;
+}
+.btn-open-all:hover { opacity: .9; }
+.btn-open-all:active { transform: scale(.98); }
+.btn-open-all:disabled { opacity: .35; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.status-bar {
+background: rgba(0,212,170,.1);
+border: 1px solid var(--accent2);
+border-radius: 10px;
+padding: 13px 18px;
+font-size: 1rem;
+font-weight: 700;
+color: var(--accent2);
+display: none;
+align-items: center;
+gap: 8px;
+margin-bottom: 16px;
+}
+.status-bar.visible { display: flex; }
+
+.links-panel {
+background: var(--surface2);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+padding: 22px;
+display: none;
+margin-top: 4px;
+}
+.links-panel.visible { display: block; }
+.links-title {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: 1rem;
+font-weight: 900;
+color: var(--text);
+margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.link-row {
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 13px 16px;
+border-radius: 10px;
+margin-bottom: 8px;
+background: var(--surface);
+border: 1px solid var(--border);
+text-decoration: none;
+color: var(--text);
+font-size: 1rem;
+transition: border-color .15s, background .15s;
+}
+.link-row:hover { border-color: var(--accent); background: rgba(30,144,255,.07); }
+.link-row-emoji { font-size: 1.5rem; flex-shrink: 0; }
+.link-row-name { flex: 1; font-weight: 700; }
+.link-row-arrow { color: var(--accent); font-size: 1.1rem; font-weight: 900; }
+.review-tip {
+background: rgba(255,107,53,.1);
+border: 1px solid rgba(255,107,53,.4);
+border-radius: 10px;
+padding: 14px 16px;
+margin-top: 16px;
+font-size: .93rem;
+color: #ffb899;
+line-height: 1.7;
+}
+
+.plans-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+gap: 20px;
+}
+.plan-card {
+background: var(--bg);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+padding: 28px 24px;
+position: relative;
+transition: border-color .25s, transform .2s;
+}
+.plan-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+.plan-card.featured {
+border-color: var(--accent2);
+background: linear-gradient(135deg, rgba(0,212,170,.06), rgba(30,144,255,.06));
+}
+.plan-card.featured::before {
+content: '🔥 おすすめ';
+position: absolute;
+top: -13px; left: 50%;
+transform: translateX(-50%);
+background: var(--accent2);
+color: #0d1117;
+font-size: .78rem;
+font-weight: 900;
+padding: 3px 14px;
+border-radius: 20px;
+white-space: nowrap;
+font-family: 'Zen Kaku Gothic New', sans-serif;
+}
+.plan-emoji { font-size: 2rem; margin-bottom: 10px; display: block; }
+.plan-name {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: 1.3rem;
+font-weight: 900;
+margin-bottom: 6px;
+color: var(--text);
+}
+.plan-target { font-size: .9rem; color: var(--text-muted); margin-bottom: 18px; }
+.plan-price {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: 2.4rem;
+font-weight: 900;
+color: var(--accent);
+margin-bottom: 4px;
+line-height: 1;
+}
+.plan-price-note { font-size: .85rem; color: var(--text-muted); margin-bottom: 20px; }
+.plan-list { list-style: none; margin-bottom: 24px; }
+.plan-list li {
+font-size: .95rem;
+color: var(--text-mid);
+padding: 7px 0;
+border-bottom: 1px solid var(--border);
+display: flex;
+align-items: flex-start;
+gap: 8px;
+}
+.plan-list li::before { content: '✓'; color: var(--accent2); flex-shrink: 0; font-weight: 700; }
+.plan-btn {
+display: block;
+text-align: center;
+padding: 13px;
+background: linear-gradient(135deg, var(--accent), #0070d8);
+color: #fff;
+border-radius: 8px;
+font-size: .95rem;
+font-weight: 700;
+text-decoration: none;
+transition: opacity .15s;
+font-family: 'Zen Kaku Gothic New', sans-serif;
+}
+.plan-btn:hover { opacity: .85; }
+
+.payment-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+gap: 14px;
+}
+.pay-card {
+background: var(--bg);
+border: 1px solid var(--border);
+border-radius: 12px;
+padding: 20px 16px;
+text-align: center;
+transition: border-color .15s;
+}
+.pay-card:hover { border-color: var(--accent); }
+.pay-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+.pay-name { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.pay-sub { font-size: .84rem; color: var(--text-muted); }
+
+.flow-steps { max-width: 600px; margin: 0 auto; }
+.flow-step {
+display: flex;
+gap: 20px;
+align-items: flex-start;
+position: relative;
+}
+.flow-step:not(:last-child)::after {
+content: '';
+position: absolute;
+left: 19px; top: 44px;
+width: 2px;
+height: calc(100% - 8px);
+background: linear-gradient(var(--accent), var(--accent2));
+opacity: .35;
+}
+.step-num {
+width: 40px; height: 40px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(--accent), var(--accent2));
+display: flex; align-items: center; justify-content: center;
+font-weight: 900; font-size: .95rem;
+flex-shrink: 0; color: #fff;
+font-family: 'Zen Kaku Gothic New', sans-serif;
+}
+.step-body { padding: 6px 0 34px; }
+.step-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 5px; color: var(--text); }
+.step-desc { font-size: .92rem; color: var(--text-mid); }
+
+.cta-section {
+text-align: center;
+padding: 72px 24px;
+background: linear-gradient(135deg, rgba(30,144,255,.08), rgba(0,212,170,.08));
+border-top: 1px solid var(--border);
+}
+.cta-section h2 {
+font-family: 'Zen Kaku Gothic New', sans-serif;
+font-size: clamp(1.5rem, 4vw, 2rem);
+font-weight: 900;
+margin-bottom: 16px;
+color: var(--text);
+}
+.cta-section p { color: var(--text-mid); margin-bottom: 32px; font-size: 1rem; }
+.cta-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+
+footer {
+text-align: center;
+padding: 28px 20px;
+border-top: 1px solid var(--border);
+font-size: .88rem;
+color: var(--text-muted);
+}
+footer a { color: var(--accent); text-decoration: none; }
+
+.divider { height: 1px; background: var(--border); }
+
+.fade-in { opacity:0; transform:translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+.fade-in.visible { opacity:1; transform:translateY(0); }
+
+@media (max-width: 600px) {
+.search-row { flex-direction: column; }
+.btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+.cta-btns { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+<span class="header-icon">🐧</span>
+<div>
+<div class="header-title">かんたん比較ツール</div>
+<div class="header-sub">業務改善のペンギン</div>
+</div>
+</header>
+
+<div class="hero">
+<div class="grid-bg"></div>
+<span class="hero-badge">業務改善のペンギン × ショッピング比較</span>
+<h1>商品名を入れて<br><span>一気に比べる。</span></h1>
+<p class="hero-sub">
+Amazon・楽天・Yahoo!など複数サイトを<br>
+ボタン1つで同時に開いてレビューまで比較できます。
+</p>
+</div>
+
+<div class="divider"></div>
+
+<section class="section section-dark">
+<div class="container">
+<div class="tool-card fade-in">
+<div class="tool-card-inner">
+<div class="search-label">🔍 商品名・キーワードを入力</div>
+<div class="search-row">
+<input type="text" class="search-input" id="searchInput" placeholder="例：ダイソン 掃除機、Nintendo Switch..." autocomplete="off" />
+<button type="button" class="btn-primary" id="searchBtn">🚀 開く</button>
+</div>
+<p class="search-hint">💡 Enterキーでも検索できます。選んだ全サイトが同時に開きます。</p>
+<div class="tool-divider"></div>
+<div class="filter-title">💰 価格で絞り込む</div>
+<div class="chips" id="chips">
+<div class="chip" data-max="1000">〜1,000円</div>
+<div class="chip" data-max="3000">〜3,000円</div>
+<div class="chip active" data-max="10000">〜1万円</div>
+<div class="chip" data-max="30000">〜3万円</div>
+<div class="chip" data-max="100000">〜10万円</div>
+<div class="chip" data-max="0">上限なし</div>
+</div>
+<div class="custom-row">
+<span class="price-label">カスタム：</span>
+<input type="number" class="price-input" id="minPrice" placeholder="最低額" min="0" />
+<span class="price-label">〜</span>
+<input type="number" class="price-input" id="maxPrice" placeholder="最高額" min="0" />
+<span class="price-label">円</span>
+<button type="button" class="btn-apply" id="applyCustom">✓ 適用</button>
+</div>
+<div class="tool-divider"></div>
+<div class="sites-label">🛒 比較するサイトを選ぶ（複数OK）</div>
+<div class="sites-grid" id="sitesGrid"></div>
+<div class="status-bar" id="statusBar"><span id="statusText"></span></div>
+<button type="button" class="btn-open-all" id="openAllBtn" disabled>🚀 選んだ全サイトを一気に開く</button>
+<div class="links-panel" id="linksPanel">
+<div class="links-title">🔗 個別に開く</div>
+<div id="linksList"></div>
+<div class="review-tip">
+📝 <strong>レビューの見方：</strong>各サイトを開いたら「レビュー」「口コミ」タブへ。Amazonは★レビュー数順、楽天は「レビュー件数順」で並び替えるとすぐ比べられます。
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section section-dark" id="plans">
+<div class="container fade-in">
+<span class="section-label">Pricing</span>
+<h2 class="section-title">料金プラン</h2>
+<div class="plans-grid">
+<div class="plan-card">
+<span class="plan-emoji">🔖</span>
+<div class="plan-name">使い切りプラン</div>
+<div class="plan-target">初めて使う方・たまに使いたい方向け</div>
+<div class="plan-price">¥700</div>
+<div class="plan-price-note">1回限り・買い切り</div>
+<ul class="plan-list">
+<li>デモ版と同じ機能をそのまま使用可能</li>
+<li>インストール不要・ブラウザで開くだけ</li>
+<li>HTMLファイルをお渡し</li>
+<li>使用期限なし</li>
+</ul>
+<a href="https://x.com/ss8710307199902" class="plan-btn" target="_blank" rel="noopener">DMで注文する</a>
+</div>
+<div class="plan-card featured">
+<span class="plan-emoji">📅</span>
+<div class="plan-name">定額プラン</div>
+<div class="plan-target">継続的に使いたい方向け</div>
+<div class="plan-price">¥500<span style="font-size:1.1rem;font-weight:400;color:var(--text-muted)">/月</span></div>
+<div class="plan-price-note">月額サブスクリプション</div>
+<ul class="plan-list">
+<li>常に最新バージョンをお届け</li>
+<li>機能追加・改善を優先反映</li>
+<li>使い放題・ファイル更新対応</li>
+<li>質問・相談をDMで受け付け</li>
+</ul>
+<a href="https://x.com/ss8710307199902" class="plan-btn" target="_blank" rel="noopener">DMで申し込む</a>
+</div>
+<div class="plan-card">
+<span class="plan-emoji">🏢</span>
+<div class="plan-name">発注プラン</div>
+<div class="plan-target">業者・法人・カスタム希望の方向け</div>
+<div class="plan-price">¥1,000<span style="font-size:1.1rem;font-weight:400;color:var(--text-muted)">/件〜</span></div>
+<div class="plan-price-note">カスタム作成・1件ごと</div>
+<ul class="plan-list">
+<li>会社ロゴ・カラー・項目をカスタマイズ</li>
+<li>業種に合わせた比較項目を設定</li>
+<li>デモ版で気に入ったら購入もOK</li>
+<li>家庭用・ゲーマー用も対応予定</li>
+</ul>
+<a href="https://x.com/ss8710307199902" class="plan-btn" target="_blank" rel="noopener">DMで相談する</a>
+</div>
+</div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section">
+<div class="container fade-in">
+<span class="section-label">Payment</span>
+<h2 class="section-title">お支払い方法</h2>
+<p style="font-size:1rem;color:var(--text-mid);margin-bottom:28px;">QRコード決済・交通系ICカードに対応。お支払い方法はDMにてご案内します。</p>
+<div class="payment-grid">
+<div class="pay-card"><span class="pay-icon">📱</span><div class="pay-name">PayPay</div><div class="pay-sub">QRコード決済</div></div>
+<div class="pay-card"><span class="pay-icon">💳</span><div class="pay-name">Paidy（ペイディ）</div><div class="pay-sub">あと払い決済</div></div>
+<div class="pay-card"><span class="pay-icon">🚃</span><div class="pay-name">交通系IC</div><div class="pay-sub">Suica・ICOCA など</div></div>
+<div class="pay-card"><span class="pay-icon">📲</span><div class="pay-name">その他QR</div><div class="pay-sub">LINE Pay・楽天Pay など</div></div>
+</div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<section class="section section-dark">
+<div class="container fade-in">
+<span class="section-label">How to Order</span>
+<h2 class="section-title">ご利用の流れ</h2>
+<div class="flow-steps">
+<div class="flow-step">
+<div class="step-num">1</div>
+<div class="step-body">
+<div class="step-title">このページでデモを試す（無料）</div>
+<div class="step-desc">上のツールで機能を体験。使えそうか確認してから購入できます。</div>
+</div>
+</div>
+<div class="flow-step">
+<div class="step-num">2</div>
+<div class="step-body">
+<div class="step-title">X（Twitter）のDMで連絡</div>
+<div class="step-desc">希望プランと用途を教えてください。発注プランは要望もどうぞ。</div>
+</div>
+</div>
+<div class="flow-step">
+<div class="step-num">3</div>
+<div class="step-body">
+<div class="step-title">お支払い</div>
+<div class="step-desc">PayPay・ペイディ・交通系ICなどでお支払い。方法はDMでご案内します。</div>
+</div>
+</div>
+<div class="flow-step">
+<div class="step-num">4</div>
+<div class="step-body">
+<div class="step-title">ファイルお届け</div>
+<div class="step-desc">HTMLファイルをお渡し。インストール不要でブラウザですぐ使えます。</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<div class="cta-section fade-in">
+<span style="font-size:3.2rem;display:block;margin-bottom:14px;animation:float 3s ease-in-out infinite;">🐧</span>
+<h2>まず、上のツールを触ってみてください。</h2>
+<p>気に入ったらDMで気軽に声をかけてください。<br>プランや支払い方法など、何でも相談できます。</p>
+<div class="cta-btns">
+<a href="https://x.com/ss8710307199902" class="btn-primary" target="_blank" rel="noopener">📩 DMで相談する</a>
+<a href="#plans" class="btn-ghost">料金プランを見る</a>
+</div>
+</div>
+
+<footer>
+<p>🐧 業務改善のペンギン &nbsp;｜&nbsp; 現場 × AI で働き方を変える</p>
+<p style="margin-top:8px;">
+<a href="https://x.com/ss8710307199902">X (Twitter)</a> &nbsp;｜&nbsp;
+<a href="https://note.com/nice_otter2073">note</a> &nbsp;｜&nbsp;
+<a href="https://pengo-homepage.github.io/pengo-homepage/">ホームページ</a>
+</p>
+</footer>
+
+<script>
+const SITES = [
+{ id: 'amazon', name: 'Amazon', emoji: '📦', url: (q, min, max) => { let u = `https://www.amazon.co.jp/s?k=${enc(q)}&s=review-rank`; if (max > 0) u += `&rh=p_36%3A${min*100}-${max*100}`; return u; } },
+{ id: 'rakuten', name: '楽天市場', emoji: '🛍️', url: (q, min, max) => { let u = `https://search.rakuten.co.jp/search/mall/${enc(q)}/?s=4`; if (min > 0) u += `&min=${min}`; if (max > 0) u += `&max=${max}`; return u; } },
+{ id: 'yahoo', name: 'Yahoo!ショッピング', emoji: '🟣', url: (q, min, max) => { let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}&sort=review`; if (min > 0) u += `&pricefrom=${min}`; if (max > 0) u += `&priceto=${max}`; return u; } },
+{ id: 'kakaku', name: '価格.com', emoji: '💴', url: (q, min, max) => { let u = `https://kakaku.com/search_results/${enc(q)}/?sort=Trevinum`; if (min > 0) u += `&pricemin=${min}`; if (max > 0) u += `&pricemax=${max}`; return u; } },
+{ id: 'monotaro', name: 'モノタロウ', emoji: '🔧', url: (q, min, max) => { let u = `https://www.monotaro.com/s/pages/productList/?searchname=${enc(q)}`; if (min > 0) u += `&price_min=${min}`; if (max > 0) u += `&price_max=${max}`; return u; } },
+{ id: 'yodobashi', name: 'ヨドバシ', emoji: '🏬', url: (q) => `https://www.yodobashi.com/?word=${enc(q)}&order=4` },
+{ id: 'mercari', name: 'メルカリ', emoji: '♻️', url: (q, min, max) => { let u = `https://jp.mercari.com/search?keyword=${enc(q)}&sort=num_likes_desc`; if (min > 0) u += `&price_min=${min}`; if (max > 0) u += `&price_max=${max}`; return u; } },
+{ id: 'paypay', name: 'PayPayモール', emoji: '💳', url: (q, min, max) => { let u = `https://paypaymall.yahoo.co.jp/search?p=${enc(q)}&sort=review`; if (min > 0) u += `&pricefrom=${min}`; if (max > 0) u += `&priceto=${max}`; return u; } },
+];
+
+function enc(s) { return encodeURIComponent(s); }
+let selected = new Set(['amazon','rakuten','yahoo','kakaku']);
+let priceMin = 0, priceMax = 10000;
+
+const grid = document.getElementById('sitesGrid');
+SITES.forEach(site => {
+const el = document.createElement('div');
+el.className = 'site-card' + (selected.has(site.id) ? ' on' : '');
+el.dataset.id = site.id;
+el.innerHTML = `<div class="site-check">✓</div><span class="site-emoji">${site.emoji}</span><span class="site-name">${site.name}</span>`;
+el.addEventListener('click', () => {
+selected.has(site.id) ? selected.delete(site.id) : selected.add(site.id);
+el.classList.toggle('on');
+updateBtn();
+});
+grid.appendChild(el);
+});
+
+document.querySelectorAll('.chip').forEach(chip => {
+chip.addEventListener('click', () => {
+document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+chip.classList.add('active');
+priceMax = parseInt(chip.dataset.max);
+priceMin = 0;
+document.getElementById('minPrice').value = '';
+document.getElementById('maxPrice').value = '';
+updateBtn();
+});
+});
+
+document.getElementById('applyCustom').addEventListener('click', () => {
+priceMin = parseInt(document.getElementById('minPrice').value) || 0;
+priceMax = parseInt(document.getElementById('maxPrice').value) || 0;
+document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+updateBtn();
+});
+
+function updateBtn() {
+const kw = document.getElementById('searchInput').value.trim();
+const btn = document.getElementById('openAllBtn');
+const n = selected.size;
+if (kw && n > 0) { btn.disabled = false; btn.textContent = `🚀 ${n}サイトを一気に開く`; }
+else if (!kw) { btn.disabled = true; btn.textContent = '🚀 まず商品名を入力してください'; }
+else { btn.disabled = true; btn.textContent = '🚀 サイトを1つ以上選んでください'; }
+}
+
+document.getElementById('searchInput').addEventListener('input', updateBtn);
+
+function openAll() {
+const kw = document.getElementById('searchInput').value.trim();
+if (!kw || selected.size === 0) return;
+const opened = [];
+SITES.forEach(site => { if (selected.has(site.id)) { window.open(site.url(kw, priceMin, priceMax), '_blank'); opened.push(site); } });
+const priceStr = priceMax > 0 ? `（〜${priceMax.toLocaleString()}円）` : priceMin > 0 ? `（${priceMin.toLocaleString()}円〜）` : '';
+document.getElementById('statusText').textContent = `✅ 「${kw}」${priceStr} を ${opened.length}サイトで開きました！`;
+document.getElementById('statusBar').classList.add('visible');
+const list = document.getElementById('linksList');
+list.innerHTML = '';
+opened.forEach(site => {
+const a = document.createElement('a');
+a.href = site.url(kw, priceMin, priceMax);
+a.target = '_blank';
+a.className = 'link-row';
+a.innerHTML = `<span class="link-row-emoji">${site.emoji}</span><span class="link-row-name">${site.name}</span><span class="link-row-arrow">→</span>`;
+list.appendChild(a);
+});
+document.getElementById('linksPanel').classList.add('visible');
+}
+
+document.getElementById('openAllBtn').addEventListener('click', openAll);
+document.getElementById('searchBtn').addEventListener('click', openAll);
+document.getElementById('searchInput').addEventListener('keydown', e => { if (e.key === 'Enter') openAll(); });
+
+updateBtn();
+
+const obs = new IntersectionObserver(entries => {
+entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
