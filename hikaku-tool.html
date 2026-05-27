@@ -830,13 +830,22 @@ else { btn.disabled = true; btn.textContent = '🚀 サイトを1つ以上選ん
 
 document.getElementById('searchInput').addEventListener('input', updateBtn);
 
+const isApp = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
 function openAll() {
 const kw = document.getElementById('searchInput').value.trim();
 if (!kw || selected.size === 0) return;
 const opened = [];
-SITES.forEach(site => { if (selected.has(site.id)) { window.open(site.url(kw, priceMin, priceMax), '_blank'); opened.push(site); } });
+SITES.forEach(site => { if (selected.has(site.id)) opened.push(site); });
 const priceStr = priceMax > 0 ? `（〜${priceMax.toLocaleString()}円）` : priceMin > 0 ? `（${priceMin.toLocaleString()}円〜）` : '';
-document.getElementById('statusText').textContent = `✅ 「${kw}」${priceStr} を ${opened.length}サイトで開きました！`;
+
+if (isApp) {
+  document.getElementById('statusText').textContent = `🔗 「${kw}」${priceStr} — タップして各サイトを開く`;
+} else {
+  opened.forEach(site => window.open(site.url(kw, priceMin, priceMax), '_blank'));
+  document.getElementById('statusText').textContent = `✅ 「${kw}」${priceStr} を ${opened.length}サイトで開きました！`;
+}
+
 document.getElementById('statusBar').classList.add('visible');
 const list = document.getElementById('linksList');
 list.innerHTML = '';
@@ -844,6 +853,7 @@ opened.forEach(site => {
 const a = document.createElement('a');
 a.href = site.url(kw, priceMin, priceMax);
 a.target = '_blank';
+a.rel = 'noopener';
 a.className = 'link-row';
 a.innerHTML = `<span class="link-row-emoji">${site.emoji}</span><span class="link-row-name">${site.name}</span><span class="link-row-arrow">→</span>`;
 list.appendChild(a);
