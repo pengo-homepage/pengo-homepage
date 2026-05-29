@@ -767,9 +767,10 @@ textarea.form-input { height: 70px; resize: vertical; margin-bottom: 14px; }
 </head>
 <body>
 
-<div class="header">
+<div class="header" style="position:relative;">
   <h1>📊 見積もり比較ツール</h1>
   <p>左右に入力してかんたん比較（最大4社）</p>
+  <a href="#lp-mitsumori" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;padding:6px 13px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">詳細・購入</a>
 </div>
 
 <!-- ===== 比較エリア A vs B ===== -->
@@ -1680,6 +1681,211 @@ document.getElementById('checklist-modal').addEventListener('click', e => {
 // ===== 起動 =====
 renderAll();
 renderChecklistBody();
+</script>
+
+<!-- ========== LP SECTION ========== -->
+<style>
+/* copy protection */
+*{user-select:none;-webkit-user-select:none;}
+input,textarea,select{user-select:text;-webkit-user-select:text;}
+
+/* LP styles */
+#lp-mitsumori{border-top:3px solid #1e3a8a;font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Yu Gothic UI',sans-serif;}
+.lpm-hero{background:linear-gradient(135deg,#1e3a8a,#1d4ed8);color:#fff;text-align:center;padding:60px 20px 48px;}
+.lpm-badge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:16px;}
+.lpm-hero h2{font-size:clamp(20px,5vw,32px);font-weight:800;line-height:1.5;margin-bottom:12px;}
+.lpm-hero p{font-size:14px;opacity:.85;line-height:1.8;max-width:480px;margin:0 auto 24px;}
+.lpm-btn{display:inline-block;background:#fff;color:#1e3a8a;padding:13px 28px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;cursor:pointer;border:none;transition:all .2s;}
+.lpm-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.2);}
+.lpm-section{max-width:720px;margin:0 auto;padding:48px 20px;}
+.lpm-section-title{text-align:center;margin-bottom:28px;}
+.lpm-section-title h3{font-size:20px;font-weight:700;color:#1a202c;margin-bottom:6px;}
+.lpm-section-title p{font-size:13px;color:#718096;}
+.lpm-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.lpm-feat{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;}
+.lpm-feat-icon{font-size:26px;margin-bottom:8px;}
+.lpm-feat h4{font-size:13px;font-weight:700;color:#1a202c;margin-bottom:6px;}
+.lpm-feat p{font-size:12px;color:#718096;line-height:1.7;}
+.lpm-pricing{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;}
+.lpm-plan{background:#fff;border:2px solid #e2e8f0;border-radius:14px;padding:22px 18px;text-align:center;position:relative;}
+.lpm-plan.featured{border-color:#1e3a8a;}
+.lpm-plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#1e3a8a;color:#fff;font-size:11px;font-weight:700;padding:3px 14px;border-radius:10px;white-space:nowrap;}
+.lpm-plan h4{font-size:14px;font-weight:700;color:#1a202c;margin-bottom:4px;}
+.lpm-plan-sub{font-size:12px;color:#718096;margin-bottom:12px;}
+.lpm-plan-price{font-size:30px;font-weight:800;color:#1a202c;margin-bottom:2px;}
+.lpm-plan-unit{font-size:12px;color:#718096;margin-bottom:14px;}
+.lpm-plan-feats{text-align:left;margin-bottom:18px;}
+.lpm-plan-feat{font-size:12px;color:#4a5568;line-height:2.2;display:flex;gap:6px;}
+.lpm-plan-feat::before{content:'✓';color:#16a34a;flex-shrink:0;}
+.lpm-buy{display:block;padding:10px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;text-align:center;transition:all .2s;cursor:pointer;border:none;}
+.lpm-buy-fill{background:#1e3a8a;color:#fff;}
+.lpm-buy-fill:hover{background:#1d4ed8;}
+.lpm-buy-outline{background:#fff;border:2px solid #1e3a8a;color:#1e3a8a;}
+.lpm-buy-outline:hover{background:#eff6ff;}
+.lpm-faq{background:#f7fafc;border-radius:14px;padding:24px;}
+.lpm-faq-item{border-bottom:1px solid #e2e8f0;padding:14px 0;}
+.lpm-faq-item:last-child{border-bottom:none;}
+.lpm-faq-q{font-size:13px;font-weight:700;color:#1a202c;margin-bottom:6px;display:flex;gap:8px;}
+.lpm-faq-q::before{content:'Q.';color:#1e3a8a;flex-shrink:0;}
+.lpm-faq-a{font-size:12px;color:#718096;line-height:1.8;padding-left:22px;}
+.lpm-footer{background:#1a202c;color:#a0aec0;text-align:center;padding:20px;font-size:12px;line-height:2;}
+.lpm-footer a{color:#a0aec0;}
+.lpm-fab{position:fixed;bottom:20px;right:16px;background:#1e3a8a;color:#fff;border:none;border-radius:28px;padding:11px 18px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(30,58,138,.4);z-index:500;display:none;}
+.lpm-fab.visible{display:block;}
+@media(max-width:480px){.lpm-plan-price{font-size:26px;}}
+</style>
+
+<section id="lp-mitsumori">
+
+  <div class="lpm-hero">
+    <div class="lpm-badge">🏢 法人・事業者向け</div>
+    <h2>相見積もりを一画面で比較。<br>発注判断をもっとスムーズに。</h2>
+    <p>最大4社の見積もりを並べて入力するだけで、AIが金額・保証・納期を分析して最適な業者を提案。調達・購買・総務担当者の業務負担を大幅に削減します。</p>
+    <button class="lpm-btn" onclick="document.getElementById('lp-mitsumori').previousElementSibling.previousElementSibling && window.scrollTo({top:0,behavior:'smooth'})">▲ ツールを使ってみる（無料デモ）</button>
+  </div>
+
+  <div class="lpm-section" style="background:#f7fafc;">
+    <div class="lpm-section-title">
+      <h3>選ばれる理由</h3>
+      <p>調達・購買担当者の声をもとに設計しました</p>
+    </div>
+    <div class="lpm-features">
+      <div class="lpm-feat">
+        <div class="lpm-feat-icon">📋</div>
+        <h4>最大4社を同時比較</h4>
+        <p>見積もりを横並びで入力・比較。金額だけでなく保証・納期・備考まで一覧で確認できます。</p>
+      </div>
+      <div class="lpm-feat">
+        <div class="lpm-feat-icon">🤖</div>
+        <h4>AIが最適業者を提案</h4>
+        <p>入力データをもとにAIがスコアを計算し、発注先のおすすめ理由を日本語で説明します。</p>
+      </div>
+      <div class="lpm-feat">
+        <div class="lpm-feat-icon">📤</div>
+        <h4>Excel・印刷・FAX出力</h4>
+        <p>比較結果をそのままExcelに出力、または印刷・FAX送付用のフォーマットで出力できます。</p>
+      </div>
+      <div class="lpm-feat">
+        <div class="lpm-feat-icon">✅</div>
+        <h4>発注前チェックリスト</h4>
+        <p>取付費・保証・納期確認など、見落としがちな項目を網羅したチェックリスト付き。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="lpm-section">
+    <div class="lpm-section-title">
+      <h3>料金プラン</h3>
+      <p>用途に合わせてお選びください</p>
+    </div>
+    <div class="lpm-pricing">
+      <div class="lpm-plan">
+        <h4>買い切り</h4>
+        <div class="lpm-plan-sub">一度買えばずっと使える</div>
+        <div class="lpm-plan-price">¥2,980</div>
+        <div class="lpm-plan-unit">1回限り</div>
+        <div class="lpm-plan-feats">
+          <div class="lpm-plan-feat">HTMLファイルをダウンロード</div>
+          <div class="lpm-plan-feat">4社比較・AI分析・出力対応</div>
+          <div class="lpm-plan-feat">PC・タブレット対応</div>
+          <div class="lpm-plan-feat">1ユーザー・1端末</div>
+        </div>
+        <!-- BASE購入URLに差し替えてください -->
+        <a href="https://pengohome.base.shop/" target="_blank" rel="noopener" class="lpm-buy lpm-buy-outline">購入する →</a>
+      </div>
+
+      <div class="lpm-plan featured">
+        <div class="lpm-plan-badge">おすすめ</div>
+        <h4>月額プラン</h4>
+        <div class="lpm-plan-sub">アップデート・サポート付き</div>
+        <div class="lpm-plan-price">¥980</div>
+        <div class="lpm-plan-unit">/ 月</div>
+        <div class="lpm-plan-feats">
+          <div class="lpm-plan-feat">買い切りの内容すべて</div>
+          <div class="lpm-plan-feat">機能アップデートを自動反映</div>
+          <div class="lpm-plan-feat">LINEまたはメールサポート</div>
+          <div class="lpm-plan-feat">新機能の優先対応</div>
+        </div>
+        <!-- 月額購入URLに差し替えてください -->
+        <a href="https://pengohome.base.shop/" target="_blank" rel="noopener" class="lpm-buy lpm-buy-fill">申し込む（準備中）</a>
+      </div>
+
+      <div class="lpm-plan">
+        <h4>カスタム発注</h4>
+        <div class="lpm-plan-sub">自社仕様にアレンジ</div>
+        <div class="lpm-plan-price">¥9,800〜</div>
+        <div class="lpm-plan-unit">内容による</div>
+        <div class="lpm-plan-feats">
+          <div class="lpm-plan-feat">会社名・ロゴ・カラー変更</div>
+          <div class="lpm-plan-feat">比較項目のカスタマイズ</div>
+          <div class="lpm-plan-feat">社内システム連携相談</div>
+          <div class="lpm-plan-feat">複数端末ライセンス</div>
+        </div>
+        <a href="mailto:tokyoribengi@gmail.com?subject=見積比較ツール カスタム相談" class="lpm-buy lpm-buy-outline">相談する（無料）</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="lpm-section" style="padding-top:0;">
+    <div class="lpm-section-title">
+      <h3>よくある質問</h3>
+    </div>
+    <div class="lpm-faq">
+      <div class="lpm-faq-item">
+        <div class="lpm-faq-q">購入後すぐ使えますか？</div>
+        <div class="lpm-faq-a">はい。購入後すぐHTMLファイルをダウンロードできます。ブラウザで開くだけで使えます。</div>
+      </div>
+      <div class="lpm-faq-item">
+        <div class="lpm-faq-q">複数人で使いたい場合は？</div>
+        <div class="lpm-faq-a">複数ユーザーの場合はカスタム発注プランをご相談ください。社内展開向けのライセンス対応も可能です。</div>
+      </div>
+      <div class="lpm-faq-item">
+        <div class="lpm-faq-q">比較項目を増やしてもらえますか？</div>
+        <div class="lpm-faq-a">カスタム発注で対応可能です。業種・用途に合わせた項目追加・変更を承ります。</div>
+      </div>
+      <div class="lpm-faq-item">
+        <div class="lpm-faq-q">データはどこに保存されますか？</div>
+        <div class="lpm-faq-a">すべてブラウザ内（LocalStorage）に保存されます。外部サーバーへの送信は一切ありません。</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<div class="lpm-footer">
+  <div>© 2025 業務改善のペンギン. All rights reserved.</div>
+  <div>このツールは購入者本人のみ使用可能です。複製・再配布・転売を禁じます。</div>
+  <div><a href="mailto:tokyoribengi@gmail.com">お問い合わせ</a></div>
+</div>
+
+<button id="lpmFab" class="lpm-fab" onclick="window.scrollTo({top:0,behavior:'smooth'})" type="button">▲ ツールを使う</button>
+
+<script>
+/* copy protection */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (e.ctrlKey && ['c','x','u','s','a','p'].includes(k)) { e.preventDefault(); e.stopPropagation(); return; }
+  if (e.key === 'F12') { e.preventDefault(); return; }
+  if (e.ctrlKey && e.shiftKey && ['i','j','c','k'].includes(k)) { e.preventDefault(); return; }
+}, true);
+document.addEventListener('keydown', e => {
+  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+    if (e.ctrlKey && ['c','x','a','v','z'].includes(e.key.toLowerCase())) return;
+  }
+});
+(function(){ console.log('%c⚠ このツールは業務改善のペンギンの著作物です。', 'color:#1e3a8a;font-size:14px;font-weight:bold;'); })();
+
+/* FAB visibility */
+const _lpSection = document.getElementById('lp-mitsumori');
+const _fab = document.getElementById('lpmFab');
+if (_lpSection && _fab) {
+  new IntersectionObserver(entries => {
+    _fab.classList.toggle('visible', entries[0].isIntersecting);
+  }, { threshold: 0.05 }).observe(_lpSection);
+}
 </script>
 </body>
 </html>
