@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>かんたん比較ツール | 業務改善のペンギン</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e90ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="比較ツール">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    /* ===== COPY PROTECTION ===== */
+    *,*::before,*::after{
+      user-select:none;
+      -webkit-user-select:none;
+      -moz-user-select:none;
+      -ms-user-select:none;
+    }
+    input,textarea{user-select:text;-webkit-user-select:text;}
+
+    /* ===== BASE ===== */
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      background:#0d1117;
+      color:#e6edf3;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+      min-height:100vh;
+    }
+
+    /* ===== WATERMARK ===== */
+    body::before{
+      content:'© 業務改善のペンギン';
+      position:fixed;
+      bottom:60px;
+      right:16px;
+      font-size:11px;
+      color:rgba(255,255,255,.06);
+      letter-spacing:1px;
+      pointer-events:none;
+      z-index:0;
+      white-space:nowrap;
+    }
+
+    /* ===== HEADER ===== */
+    .header{
+      background:rgba(22,27,34,.97);
+      border-bottom:1px solid #30363d;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      position:sticky;
+      top:0;
+      z-index:200;
+      backdrop-filter:blur(10px);
+    }
+    .header-logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;}
+    .header-logo span{font-size:20px;}
+    .btn-lp{
+      background:none;
+      border:1px solid #30363d;
+      color:#8b949e;
+      padding:6px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:13px;
+      text-decoration:none;
+      display:inline-block;
+    }
+    .btn-lp:hover{border-color:#1e90ff;color:#1e90ff;}
+
+    /* ===== TOOL SECTION ===== */
+    #tool{
+      max-width:720px;
+      margin:0 auto;
+      padding:28px 16px 48px;
+    }
+    .tool-title{
+      text-align:center;
+      margin-bottom:24px;
+    }
+    .tool-title h2{font-size:20px;font-weight:700;margin-bottom:4px;}
+    .tool-title p{font-size:13px;color:#8b949e;}
+
+    .card{
+      background:#161b22;
+      border:1px solid #30363d;
+      border-radius:14px;
+      padding:20px;
+      margin-bottom:14px;
+    }
+    .field-label{font-size:12px;color:#8b949e;font-weight:700;letter-spacing:.5px;margin-bottom:8px;}
+
+    .input-main{
+      width:100%;
+      padding:13px 15px;
+      background:#0d1117;
+      border:1px solid #30363d;
+      border-radius:10px;
+      color:#e6edf3;
+      font-size:16px;
+      outline:none;
+      transition:border-color .2s;
+    }
+    .input-main:focus{border-color:#1e90ff;}
+    .input-main::placeholder{color:#484f58;}
+
+    /* price filter */
+    .price-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+    .price-input{
+      flex:1;
+      padding:10px 12px;
+      background:#0d1117;
+      border:1px solid #30363d;
+      border-radius:8px;
+      color:#e6edf3;
+      font-size:14px;
+      outline:none;
+      transition:border-color .2s;
+      min-width:0;
+    }
+    .price-input:focus{border-color:#1e90ff;}
+    .price-input::placeholder{color:#484f58;}
+    .price-sep{color:#484f58;font-size:14px;flex-shrink:0;}
+
+    /* quick price chips */
+    .price-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+    .price-chip{
+      padding:5px 12px;
+      border-radius:14px;
+      border:1px solid #30363d;
+      background:#0d1117;
+      color:#8b949e;
+      cursor:pointer;
+      font-size:12px;
+      transition:all .15s;
+    }
+    .price-chip:hover{border-color:#484f58;color:#e6edf3;}
+    .price-chip.on{border-color:#1e90ff;color:#1e90ff;background:rgba(30,144,255,.1);}
+
+    /* site chips */
+    .site-chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .site-chip{
+      padding:8px 14px;
+      border-radius:20px;
+      border:2px solid #30363d;
+      background:#0d1117;
+      color:#8b949e;
+      cursor:pointer;
+      font-size:13px;
+      transition:all .2s;
+    }
+    .site-chip:hover{border-color:#484f58;}
+    .site-chip.on{border-color:#1e90ff;background:rgba(30,144,255,.12);color:#e6edf3;}
+
+    .select-row{
+      display:flex;
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .select-all-btn,.clear-btn{
+      font-size:12px;
+      color:#8b949e;
+      background:none;
+      border:1px solid #30363d;
+      border-radius:6px;
+      padding:4px 10px;
+      cursor:pointer;
+    }
+    .select-all-btn:hover,.clear-btn:hover{color:#e6edf3;border-color:#484f58;}
+
+    /* main button */
+    .btn-search{
+      width:100%;
+      padding:16px;
+      background:linear-gradient(135deg,#1e90ff,#0066cc);
+      color:#fff;
+      border:none;
+      border-radius:12px;
+      font-size:17px;
+      font-weight:700;
+      cursor:pointer;
+      transition:all .2s;
+      margin-top:4px;
+    }
+    .btn-search:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(30,144,255,.4);}
+    .btn-search:active{transform:none;}
+    .btn-search:disabled{background:#30363d;cursor:not-allowed;transform:none;box-shadow:none;}
+
+    /* status */
+    .status-box{
+      background:#0d1117;
+      border:1px solid #30363d;
+      border-radius:10px;
+      padding:14px;
+      margin-top:14px;
+      font-size:14px;
+      color:#8b949e;
+      min-height:48px;
+      display:none;
+    }
+    .status-box.visible{display:block;}
+
+    /* app mode links */
+    .link-list{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+    .site-link{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 14px;
+      background:#161b22;
+      border:1px solid #30363d;
+      border-radius:10px;
+      color:#e6edf3;
+      text-decoration:none;
+      font-size:14px;
+      transition:all .2s;
+    }
+    .site-link:hover{border-color:#1e90ff;background:rgba(30,144,255,.08);}
+
+    /* ===== LP SECTION ===== */
+    #lp{border-top:1px solid #30363d;padding-top:0;}
+
+    .lp-hero{
+      background:linear-gradient(180deg,#0d1117 0%,#111827 100%);
+      text-align:center;
+      padding:60px 20px 48px;
+    }
+    .lp-badge{
+      display:inline-block;
+      background:rgba(30,144,255,.15);
+      border:1px solid rgba(30,144,255,.3);
+      color:#1e90ff;
+      font-size:12px;
+      font-weight:700;
+      padding:4px 14px;
+      border-radius:20px;
+      margin-bottom:16px;
+      letter-spacing:.5px;
+    }
+    .lp-hero h1{
+      font-size:clamp(22px,5vw,36px);
+      font-weight:800;
+      line-height:1.4;
+      margin-bottom:14px;
+    }
+    .lp-hero h1 em{
+      font-style:normal;
+      background:linear-gradient(90deg,#1e90ff,#00d4aa);
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+    }
+    .lp-hero p{color:#8b949e;font-size:15px;line-height:1.8;max-width:480px;margin:0 auto 28px;}
+    .btn-hero{
+      display:inline-block;
+      background:linear-gradient(135deg,#1e90ff,#0066cc);
+      color:#fff;
+      padding:14px 32px;
+      border-radius:12px;
+      font-size:16px;
+      font-weight:700;
+      text-decoration:none;
+      cursor:pointer;
+      border:none;
+      transition:all .2s;
+    }
+    .btn-hero:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(30,144,255,.4);}
+
+    /* features */
+    .lp-features{max-width:720px;margin:0 auto;padding:48px 20px;}
+    .section-label{text-align:center;margin-bottom:32px;}
+    .section-label h2{font-size:22px;font-weight:700;margin-bottom:6px;}
+    .section-label p{color:#8b949e;font-size:14px;}
+
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+    .feature-card{
+      background:#161b22;
+      border:1px solid #30363d;
+      border-radius:14px;
+      padding:20px;
+    }
+    .feature-icon{font-size:28px;margin-bottom:10px;}
+    .feature-card h3{font-size:14px;font-weight:700;margin-bottom:6px;}
+    .feature-card p{font-size:13px;color:#8b949e;line-height:1.7;}
+
+    /* sites list */
+    .lp-sites{background:#161b22;border-top:1px solid #30363d;border-bottom:1px solid #30363d;padding:36px 20px;text-align:center;}
+    .lp-sites h3{font-size:14px;color:#8b949e;margin-bottom:16px;font-weight:400;}
+    .site-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+    .site-badge{
+      padding:7px 16px;
+      background:#0d1117;
+      border:1px solid #30363d;
+      border-radius:20px;
+      font-size:13px;
+      color:#e6edf3;
+    }
+
+    /* pricing */
+    .lp-pricing{max-width:720px;margin:0 auto;padding:48px 20px;}
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+    .price-card{
+      background:#161b22;
+      border:1px solid #30363d;
+      border-radius:16px;
+      padding:24px 20px;
+      text-align:center;
+      position:relative;
+    }
+    .price-card.featured{
+      border-color:#1e90ff;
+      background:linear-gradient(135deg,rgba(30,144,255,.08),rgba(0,212,170,.04));
+    }
+    .price-card-badge{
+      position:absolute;
+      top:-12px;
+      left:50%;
+      transform:translateX(-50%);
+      background:#1e90ff;
+      color:#fff;
+      font-size:11px;
+      font-weight:700;
+      padding:3px 14px;
+      border-radius:10px;
+      white-space:nowrap;
+    }
+    .price-card h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+    .price-label{font-size:12px;color:#8b949e;margin-bottom:14px;}
+    .price-amount{font-size:32px;font-weight:800;color:#e6edf3;margin-bottom:4px;}
+    .price-unit{font-size:13px;color:#8b949e;margin-bottom:16px;}
+    .price-features{text-align:left;margin-bottom:20px;}
+    .price-feat{font-size:13px;color:#8b949e;line-height:2;display:flex;align-items:flex-start;gap:6px;}
+    .price-feat::before{content:'✓';color:#3fb950;flex-shrink:0;}
+    .btn-buy{
+      display:block;
+      padding:11px;
+      border-radius:10px;
+      font-size:14px;
+      font-weight:700;
+      text-decoration:none;
+      text-align:center;
+      cursor:pointer;
+      border:none;
+      transition:all .2s;
+    }
+    .btn-buy-primary{background:linear-gradient(135deg,#1e90ff,#0066cc);color:#fff;}
+    .btn-buy-primary:hover{box-shadow:0 4px 16px rgba(30,144,255,.4);}
+    .btn-buy-outline{background:none;border:1px solid #30363d;color:#e6edf3;}
+    .btn-buy-outline:hover{border-color:#1e90ff;color:#1e90ff;}
+
+    /* FAQ */
+    .lp-faq{max-width:680px;margin:0 auto;padding:0 20px 48px;}
+    .faq-item{border-bottom:1px solid #30363d;padding:16px 0;}
+    .faq-q{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;gap:10px;}
+    .faq-q::before{content:'Q.';color:#1e90ff;flex-shrink:0;}
+    .faq-a{font-size:13px;color:#8b949e;line-height:1.8;padding-left:22px;}
+
+    /* footer */
+    .footer{
+      background:#161b22;
+      border-top:1px solid #30363d;
+      padding:20px;
+      text-align:center;
+      font-size:12px;
+      color:#484f58;
+      line-height:2;
+    }
+    .footer a{color:#484f58;text-decoration:none;}
+    .footer a:hover{color:#8b949e;}
+
+    /* scroll fab */
+    .fab-tool{
+      position:fixed;
+      bottom:20px;
+      right:16px;
+      background:linear-gradient(135deg,#1e90ff,#0066cc);
+      color:#fff;
+      border:none;
+      border-radius:28px;
+      padding:11px 18px;
+      font-size:13px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 4px 20px rgba(30,144,255,.4);
+      z-index:100;
+      display:none;
+    }
+    .fab-tool.visible{display:block;}
+
+    @media(max-width:480px){
+      .price-amount{font-size:28px;}
+      .lp-hero{padding:44px 16px 36px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ©2025 業務改善のペンギン. Licensed to single user. Unauthorized copying or redistribution prohibited. -->
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="header-logo">
+    <span>🐧</span>
+    <span>かんたん比較ツール</span>
+  </div>
+  <a href="#lp" class="btn-lp">詳細・購入</a>
+</header>
+
+<!-- ===== TOOL SECTION ===== -->
+<section id="tool">
+  <div class="tool-title">
+    <h2>🛒 商品を比較する</h2>
+    <p>キーワードを入力してサイトを選んでください</p>
+  </div>
+
+  <!-- keyword -->
+  <div class="card">
+    <div class="field-label">🔍 商品名・キーワード</div>
+    <input id="kwInput" class="input-main" type="search" placeholder="例：電動工具、軍手、ダンボール" autocomplete="off">
+  </div>
+
+  <!-- price filter -->
+  <div class="card">
+    <div class="field-label">💰 価格フィルター（任意）</div>
+    <div class="price-row">
+      <input id="priceMin" class="price-input" type="number" placeholder="下限（円）" min="0">
+      <span class="price-sep">〜</span>
+      <input id="priceMax" class="price-input" type="number" placeholder="上限（円）" min="0">
+    </div>
+    <div class="price-chips" id="priceChips">
+      <div class="price-chip" onclick="setPriceRange(0,1000)">〜1,000円</div>
+      <div class="price-chip" onclick="setPriceRange(0,3000)">〜3,000円</div>
+      <div class="price-chip" onclick="setPriceRange(0,10000)">〜1万円</div>
+      <div class="price-chip" onclick="setPriceRange(0,30000)">〜3万円</div>
+      <div class="price-chip" onclick="setPriceRange(0,100000)">〜10万円</div>
+      <div class="price-chip" onclick="setPriceRange(0,0)">指定なし</div>
+    </div>
+  </div>
+
+  <!-- site selection -->
+  <div class="card">
+    <div class="field-label">🌐 比較するサイトを選ぶ</div>
+    <div class="select-row">
+      <button class="select-all-btn" onclick="selectAll()">すべて選択</button>
+      <button class="clear-btn" onclick="clearAll()">すべて解除</button>
+    </div>
+    <div class="site-chips" id="siteChips"></div>
+  </div>
+
+  <!-- search button -->
+  <button id="searchBtn" class="btn-search" onclick="openAll()" type="button">
+    🚀 一括比較スタート
+  </button>
+
+  <!-- status / links -->
+  <div id="statusBox" class="status-box">
+    <div id="statusText"></div>
+    <div id="linkList" class="link-list"></div>
+  </div>
+</section>
+
+<!-- ===== LP SECTION ===== -->
+<section id="lp">
+
+  <!-- hero -->
+  <div class="lp-hero">
+    <div class="lp-badge">📊 業務改善ツール</div>
+    <h1>8つのサイトを<br><em>一気に比較。</em><br>仕入れ・発注が速くなる。</h1>
+    <p>キーワードを1回入力するだけで、Amazon・楽天・Yahoo!など8つのサイトを同時に開いて価格比較できます。毎日の発注業務をぐっと楽にします。</p>
+    <button class="btn-hero" onclick="scrollToTool()">▲ ツールを使ってみる（無料デモ）</button>
+  </div>
+
+  <!-- features -->
+  <div class="lp-features">
+    <div class="section-label">
+      <h2>選ばれる理由</h2>
+      <p>現場の発注担当者が実際に使いやすいように作りました</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>ワンクリックで8サイト同時検索</h3>
+        <p>キーワードと価格を入れてボタンを押すだけ。毎回サイトを開き直す手間がゼロになります。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💴</div>
+        <h3>価格フィルター付き</h3>
+        <p>「〜1万円」など上限・下限を指定して検索。予算内の商品だけを効率よく比較できます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>スマホ・タブレットも対応</h3>
+        <p>ホーム画面に追加してアプリのように使えます（PWA対応）。外出先や現場でも使えます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>インストール不要・クラウド不要</h3>
+        <p>HTMLファイル1つ。ダウンロードしてブラウザで開くだけ。個人情報の入力は一切不要です。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- sites -->
+  <div class="lp-sites">
+    <h3>対応している比較サイト（8サイト）</h3>
+    <div class="site-badges">
+      <div class="site-badge">🛒 Amazon</div>
+      <div class="site-badge">🛍 楽天市場</div>
+      <div class="site-badge">🏪 Yahoo!ショッピング</div>
+      <div class="site-badge">💴 価格.com</div>
+      <div class="site-badge">🔧 モノタロウ</div>
+      <div class="site-badge">📺 ヨドバシ.com</div>
+      <div class="site-badge">📦 メルカリ</div>
+      <div class="site-badge">💳 PayPayモール</div>
+    </div>
+  </div>
+
+  <!-- pricing -->
+  <div class="lp-pricing">
+    <div class="section-label">
+      <h2>料金プラン</h2>
+      <p>用途に合わせてお選びください</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>買い切り</h3>
+        <div class="price-label">一度買えばずっと使える</div>
+        <div class="price-amount">¥700</div>
+        <div class="price-unit">1回限り</div>
+        <div class="price-features">
+          <div class="price-feat">HTMLファイルをダウンロード</div>
+          <div class="price-feat">8サイト対応・価格フィルター</div>
+          <div class="price-feat">スマホ対応（PWA）</div>
+          <div class="price-feat">1ユーザー・1端末</div>
+        </div>
+        <a href="https://pengohome.base.shop/items/145668497" target="_blank" rel="noopener" class="btn-buy btn-buy-outline">購入する →</a>
+      </div>
+
+      <div class="price-card featured">
+        <div class="price-card-badge">おすすめ</div>
+        <h3>月額プラン</h3>
+        <div class="price-label">アップデート・サポート付き</div>
+        <div class="price-amount">¥500</div>
+        <div class="price-unit">/ 月</div>
+        <div class="price-features">
+          <div class="price-feat">買い切りの内容すべて</div>
+          <div class="price-feat">機能アップデートを自動反映</div>
+          <div class="price-feat">LINEまたはメールサポート</div>
+          <div class="price-feat">新サイト追加対応</div>
+        </div>
+        <!-- 月額購入URLに差し替えてください -->
+        <a href="#" class="btn-buy btn-buy-primary">申し込む（準備中）</a>
+      </div>
+
+      <div class="price-card">
+        <h3>カスタム発注</h3>
+        <div class="price-label">自社仕様にアレンジ</div>
+        <div class="price-amount">¥1,000〜</div>
+        <div class="price-unit">内容による</div>
+        <div class="price-features">
+          <div class="price-feat">サイト追加・変更</div>
+          <div class="price-feat">会社ロゴ・カラー変更</div>
+          <div class="price-feat">社内向け機能追加</div>
+          <div class="price-feat">複数端末ライセンス</div>
+        </div>
+        <!-- お問い合わせURLに差し替えてください -->
+        <a href="mailto:tokyoribengi@gmail.com?subject=比較ツール カスタム相談" class="btn-buy btn-buy-outline">相談する（無料）</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="lp-faq">
+    <div class="section-label">
+      <h2>よくある質問</h2>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">購入後すぐ使えますか？</div>
+      <div class="faq-a">購入後すぐにHTMLファイルをダウンロードできます。ブラウザで開くだけで使えます。インストール不要です。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">スマホでも使えますか？</div>
+      <div class="faq-a">はい。スマホのブラウザで開けます。またホーム画面に追加するとアプリのように使えます（Android・iPhone対応）。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">会社の複数人で使いたい場合は？</div>
+      <div class="faq-a">複数ユーザーの場合はカスタム発注プランをご相談ください。人数に応じた対応が可能です。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">自社のサイトに対応してもらえますか？</div>
+      <div class="faq-a">対応可能です。モノタロウ・アスクル・Misumi等の業務向けサイトへの対応もカスタム発注で承ります。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">返金対応はありますか？</div>
+      <div class="faq-a">購入前にこのページ上部のデモで動作確認ができます。デジタルコンテンツのため、購入後の返金は対応していません。</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- footer -->
+<footer class="footer">
+  <div>© 2025 業務改善のペンギン. All rights reserved.</div>
+  <div>このツールは購入者本人のみ使用可能です。複製・再配布・転売を禁じます。</div>
+  <div style="margin-top:8px;">
+    <a href="mailto:tokyoribengi@gmail.com">お問い合わせ</a>
+  </div>
+</footer>
+
+<!-- scroll to tool FAB (shown when scrolled into LP) -->
+<button id="fabTool" class="fab-tool" onclick="scrollToTool()" type="button">
+  ▲ ツールを使う
+</button>
+
+<script>
+'use strict';
+
+/* ===== COPY PROTECTION ===== */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (e.ctrlKey && ['c','x','u','s','a','p'].includes(k)) { e.preventDefault(); e.stopPropagation(); return; }
+  if (e.key === 'F12') { e.preventDefault(); return; }
+  if (e.ctrlKey && e.shiftKey && ['i','j','c','k'].includes(k)) { e.preventDefault(); return; }
+});
+// allow copy in inputs
+document.addEventListener('keydown', e => {
+  if (document.activeElement.tagName === 'INPUT') {
+    if (e.ctrlKey && ['c','x','a','v'].includes(e.key.toLowerCase())) return;
+  }
+}, true);
+
+// console warning
+(function(){
+  const w = '%c⚠ このツールは業務改善のペンギンの著作物です。複製・転売を禁じます。';
+  console.log(w, 'color:#f85149;font-size:14px;font-weight:bold;');
+})();
+
+/* ===== SITES ===== */
+const enc = encodeURIComponent;
+const SITES = [
+  {
+    id: 'amazon', name: 'Amazon', emoji: '🛒',
+    url: (q, mn, mx) => {
+      let u = `https://www.amazon.co.jp/s?k=${enc(q)}`;
+      if (mn > 0 || mx > 0) u += `&rh=p_36%3A${mn * 100}-${mx > 0 ? mx * 100 : ''}`;
+      return u;
+    }
+  },
+  {
+    id: 'rakuten', name: '楽天市場', emoji: '🛍',
+    url: (q, mn, mx) => {
+      let u = `https://search.rakuten.co.jp/search/mall/${enc(q)}/`;
+      const p = [];
+      if (mn > 0) p.push(`min=${mn}`);
+      if (mx > 0) p.push(`max=${mx}`);
+      return p.length ? u + '?' + p.join('&') : u;
+    }
+  },
+  {
+    id: 'yahoo', name: 'Yahoo!ショッピング', emoji: '🏪',
+    url: (q, mn, mx) => {
+      let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}`;
+      if (mn > 0) u += `&min_price=${mn}`;
+      if (mx > 0) u += `&max_price=${mx}`;
+      return u;
+    }
+  },
+  {
+    id: 'kakaku', name: '価格.com', emoji: '💴',
+    url: (q, mn, mx) => {
+      let u = `https://kakaku.com/search_results/${enc(q)}/`;
+      if (mn > 0 || mx > 0) u += `?min=${mn}&max=${mx}`;
+      return u;
+    }
+  },
+  {
+    id: 'monotaro', name: 'モノタロウ', emoji: '🔧',
+    url: (q) => `https://www.monotaro.com/s/?c=&q=${enc(q)}`
+  },
+  {
+    id: 'yodobashi', name: 'ヨドバシ.com', emoji: '📺',
+    url: (q) => `https://www.yodobashi.com/?word=${enc(q)}`
+  },
+  {
+    id: 'mercari', name: 'メルカリ', emoji: '📦',
+    url: (q, mn, mx) => {
+      let u = `https://jp.mercari.com/search?keyword=${enc(q)}&status=on_sale`;
+      if (mn > 0) u += `&price_min=${mn}`;
+      if (mx > 0) u += `&price_max=${mx}`;
+      return u;
+    }
+  },
+  {
+    id: 'paypay', name: 'PayPayモール', emoji: '💳',
+    url: (q, mn, mx) => {
+      let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}&tab=paypay`;
+      if (mn > 0) u += `&min_price=${mn}`;
+      if (mx > 0) u += `&max_price=${mx}`;
+      return u;
+    }
+  }
+];
+
+const selected = new Set(SITES.map(s => s.id));
+let priceMin = 0, priceMax = 0;
+const isApp = window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
+
+/* ===== BUILD SITE CHIPS ===== */
+function buildChips() {
+  const el = document.getElementById('siteChips');
+  el.innerHTML = SITES.map(s => `
+    <div class="site-chip on" id="chip-${s.id}" onclick="toggleSite('${s.id}')" data-id="${s.id}">
+      ${s.emoji} ${s.name}
+    </div>`).join('');
+}
+buildChips();
+
+function toggleSite(id) {
+  const el = document.getElementById('chip-' + id);
+  if (selected.has(id)) { selected.delete(id); el.classList.remove('on'); }
+  else { selected.add(id); el.classList.add('on'); }
+}
+
+function selectAll() {
+  SITES.forEach(s => { selected.add(s.id); document.getElementById('chip-' + s.id).classList.add('on'); });
+}
+function clearAll() {
+  SITES.forEach(s => { selected.delete(s.id); document.getElementById('chip-' + s.id).classList.remove('on'); });
+}
+
+/* ===== PRICE CHIPS ===== */
+function setPriceRange(mn, mx) {
+  document.getElementById('priceMin').value = mn || '';
+  document.getElementById('priceMax').value = mx || '';
+  priceMin = mn;
+  priceMax = mx;
+  document.querySelectorAll('.price-chip').forEach(c => c.classList.remove('on'));
+  event.target.classList.add('on');
+}
+
+/* ===== SEARCH ===== */
+function openAll() {
+  const kw = document.getElementById('kwInput').value.trim();
+  priceMin = parseInt(document.getElementById('priceMin').value) || 0;
+  priceMax = parseInt(document.getElementById('priceMax').value) || 0;
+
+  if (!kw) { document.getElementById('kwInput').focus(); return; }
+  if (selected.size === 0) { alert('サイトを1つ以上選んでください'); return; }
+
+  const targets = SITES.filter(s => selected.has(s.id));
+  const priceStr = priceMax > 0
+    ? `〜${priceMax.toLocaleString()}円`
+    : priceMin > 0 ? `${priceMin.toLocaleString()}円〜` : '';
+
+  const statusBox = document.getElementById('statusBox');
+  const statusText = document.getElementById('statusText');
+  const linkList = document.getElementById('linkList');
+  statusBox.classList.add('visible');
+
+  if (isApp) {
+    statusText.textContent = `🔗「${kw}」${priceStr ? `（${priceStr}）` : ''} — タップして各サイトを開く`;
+    linkList.innerHTML = targets.map(s => `
+      <a href="${s.url(kw, priceMin, priceMax)}" target="_blank" rel="noopener noreferrer" class="site-link">
+        <span style="font-size:18px;">${s.emoji}</span>
+        <span>${s.name}で「${kw}」を検索</span>
+        <span style="margin-left:auto;color:#484f58;font-size:12px;">開く →</span>
+      </a>`).join('');
+  } else {
+    targets.forEach(s => window.open(s.url(kw, priceMin, priceMax), '_blank', 'noopener,noreferrer'));
+    statusText.innerHTML = `✅ <strong>「${kw}」</strong>${priceStr ? `（${priceStr}）` : ''} を ${targets.length}サイトで開きました！`;
+    linkList.innerHTML = targets.map(s => `
+      <a href="${s.url(kw, priceMin, priceMax)}" target="_blank" rel="noopener noreferrer" class="site-link">
+        <span style="font-size:18px;">${s.emoji}</span>
+        <span>${s.name}</span>
+        <span style="margin-left:auto;color:#484f58;font-size:12px;">再度開く →</span>
+      </a>`).join('');
+  }
+}
+
+/* ===== SCROLL ===== */
+function scrollToTool() {
+  document.getElementById('tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// show FAB when scrolled into LP
+const lpEl = document.getElementById('lp');
+const fabEl = document.getElementById('fabTool');
+const obs = new IntersectionObserver(entries => {
+  fabEl.classList.toggle('visible', entries[0].isIntersecting);
+}, { threshold: 0.05 });
+obs.observe(lpEl);
+
+// Enter on keyword input
+document.getElementById('kwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') openAll();
+});
+
+/* ===== SW ===== */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
