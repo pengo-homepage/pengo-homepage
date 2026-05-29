@@ -1,0 +1,1915 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ルーチン業務かんたん管理</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Meiryo', 'Yu Gothic', sans-serif; background: #f0f4f8; color: #222; }
+
+    /* ===== ヘッダー ===== */
+    header {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      color: white; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.03em; }
+    .header-right { display: flex; align-items: center; gap: 10px; }
+    .guide-btn {
+      background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.4);
+      color: white; border-radius: 20px; padding: 5px 14px;
+      font-size: 0.82rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: background 0.2s;
+    }
+    .guide-btn:hover { background: rgba(255,255,255,0.25); }
+
+    /* ===== タブ ===== */
+    .tabs { display: flex; background: #1e3a5f; padding: 0 24px; gap: 4px; }
+    .tab {
+      padding: 11px 24px; font-size: 0.9rem; font-weight: 700;
+      color: rgba(255,255,255,0.55); cursor: pointer;
+      border-bottom: 3px solid transparent; transition: all 0.2s; user-select: none;
+    }
+    .tab:hover { color: white; }
+    .tab.active { color: white; border-bottom-color: #60a5fa; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
+    .card {
+      background: white; border-radius: 12px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.09);
+      padding: 22px 24px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 0.95rem; font-weight: 700; color: #1e3a5f;
+      border-left: 4px solid #2563eb; padding-left: 10px; margin-bottom: 18px;
+    }
+
+    /* ===== 部門ボタン ===== */
+    .dept-selector { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+    .dept-btn {
+      flex: 1; min-width: 140px; padding: 14px 16px;
+      border: 2px solid #d1d5db; border-radius: 12px;
+      background: #f8fafc; cursor: pointer; text-align: center;
+      transition: all 0.18s; user-select: none;
+    }
+    .dept-btn .dept-icon { font-size: 1.8rem; display: block; margin-bottom: 5px; }
+    .dept-btn .dept-name { font-size: 1rem; font-weight: 700; color: #444; }
+    .dept-btn .dept-sub  { font-size: 0.72rem; color: #888; margin-top: 3px; }
+    .dept-btn.active-wh  { border-color: #2563eb; background: #eff6ff; box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+    .dept-btn.active-wh .dept-name { color: #1d4ed8; }
+    .dept-btn.active-mfg { border-color: #059669; background: #ecfdf5; box-shadow: 0 0 0 3px rgba(5,150,105,0.12); }
+    .dept-btn.active-mfg .dept-name { color: #047857; }
+
+    /* ===== フォーム ===== */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group.half { grid-column: span 2; }
+
+    .field-label {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.78rem; font-weight: 700; color: #444;
+    }
+    .field-label .req { color: #dc2626; }
+    .help-btn {
+      background: #e0e7ff; border: none; color: #4338ca;
+      border-radius: 50%; width: 18px; height: 18px;
+      font-size: 0.65rem; font-weight: 900; cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s; font-family: inherit;
+      line-height: 1;
+    }
+    .help-btn:hover { background: #c7d2fe; }
+
+    input[type=text], input[type=number], select, textarea {
+      border: 1.5px solid #d1d5db; border-radius: 8px;
+      padding: 9px 12px; font-size: 0.92rem; font-family: inherit;
+      background: #fafafa; transition: border-color 0.2s, background 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none; border-color: #2563eb; background: white;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+    }
+    textarea { resize: vertical; min-height: 64px; }
+
+    /* 部門別セクション */
+    .field-section {
+      grid-column: 1 / -1; display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px; padding: 14px; border-radius: 10px; margin: -4px 0;
+    }
+    .field-section.wh-section  { background: #f0f7ff; border: 1.5px solid #bfdbfe; }
+    .field-section.mfg-section { background: #f0fdf8; border: 1.5px solid #a7f3d0; }
+    .section-label {
+      grid-column: 1 / -1; font-size: 0.76rem; font-weight: 700;
+      display: flex; align-items: center; gap: 6px; margin-bottom: -4px;
+    }
+    .section-label.wh  { color: #1d4ed8; }
+    .section-label.mfg { color: #047857; }
+
+    /* 所要時間 */
+    .duration-range { display: flex; align-items: center; gap: 6px; }
+    .duration-range input { width: 72px; }
+    .duration-range span { font-size: 0.9rem; color: #555; white-space: nowrap; }
+
+    /* ラジオ */
+    .radio-group { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; }
+    .radio-label {
+      display: flex; align-items: center; gap: 5px; cursor: pointer;
+      font-size: 0.88rem; font-weight: 600; color: #333;
+      padding: 7px 15px; border: 1.5px solid #d1d5db; border-radius: 20px;
+      transition: all 0.15s; user-select: none;
+    }
+    .radio-label input[type=radio] { display: none; }
+    .radio-label.checked { border-color: #2563eb; background: #eff6ff; color: #1d4ed8; }
+
+    /* 時系列 */
+    .timeline-section { margin-top: 4px; }
+    .timeline-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .timeline-row .step-num {
+      min-width: 26px; height: 26px; background: #2563eb; color: white;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; margin-top: 8px; flex-shrink: 0;
+    }
+    .timeline-row .time-input   { width: 86px; flex-shrink: 0; }
+    .timeline-row .action-input { flex: 1; min-width: 100px; }
+    .step-dur { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+    .step-dur input { width: 58px; padding: 9px 6px; font-size: 0.82rem; }
+    .step-dur span  { font-size: 0.82rem; color: #666; white-space: nowrap; }
+    .timeline-row .del-btn {
+      background: #fee2e2; border: none; color: #dc2626; border-radius: 6px;
+      width: 30px; height: 30px; font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 7px; flex-shrink: 0; font-weight: 700; transition: background 0.15s;
+    }
+    .timeline-row .del-btn:hover { background: #fca5a5; }
+    .add-step-btn {
+      display: flex; align-items: center; gap: 6px; color: #2563eb;
+      font-size: 0.88rem; font-weight: 700; background: #eff6ff;
+      border: 1.5px dashed #93c5fd; border-radius: 8px; padding: 8px 16px;
+      cursor: pointer; transition: background 0.15s; margin-top: 4px;
+    }
+    .add-step-btn:hover { background: #dbeafe; }
+
+    /* ===== ボタン ===== */
+    .btn-row { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    button {
+      padding: 10px 24px; border-radius: 8px; border: none;
+      font-size: 0.92rem; font-weight: 700; cursor: pointer;
+      transition: background 0.15s, transform 0.1s; font-family: inherit;
+    }
+    button:active { transform: scale(0.97); }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-success { background: #059669; color: white; }
+    .btn-success:hover { background: #047857; }
+    .btn-outline { background: white; color: #2563eb; border: 1.5px solid #2563eb; }
+    .btn-outline:hover { background: #eff6ff; }
+    .btn-danger  { background: #dc2626; color: white; padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-edit    { background: #7c3aed; color: white; padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; }
+    .btn-copy    { background: #d97706; color: white; padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; cursor: pointer; border: none; font-family: inherit; }
+    .btn-copy:hover { background: #b45309; }
+    .btn-edit:hover { background: #6d28d9; }
+    .btn-detail  { background: #0284c7; color: white; padding: 5px 12px; font-size: 0.78rem; border-radius: 5px; }
+    .btn-detail:hover { background: #0369a1; }
+
+    /* ===== サマリー ===== */
+    .summary-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .summary-item { border-radius: 10px; padding: 10px 18px; text-align: center; min-width: 90px; }
+    .summary-item.s-total { background: linear-gradient(135deg,#eff6ff,#dbeafe); border: 1px solid #bfdbfe; }
+    .summary-item.s-wh    { background: linear-gradient(135deg,#eff6ff,#dbeafe); border: 1px solid #93c5fd; }
+    .summary-item.s-mfg   { background: linear-gradient(135deg,#ecfdf5,#d1fae5); border: 1px solid #6ee7b7; }
+    .summary-item .num { font-size: 1.6rem; font-weight: 800; }
+    .summary-item.s-total .num, .summary-item.s-wh .num { color: #1d4ed8; }
+    .summary-item.s-mfg .num { color: #047857; }
+    .summary-item .lbl { font-size: 0.7rem; color: #555; margin-top: 2px; }
+
+    /* ===== ツールバー ===== */
+    .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .toolbar-right { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .search-input {
+      padding: 8px 12px; border: 1.5px solid #d1d5db;
+      border-radius: 8px; font-size: 0.88rem; width: 180px; font-family: inherit;
+    }
+    .search-input:focus { outline: none; border-color: #2563eb; }
+    .filter-select {
+      padding: 8px 10px; border: 1.5px solid #d1d5db;
+      border-radius: 8px; font-size: 0.88rem; font-family: inherit; background: white;
+    }
+
+    /* ===== テーブル ===== */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    th { background: #1e3a5f; color: white; padding: 10px 12px; text-align: left; white-space: nowrap; font-weight: 700; }
+    td { padding: 10px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
+    tr:hover td { background: #f5f9ff; }
+    tr.row-mfg:hover td { background: #f0fdf8; }
+    tr:last-child td { border-bottom: none; }
+
+    /* バッジ */
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 0.74rem; font-weight: 700; white-space: nowrap; }
+    .badge-wh      { background: #dbeafe; color: #1e40af; }
+    .badge-mfg     { background: #d1fae5; color: #065f46; }
+    .badge-route   { background: #dbeafe; color: #1d4ed8; }
+    .badge-charter { background: #fce7f3; color: #9d174d; }
+    .badge-none    { background: #e5e7eb; color: #6b7280; }
+    .badge-work    { background: #f3e8ff; color: #6b21a8; }
+
+    /* タイムラインプレビュー */
+    .tl-preview { font-size: 0.78rem; color: #374151; line-height: 1.8; }
+    .tl-preview .tl-item { display: flex; gap: 6px; align-items: baseline; }
+    .tl-preview .tl-time   { color: #6b7280; white-space: nowrap; min-width: 46px; }
+    .tl-preview .tl-dur    { color: #9ca3af; font-size: 0.72rem; margin-left: 4px; }
+
+    /* ===== 空状態 ===== */
+    .empty-state {
+      text-align: center; padding: 52px 20px;
+    }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 12px; }
+    .empty-state .empty-title { font-size: 1.1rem; font-weight: 700; color: #374151; margin-bottom: 6px; }
+    .empty-state .empty-sub { font-size: 0.88rem; color: #9ca3af; margin-bottom: 20px; }
+    .empty-state .empty-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    /* ===== モーダル（共通） ===== */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white; border-radius: 16px; padding: 28px;
+      width: 100%; max-width: 720px; max-height: 92vh;
+      overflow-y: auto; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+    .modal h3 { font-size: 1.05rem; font-weight: 700; color: #1e3a5f; margin-bottom: 18px; }
+
+    /* ===== ウェルカム画面 ===== */
+    #welcome-modal .modal {
+      max-width: 560px; text-align: center; padding: 36px 32px;
+    }
+    .welcome-logo { font-size: 3.2rem; margin-bottom: 8px; }
+    .welcome-title { font-size: 1.5rem; font-weight: 800; color: #1e3a5f; margin-bottom: 6px; }
+    .welcome-sub { font-size: 0.9rem; color: #6b7280; margin-bottom: 28px; line-height: 1.6; }
+    .steps-row { display: flex; gap: 8px; margin-bottom: 28px; }
+    .step-card {
+      flex: 1; background: #f8fafc; border: 1.5px solid #e2e8f0;
+      border-radius: 12px; padding: 16px 10px; text-align: center;
+    }
+    .step-card .s-icon { font-size: 1.8rem; margin-bottom: 6px; }
+    .step-card .s-num  { font-size: 0.7rem; font-weight: 800; color: #2563eb; margin-bottom: 3px; letter-spacing: 0.05em; }
+    .step-card .s-text { font-size: 0.8rem; font-weight: 700; color: #374151; line-height: 1.4; }
+    .welcome-btns { display: flex; flex-direction: column; gap: 10px; }
+    .btn-welcome-primary {
+      background: #2563eb; color: white; border: none; border-radius: 10px;
+      padding: 14px; font-size: 1rem; font-weight: 800; cursor: pointer;
+      font-family: inherit; transition: background 0.15s; width: 100%;
+    }
+    .btn-welcome-primary:hover { background: #1d4ed8; }
+    .btn-welcome-sample {
+      background: #ecfdf5; color: #047857; border: 1.5px solid #6ee7b7;
+      border-radius: 10px; padding: 13px; font-size: 0.95rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: background 0.15s; width: 100%;
+    }
+    .btn-welcome-sample:hover { background: #d1fae5; }
+    .btn-welcome-skip {
+      background: none; border: none; color: #9ca3af; font-size: 0.82rem;
+      cursor: pointer; font-family: inherit; padding: 4px; text-decoration: underline;
+    }
+
+    /* ===== ヘルプポップアップ ===== */
+    #help-modal .modal {
+      max-width: 400px; padding: 24px;
+    }
+    .help-modal-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .help-modal-title { font-size: 1rem; font-weight: 800; color: #1e3a5f; margin-bottom: 10px; }
+    .help-modal-body { font-size: 0.9rem; color: #374151; line-height: 1.7; }
+    .help-modal-example {
+      background: #f0f7ff; border-left: 3px solid #2563eb; border-radius: 0 6px 6px 0;
+      padding: 8px 12px; margin-top: 10px; font-size: 0.85rem; color: #1e40af;
+    }
+    .help-modal-example strong { display: block; font-size: 0.72rem; color: #6b7280; margin-bottom: 3px; }
+
+    /* ===== ガイドモーダル ===== */
+    #guide-modal .modal { max-width: 520px; padding: 28px; }
+    .guide-step {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px 0; border-bottom: 1px solid #f0f0f0;
+    }
+    .guide-step:last-child { border-bottom: none; }
+    .guide-step-icon { font-size: 1.8rem; flex-shrink: 0; margin-top: 2px; }
+    .guide-step-title { font-size: 0.95rem; font-weight: 700; color: #1e3a5f; margin-bottom: 4px; }
+    .guide-step-text  { font-size: 0.85rem; color: #555; line-height: 1.6; }
+
+    /* ===== 詳細モーダル ===== */
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    .detail-item label { font-size: 0.72rem; font-weight: 700; color: #6b7280; display: block; margin-bottom: 3px; }
+    .detail-item p { font-size: 0.9rem; color: #111; }
+    .detail-item.full { grid-column: 1/-1; }
+    .detail-section { grid-column: 1/-1; padding: 12px 14px; border-radius: 8px; margin: 4px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .detail-section.wh-sec  { background: #f0f7ff; border: 1px solid #bfdbfe; }
+    .detail-section.mfg-sec { background: #f0fdf8; border: 1px solid #a7f3d0; }
+    .detail-section-title { grid-column: 1/-1; font-size: 0.72rem; font-weight: 700; margin-bottom: 4px; }
+    .detail-section-title.wh  { color: #1d4ed8; }
+    .detail-section-title.mfg { color: #047857; }
+    .timeline-detail { margin-top: 6px; }
+    .tl-detail-row { display: flex; position: relative; padding-left: 16px; }
+    .tl-detail-row::before { content: ''; position: absolute; left: 5px; top: 0; bottom: -1px; width: 2px; background: #bfdbfe; }
+    .tl-detail-row:last-child::before { display: none; }
+    .tl-dot { position: absolute; left: 0; top: 10px; width: 12px; height: 12px; background: #2563eb; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 2px #2563eb; }
+    .tl-d-time   { font-size: 0.78rem; font-weight: 700; color: #2563eb; min-width: 60px; padding: 8px 8px 8px 0; }
+    .tl-d-action { font-size: 0.88rem; color: #222; padding: 8px 0; flex: 1; border-bottom: 1px dashed #e5e7eb; }
+    .tl-detail-row:last-child .tl-d-action { border-bottom: none; }
+
+    /* ===== トースト ===== */
+    #toast {
+      position: fixed; bottom: 28px; right: 28px;
+      color: white; padding: 12px 22px; border-radius: 10px;
+      font-size: 0.92rem; font-weight: 700; opacity: 0; transition: opacity 0.3s;
+      z-index: 300; pointer-events: none; max-width: 300px; text-align: center;
+    }
+    #toast.show { opacity: 1; }
+    #toast.toast-ok  { background: #059669; }
+    #toast.toast-err { background: #dc2626; }
+
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-group.half { grid-column: span 1; }
+      .field-section { grid-template-columns: 1fr; }
+      .search-input { width: 100%; }
+      .detail-grid, .detail-section { grid-template-columns: 1fr; }
+      .steps-row { flex-direction: column; }
+    }
+
+    /* ===== ガイドツアー ===== */
+    #tour-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500; pointer-events: none;
+    }
+    #tour-overlay.active { display: block; pointer-events: auto; }
+    #tour-overlay svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    #tour-tooltip {
+      display: none; position: fixed; z-index: 510;
+      background: white; border-radius: 14px;
+      padding: 20px 22px; width: 300px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+      pointer-events: auto;
+    }
+    #tour-tooltip.active { display: block; }
+    .tour-badge {
+      font-size: 0.7rem; font-weight: 800; color: #2563eb;
+      background: #eff6ff; border-radius: 20px;
+      padding: 2px 10px; display: inline-block; margin-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+    .tour-title {
+      font-size: 1rem; font-weight: 800; color: #1e3a5f;
+      margin-bottom: 8px; line-height: 1.4;
+    }
+    .tour-text {
+      font-size: 0.88rem; color: #374151; line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .tour-arrow {
+      position: absolute; width: 16px; height: 16px;
+      background: white; transform: rotate(45deg);
+    }
+    .tour-arrow.top    { top: -8px; left: 50%; margin-left: -8px; box-shadow: -2px -2px 4px rgba(0,0,0,0.08); }
+    .tour-arrow.bottom { bottom: -8px; left: 50%; margin-left: -8px; box-shadow: 2px 2px 4px rgba(0,0,0,0.08); }
+    .tour-arrow.left   { left: -8px; top: 50%; margin-top: -8px; box-shadow: -2px 2px 4px rgba(0,0,0,0.08); }
+    .tour-footer { display: flex; align-items: center; justify-content: space-between; }
+    .tour-progress {
+      font-size: 0.75rem; color: #9ca3af; font-weight: 700;
+    }
+    .tour-dots {
+      display: flex; gap: 4px; align-items: center;
+    }
+    .tour-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #d1d5db; transition: all 0.2s;
+    }
+    .tour-dot.active { background: #2563eb; width: 18px; border-radius: 3px; }
+    .tour-btns { display: flex; gap: 8px; }
+    .tour-btn-next {
+      background: #2563eb; color: white; border: none; border-radius: 8px;
+      padding: 8px 18px; font-size: 0.88rem; font-weight: 800;
+      cursor: pointer; font-family: inherit; transition: background 0.15s;
+    }
+    .tour-btn-next:hover { background: #1d4ed8; }
+    .tour-btn-prev {
+      background: #f1f5f9; color: #475569; border: none; border-radius: 8px;
+      padding: 8px 14px; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: background 0.15s;
+    }
+    .tour-btn-prev:hover { background: #e2e8f0; }
+    .tour-btn-skip {
+      background: none; border: none; color: #9ca3af;
+      font-size: 0.78rem; cursor: pointer; font-family: inherit;
+      text-decoration: underline; padding: 0;
+    }
+
+    /* スポットライトのパルス枠 */
+    @keyframes tour-pulse {
+      0%   { opacity: 1; }
+      50%  { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    #tour-ring {
+      display: none; position: fixed; z-index: 502; pointer-events: none;
+      border: 3px solid #60a5fa; border-radius: 10px;
+      animation: tour-pulse 1.4s ease-in-out infinite;
+      box-shadow: 0 0 0 4px rgba(96,165,250,0.25);
+    }
+    #tour-ring.active { display: block; }
+
+    /* ===== AI機能 ===== */
+    .ai-key-wrap { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+    .ai-key-input {
+      flex: 1; min-width: 220px; padding: 10px 12px;
+      border: 1.5px solid #d1d5db; border-radius: 8px;
+      font-size: 0.88rem; font-family: 'Courier New', monospace;
+      color: #374151; background: #f9fafb;
+    }
+    .ai-key-input:focus { outline: none; border-color: #7c3aed; background: white; }
+    .ai-key-status {
+      font-size: 0.8rem; margin-top: 8px; padding: 6px 12px;
+      border-radius: 6px; display: none;
+    }
+    .ai-key-status.ok  { background: #d1fae5; color: #065f46; display: block; }
+    .ai-key-status.err { background: #fee2e2; color: #991b1b; display: block; }
+
+    .ai-features { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+    .ai-feat-btn {
+      border: none; border-radius: 12px;
+      padding: 18px 16px; cursor: pointer; text-align: left;
+      font-family: inherit; transition: all 0.18s;
+      color: white;
+    }
+    .ai-feat-btn:hover { transform: translateY(-2px); }
+    .ai-feat-btn:active { transform: translateY(0); }
+    .ai-feat-btn .ai-icon  { font-size: 1.7rem; display: block; margin-bottom: 8px; }
+    .ai-feat-btn .ai-title { font-size: 0.93rem; font-weight: 800; display: block; margin-bottom: 4px; }
+    .ai-feat-btn .ai-desc  { font-size: 0.75rem; opacity: 0.88; display: block; line-height: 1.5; }
+    .ai-feat-btn.report { background: linear-gradient(135deg,#2563eb,#1e40af); box-shadow:0 2px 10px rgba(37,99,235,0.3); }
+    .ai-feat-btn.manual { background: linear-gradient(135deg,#059669,#047857); box-shadow:0 2px 10px rgba(5,150,105,0.3); }
+    .ai-feat-btn.ideas  { background: linear-gradient(135deg,#d97706,#b45309); box-shadow:0 2px 10px rgba(217,119,6,0.3); }
+
+    #ai-modal .modal { max-width: 720px; max-height: 85vh; overflow-y: auto; }
+    .ai-result-content {
+      background: #f8fafc; border-radius: 10px;
+      padding: 18px 20px; margin: 14px 0;
+      font-size: 0.87rem; line-height: 1.85; color: #1f2937;
+      white-space: pre-wrap; word-break: break-word;
+      border: 1px solid #e5e7eb; max-height: 52vh; overflow-y: auto;
+    }
+    .ai-loading { text-align: center; padding: 44px 20px; color: #7c3aed; }
+    .ai-spinner { font-size: 2.8rem; display: block; margin-bottom: 14px; animation: ai-spin 1.4s linear infinite; }
+    @keyframes ai-spin { to { transform: rotate(360deg); } }
+    .ai-loading-text { font-size: 0.95rem; font-weight: 700; }
+    .ai-loading-sub  { font-size: 0.8rem; color: #9ca3af; margin-top: 6px; }
+  </style>
+  <style>
+    #demo-banner {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+      background: linear-gradient(135deg, #FF6B35, #e8521e);
+      color: white; text-align: center;
+      padding: 10px 16px; font-size: 13px; font-weight: 700;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; flex-wrap: wrap; font-family: sans-serif;
+    }
+    #demo-banner a {
+      color: white; text-decoration: underline; font-weight: 700;
+    }
+    body { padding-top: 48px !important; }
+  </style>
+</head>
+<body>
+  <div id="demo-banner">
+    🐧 これはデモ版です。入力したデータは保存されません。
+    ｜ 実際に使いたい方は
+    <a href="https://x.com/ss8710307199902" target="_blank">X</a> または
+    <a href="https://www.instagram.com/pengo_365/" target="_blank">Instagram</a> のDMへ！
+  </div>
+
+<!-- ========== ガイドツアー オーバーレイ ========== -->
+<div id="tour-overlay">
+  <svg id="tour-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <mask id="tour-mask">
+        <rect width="100%" height="100%" fill="white"/>
+        <rect id="tour-hole" rx="10" fill="black"/>
+      </mask>
+    </defs>
+    <rect id="tour-bg" width="100%" height="100%" fill="rgba(0,0,0,0.62)" mask="url(#tour-mask)"/>
+  </svg>
+</div>
+<div id="tour-ring"></div>
+<div id="tour-tooltip">
+  <div id="tour-arrow-el" class="tour-arrow top"></div>
+  <div class="tour-badge" id="tour-badge">STEP 1 / 13</div>
+  <div class="tour-title" id="tour-title"></div>
+  <div class="tour-text"  id="tour-text"></div>
+  <div class="tour-footer">
+    <div>
+      <div class="tour-dots" id="tour-dots"></div>
+    </div>
+    <div class="tour-btns">
+      <button class="tour-btn-skip" onclick="endTour()">終了</button>
+      <button class="tour-btn-prev" id="tour-prev" onclick="tourPrev()">◀ 戻る</button>
+      <button class="tour-btn-next" id="tour-next" onclick="tourNext()">次へ ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ウェルカムモーダル ========== -->
+<div class="modal-overlay" id="welcome-modal">
+  <div class="modal">
+    <div class="welcome-logo">📋</div>
+    <div class="welcome-title">ルーチン業務かんたん管理</div>
+    <div class="welcome-sub">製造・倉庫の「いつもの仕事」を<br>かんたんにまとめてExcelで出力できます</div>
+
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="s-icon">🏭</div>
+        <div class="s-num">STEP 1</div>
+        <div class="s-text">部門を<br>選ぶ</div>
+      </div>
+      <div class="step-card">
+        <div class="s-icon">✏️</div>
+        <div class="s-num">STEP 2</div>
+        <div class="s-text">業務を<br>登録する</div>
+      </div>
+      <div class="step-card">
+        <div class="s-icon">📥</div>
+        <div class="s-num">STEP 3</div>
+        <div class="s-text">Excelで<br>出力する</div>
+      </div>
+    </div>
+
+    <div class="welcome-btns">
+      <button class="btn-welcome-sample" onclick="loadSampleData()">
+        🎯 サンプルデータを入れて試してみる
+      </button>
+      <button class="btn-welcome-primary" onclick="closeWelcome()">
+        ➕ 自分で業務を登録してはじめる
+      </button>
+      <button class="btn-welcome-skip" onclick="closeWelcome()">スキップ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ヘルプポップアップ ========== -->
+<div class="modal-overlay" id="help-modal">
+  <div class="modal">
+    <span class="help-modal-icon" id="help-icon"></span>
+    <div class="help-modal-title" id="help-title"></div>
+    <div class="help-modal-body"  id="help-body"></div>
+    <div class="help-modal-example" id="help-example" style="display:none">
+      <strong>入力例</strong>
+      <span id="help-example-text"></span>
+    </div>
+    <div class="btn-row" style="margin-top:18px;justify-content:flex-end;">
+      <button class="btn-primary" onclick="closeHelp()">わかった！</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 使い方ガイドモーダル ========== -->
+<div class="modal-overlay" id="guide-modal">
+  <div class="modal">
+    <h3>📖 使い方ガイド</h3>
+    <div class="guide-step">
+      <div class="guide-step-icon">🏭</div>
+      <div>
+        <div class="guide-step-title">①「業務追加」タブを開く</div>
+        <div class="guide-step-text">画面上部のタブから「➕ 業務追加」を押します。倉庫か製造かを選んでください。</div>
+      </div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-icon">✏️</div>
+      <div>
+        <div class="guide-step-title">②業務の内容を入力する</div>
+        <div class="guide-step-text">業務名・作業内容・頻度・担当者などを入力します。わからない項目は「❓」ボタンを押すと説明が出ます。時系列フローは「＋ステップを追加」で手順を1つずつ登録できます。</div>
+      </div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-icon">💾</div>
+      <div>
+        <div class="guide-step-title">③「登録する」ボタンを押す</div>
+        <div class="guide-step-text">入力が終わったら「＋ 登録する」を押せば保存されます。データはこのパソコンに自動で保存されるので、次に開いても残っています。</div>
+      </div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-icon">📥</div>
+      <div>
+        <div class="guide-step-title">④Excelで出力する</div>
+        <div class="guide-step-text">「📋 業務一覧」タブの「📥 Excel出力」ボタンを押すと、登録した業務がExcelファイルになってダウンロードされます。</div>
+      </div>
+    </div>
+    <div class="guide-step">
+      <div class="guide-step-icon">💾</div>
+      <div>
+        <div class="guide-step-title">⑤バックアップを忘れずに</div>
+        <div class="guide-step-text">「💾 バックアップ」ボタンでデータをファイルに保存しておくと安心です。パソコンが変わっても「📂 読み込み」で復元できます。</div>
+      </div>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;margin-top:4px;">
+      <button class="btn-primary" onclick="closeGuide()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== ヘッダー ========== -->
+<header>
+  <h1>📋 ルーチン業務かんたん管理</h1>
+  <div class="header-right">
+    <button class="guide-btn" onclick="startTour()">▶ 使い方ツアー</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('list')">📋 業務一覧</div>
+  <div class="tab" onclick="switchTab('add')">➕ 業務追加</div>
+  <div class="tab" onclick="switchTab('settings')">⚙️ データ管理</div>
+</div>
+
+<!-- ========== 一覧タブ ========== -->
+<div class="tab-content active" id="tab-list">
+  <div class="container">
+    <div class="card">
+      <div class="toolbar">
+        <div class="card-title" style="margin:0">業務一覧</div>
+        <div class="toolbar-right">
+          <select class="filter-select" id="filter-dept" onchange="renderTable()">
+            <option value="" selected>全部門</option>
+            <option value="倉庫">🏭 倉庫</option>
+            <option value="製造">🔧 製造</option>
+          </select>
+          <select class="filter-select" id="filter-freq" onchange="renderTable()">
+            <option value="" selected>全頻度</option>
+            <option value="毎日">毎日</option>
+            <option value="毎週">毎週</option>
+            <option value="毎月">毎月</option>
+          </select>
+          <input class="search-input" type="text" id="search" placeholder="🔍 検索..." oninput="renderTable()">
+          <button id="filter-reset-btn" onclick="resetFilters()" style="display:none;padding:8px 14px;background:#fee2e2;color:#dc2626;border:1.5px solid #fca5a5;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:inherit;">✖ 絞り込み解除</button>
+          <button class="btn-success" onclick="exportExcel()">📥 Excel出力</button>
+          <button class="btn-outline" onclick="exportJson()">💾 バックアップ</button>
+          <label class="btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;padding:10px 18px;border-radius:8px;border:1.5px solid #2563eb;font-size:0.92rem;font-weight:700;">
+            📂 読み込み
+            <input type="file" accept=".json" onchange="importJson(event)" style="display:none">
+          </label>
+        </div>
+      </div>
+      <div class="summary-row" id="summary"></div>
+      <div class="table-wrap">
+        <table id="task-table-wrap">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>部門</th>
+              <th>業務名</th>
+              <th>主な作業内容</th>
+              <th>部門別情報</th>
+              <th>頻度</th>
+              <th>実施タイミング</th>
+              <th>所要時間</th>
+              <th>担当者</th>
+              <th>作業フロー</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="task-table"></tbody>
+        </table>
+        <div id="empty-state" style="display:none">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div class="empty-title">まだ業務が登録されていません</div>
+            <div class="empty-sub">「業務追加」タブから最初の業務を登録してみましょう</div>
+            <div class="empty-actions">
+              <button class="btn-success" onclick="loadSampleData()">🎯 サンプルデータを入れて試す</button>
+              <button class="btn-primary" onclick="switchTab('add')">➕ 業務を追加する</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 追加タブ ========== -->
+<div class="tab-content" id="tab-add">
+  <div class="container">
+    <div class="card">
+      <div class="card-title">新規業務を登録</div>
+
+      <div class="dept-selector">
+        <div class="dept-btn active-wh" id="dept-btn-wh" onclick="setDept('f','倉庫')">
+          <span class="dept-icon">🏭</span>
+          <div class="dept-name">倉庫部門</div>
+          <div class="dept-sub">出荷・入庫・在庫管理</div>
+        </div>
+        <div class="dept-btn" id="dept-btn-mfg" onclick="setDept('f','製造')">
+          <span class="dept-icon">🔧</span>
+          <div class="dept-name">製造部門</div>
+          <div class="dept-sub">生産・品質・設備管理</div>
+        </div>
+      </div>
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <div class="field-label">
+            業務名<span class="req">*</span>
+            <button class="help-btn" onclick="showHelp('gyomu')">?</button>
+          </div>
+          <select id="f-name" onchange="onSelectOther('f-name','f-name-other')"></select>
+          <input type="text" id="f-name-other" placeholder="業務名を入力してください" style="display:none;margin-top:6px;">
+        </div>
+
+        <div class="form-group">
+          <div class="field-label">
+            主な作業内容<span class="req">*</span>
+            <button class="help-btn" onclick="showHelp('work')">?</button>
+          </div>
+          <select id="f-work" onchange="onSelectOther('f-work','f-work-other')"></select>
+          <input type="text" id="f-work-other" placeholder="作業内容を入力してください" style="display:none;margin-top:6px;">
+        </div>
+
+        <!-- 倉庫専用 -->
+        <div class="field-section wh-section" id="f-wh-fields">
+          <div class="section-label wh">🏭 倉庫部門の情報</div>
+          <div class="form-group">
+            <div class="field-label">
+              便の種類
+              <button class="help-btn" onclick="showHelp('bin')">?</button>
+            </div>
+            <div class="radio-group" id="f-bin-group">
+              <label class="radio-label checked" data-val="路線便"><input type="radio" name="f-bin" value="路線便" checked><span>路線便</span></label>
+              <label class="radio-label" data-val="チャーター便"><input type="radio" name="f-bin" value="チャーター便"><span>チャーター便</span></label>
+              <label class="radio-label" data-val="なし"><input type="radio" name="f-bin" value="なし"><span>なし</span></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="field-label">
+              物流会社
+              <button class="help-btn" onclick="showHelp('company')">?</button>
+            </div>
+            <input type="text" id="f-company" placeholder="例: ○○物流、○○運送">
+          </div>
+        </div>
+
+        <!-- 製造専用 -->
+        <div class="field-section mfg-section" id="f-mfg-fields" style="display:none">
+          <div class="section-label mfg">🔧 製造部門の情報</div>
+          <div class="form-group">
+            <div class="field-label">
+              工程名 / 生産ライン
+              <button class="help-btn" onclick="showHelp('line')">?</button>
+            </div>
+            <input type="text" id="f-line" placeholder="例: 第1ライン、組立工程">
+          </div>
+          <div class="form-group">
+            <div class="field-label">
+              設備・機器名
+              <button class="help-btn" onclick="showHelp('machine')">?</button>
+            </div>
+            <input type="text" id="f-machine" placeholder="例: プレス機A、コンベア3号">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="field-label">
+            頻度
+            <button class="help-btn" onclick="showHelp('freq')">?</button>
+          </div>
+          <select id="f-freq">
+            <option value="毎日">毎日</option>
+            <option value="毎週">毎週</option>
+            <option value="隔週">隔週</option>
+            <option value="毎月">毎月</option>
+            <option value="随時">随時</option>
+            <option value="その他">その他</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <div class="field-label">
+            実施タイミング
+            <button class="help-btn" onclick="showHelp('timing')">?</button>
+          </div>
+          <input type="text" id="f-timing" placeholder="例: 毎朝8:00 / 月末最終日">
+        </div>
+
+        <div class="form-group">
+          <div class="field-label">
+            所要時間
+            <button class="help-btn" onclick="showHelp('duration')">?</button>
+          </div>
+          <div class="duration-range">
+            <input type="number" id="f-dur-min" placeholder="最短" min="1" inputmode="numeric">
+            <span>〜</span>
+            <input type="number" id="f-dur-max" placeholder="最長" min="1" inputmode="numeric">
+            <span>分</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="field-label">
+            担当者
+            <button class="help-btn" onclick="showHelp('person')">?</button>
+          </div>
+          <input type="text" id="f-person" placeholder="例: 田中">
+        </div>
+
+        <div class="form-group full">
+          <div class="field-label">
+            備考・注意事項
+            <button class="help-btn" onclick="showHelp('notes')">?</button>
+          </div>
+          <textarea id="f-notes" rows="2" placeholder="注意事項や補足があれば書いてください（なければ空白でOK）"></textarea>
+        </div>
+
+        <div class="form-group full">
+          <div class="field-label">
+            作業フロー（時系列）
+            <button class="help-btn" onclick="showHelp('timeline')">?</button>
+          </div>
+          <div class="timeline-section" id="f-timeline"></div>
+          <button type="button" class="add-step-btn" onclick="addStep('f')">＋ ステップを追加する</button>
+        </div>
+
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" style="font-size:1rem;padding:12px 28px;" onclick="addTask()">＋ 登録する</button>
+        <button class="btn-outline" onclick="clearForm()">クリア</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== データ管理タブ ========== -->
+<div class="tab-content" id="tab-settings">
+  <div class="container">
+
+    <!-- AI設定 -->
+    <div class="card">
+      <div class="card-title">🤖 AI設定（Claude APIキー）</div>
+      <p style="font-size:0.85rem;color:#6b7280;margin-bottom:14px;line-height:1.7;">
+        AI機能を使うには <strong>Claude APIキー</strong> の設定が必要です。キーはこのパソコン内にのみ保存されます。<br>
+        まだキーをお持ちでない方は <a href="https://console.anthropic.com/" target="_blank" style="color:#7c3aed;font-weight:700;">Anthropic Console</a> で取得できます（無料枠あり）。
+      </p>
+      <div class="ai-key-wrap">
+        <input type="password" class="ai-key-input" id="ai-key-input" placeholder="sk-ant-api03-xxxxxxxxxx...">
+        <button class="btn-primary" style="padding:10px 20px;" onclick="saveApiKey()">保存</button>
+        <button class="btn-outline" style="padding:10px 20px;" onclick="deleteApiKey()">削除</button>
+      </div>
+      <div class="ai-key-status" id="ai-key-status"></div>
+    </div>
+
+    <!-- AI機能 -->
+    <div class="card">
+      <div class="card-title">✨ AI自動分析・生成</div>
+      <p style="font-size:0.85rem;color:#6b7280;margin-bottom:18px;line-height:1.6;">
+        ボタンを1つ押すだけで、登録済みの業務データを <strong>AIが自動で分析・文章化</strong> します。
+      </p>
+      <div class="ai-features">
+        <button class="ai-feat-btn report" onclick="aiAnalyze('report')">
+          <span class="ai-icon">📊</span>
+          <span class="ai-title">業務改善レポート</span>
+          <span class="ai-desc">全業務を分析して改善アイデアをまとめます</span>
+        </button>
+        <button class="ai-feat-btn manual" onclick="aiAnalyze('manual')">
+          <span class="ai-icon">📄</span>
+          <span class="ai-title">作業マニュアル生成</span>
+          <span class="ai-desc">手順書のたたき台を自動で作成します</span>
+        </button>
+        <button class="ai-feat-btn ideas" onclick="aiAnalyze('ideas')">
+          <span class="ai-icon">💡</span>
+          <span class="ai-title">自動化アイデア提案</span>
+          <span class="ai-desc">自動化・デジタル化できる業務を提案します</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">データ管理</div>
+      <p style="font-size:0.88rem;color:#6b7280;margin-bottom:18px;line-height:1.7;">
+        💡 <strong>バックアップ</strong>を定期的に取っておくと安心です。パソコンが変わっても「読み込み」で復元できます。
+      </p>
+      <div class="btn-row">
+        <button class="btn-outline" onclick="exportJson()">💾 バックアップを保存する</button>
+        <label class="btn-outline" style="cursor:pointer;display:inline-flex;align-items:center;padding:10px 24px;border-radius:8px;border:1.5px solid #2563eb;font-size:0.92rem;font-weight:700;">
+          📂 バックアップを読み込む
+          <input type="file" accept=".json" onchange="importJson(event)" style="display:none">
+        </label>
+        <button class="btn-danger" style="padding:10px 24px;font-size:0.92rem;" onclick="clearAll()">🗑️ 全データ削除</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">サンプルデータ</div>
+      <p style="font-size:0.88rem;color:#6b7280;margin-bottom:16px;">
+        倉庫・製造の記入例を入れてお試しいただけます。
+      </p>
+      <div class="btn-row">
+        <button class="btn-success" onclick="loadSampleData()">🎯 サンプルデータを読み込む</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI結果モーダル -->
+<div class="modal-overlay" id="ai-modal">
+  <div class="modal">
+    <h3 id="ai-modal-title">AIが分析中...</h3>
+    <div id="ai-loading" class="ai-loading">
+      <span class="ai-spinner">🤖</span>
+      <div class="ai-loading-text">AIが業務データを分析しています</div>
+      <div class="ai-loading-sub">10〜30秒ほどかかります。そのままお待ちください...</div>
+    </div>
+    <div id="ai-result-wrap" style="display:none">
+      <div class="ai-result-content" id="ai-result-text"></div>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;margin-top:16px;">
+      <button class="btn-outline" onclick="closeAiModal()">閉じる</button>
+      <button class="btn-success" id="ai-copy-btn" style="display:none" onclick="copyAiResult()">📋 コピー</button>
+      <button class="btn-primary" id="ai-save-btn" style="display:none" onclick="saveAiResult()">💾 テキスト保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- 詳細モーダル -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal">
+    <h3 id="dm-title"></h3>
+    <div class="detail-grid" id="dm-grid"></div>
+    <div id="dm-timeline-wrap" style="display:none">
+      <div style="font-size:0.77rem;font-weight:700;color:#444;margin-bottom:10px;">作業フロー（時系列）</div>
+      <div class="timeline-detail" id="dm-timeline"></div>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;margin-top:20px;">
+      <button class="btn-outline" onclick="closeDetailModal()">閉じる</button>
+      <button class="btn-edit" style="padding:10px 22px;font-size:0.92rem;" onclick="openEditFromDetail()">編集する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 編集モーダル -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h3>✏️ 業務を編集</h3>
+    <div class="dept-selector" style="margin-bottom:16px;">
+      <div class="dept-btn" id="e-dept-btn-wh"  onclick="setDept('e','倉庫')"><span class="dept-icon">🏭</span><div class="dept-name">倉庫部門</div></div>
+      <div class="dept-btn" id="e-dept-btn-mfg" onclick="setDept('e','製造')"><span class="dept-icon">🔧</span><div class="dept-name">製造部門</div></div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <div class="field-label">業務名<span class="req">*</span></div>
+        <select id="e-name" onchange="onSelectOther('e-name','e-name-other')"></select>
+        <input type="text" id="e-name-other" placeholder="業務名を入力" style="display:none;margin-top:6px;">
+      </div>
+      <div class="form-group">
+        <div class="field-label">主な作業内容<span class="req">*</span></div>
+        <select id="e-work" onchange="onSelectOther('e-work','e-work-other')"></select>
+        <input type="text" id="e-work-other" placeholder="作業内容を入力" style="display:none;margin-top:6px;">
+      </div>
+      <div class="field-section wh-section" id="e-wh-fields">
+        <div class="section-label wh">🏭 倉庫部門の情報</div>
+        <div class="form-group">
+          <div class="field-label">便の種類</div>
+          <div class="radio-group" id="e-bin-group">
+            <label class="radio-label" data-val="路線便"><input type="radio" name="e-bin" value="路線便"><span>路線便</span></label>
+            <label class="radio-label" data-val="チャーター便"><input type="radio" name="e-bin" value="チャーター便"><span>チャーター便</span></label>
+            <label class="radio-label" data-val="なし"><input type="radio" name="e-bin" value="なし"><span>なし</span></label>
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="field-label">物流会社</div>
+          <input type="text" id="e-company" placeholder="例: ○○物流、○○運送">
+        </div>
+      </div>
+      <div class="field-section mfg-section" id="e-mfg-fields" style="display:none">
+        <div class="section-label mfg">🔧 製造部門の情報</div>
+        <div class="form-group">
+          <div class="field-label">工程名 / 生産ライン</div>
+          <input type="text" id="e-line" placeholder="例: 第1ライン、組立工程">
+        </div>
+        <div class="form-group">
+          <div class="field-label">設備・機器名</div>
+          <input type="text" id="e-machine" placeholder="例: プレス機A、コンベア3号">
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="field-label">頻度</div>
+        <select id="e-freq">
+          <option value="毎日">毎日</option><option value="毎週">毎週</option>
+          <option value="隔週">隔週</option><option value="毎月">毎月</option>
+          <option value="随時">随時</option><option value="その他">その他</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <div class="field-label">実施タイミング</div>
+        <input type="text" id="e-timing" placeholder="例: 毎朝8:00">
+      </div>
+      <div class="form-group">
+        <div class="field-label">所要時間</div>
+        <div class="duration-range">
+          <input type="number" id="e-dur-min" placeholder="最短" min="1" inputmode="numeric">
+          <span>〜</span>
+          <input type="number" id="e-dur-max" placeholder="最長" min="1" inputmode="numeric">
+          <span>分</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="field-label">担当者</div>
+        <input type="text" id="e-person">
+      </div>
+      <div class="form-group full">
+        <div class="field-label">備考・注意事項</div>
+        <textarea id="e-notes" rows="2"></textarea>
+      </div>
+      <div class="form-group full">
+        <div class="field-label">作業フロー（時系列）</div>
+        <div class="timeline-section" id="e-timeline"></div>
+        <button type="button" class="add-step-btn" onclick="addStep('e')">＋ ステップを追加する</button>
+      </div>
+    </div>
+    <div class="btn-row" style="justify-content:flex-end;">
+      <button class="btn-outline" onclick="closeEditModal()">キャンセル</button>
+      <button class="btn-primary" onclick="saveEdit()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ===== マスタ =====
+const DEPT_OPTIONS = {
+  倉庫: {
+    names: ['倉庫業務','入庫業務','在庫管理','棚卸し','その他'],
+    works: ['出荷作業','入庫作業','ピッキング','検品','仕分け','梱包','ラベル貼付','在庫確認','棚卸し','その他'],
+  },
+  製造: {
+    names: ['製造業務','品質管理','設備保全','ライン管理','原材料管理','その他'],
+    works: ['組立','加工','品質検査','設備点検','設備清掃','原材料投入','製品梱包','不良品処理','日報作成','その他'],
+  },
+};
+
+const HELP_DATA = {
+  gyomu:    { icon:'📝', title:'業務名とは？', body:'この仕事のグループ名です。「倉庫業務」「棚卸し」など大きなくくりで名前をつけます。', example:'倉庫業務、棚卸し、在庫管理' },
+  work:     { icon:'🔨', title:'主な作業内容とは？', body:'具体的に何をする仕事かを選びます。同じ「倉庫業務」でも「出荷作業」なのか「ピッキング」なのかを区別するためのものです。', example:'出荷作業、ピッキング、検品' },
+  bin:      { icon:'🚚', title:'便の種類とは？', body:'荷物を送る方法です。\n\n【路線便】…運送会社の決まったルートで運ぶ一般的な便です。\n【チャーター便】…トラックを貸し切りで使う便です。大量輸送などに使います。\n【なし】…配送がない業務の場合はこちらを選んでください。', example:'' },
+  company:  { icon:'🏢', title:'物流会社とは？', body:'荷物を運んでくれる運送会社の名前を書きます。複数ある場合は「、」で区切って書いてください。', example:'○○物流、△△運送' },
+  line:     { icon:'🏗️', title:'工程名 / 生産ラインとは？', body:'どの場所・ライン・工程でおこなう仕事かを書きます。同じ業務でもどこでやるかで内容が違う場合に役立ちます。', example:'第1ライン、組立工程、塗装ライン' },
+  machine:  { icon:'⚙️', title:'設備・機器名とは？', body:'その仕事で使う機械や設備の名前を書きます。点検や清掃などの業務で特に役立ちます。', example:'プレス機A、コンベア3号、検査台1号' },
+  freq:     { icon:'📅', title:'頻度とは？', body:'この仕事をどのくらいの間隔でやるかを選びます。\n\n【毎日】毎日やる仕事\n【毎週】週に1回やる仕事\n【隔週】2週間に1回やる仕事\n【毎月】月に1回やる仕事\n【随時】必要なときだけやる仕事', example:'' },
+  timing:   { icon:'🕐', title:'実施タイミングとは？', body:'いつ・何時ごろにこの仕事をするかを書きます。曜日や時間が決まっている場合は具体的に書くとわかりやすいです。', example:'毎朝8:00、月曜日午前中、月末最終日の午後' },
+  duration: { icon:'⏱️', title:'所要時間とは？', body:'この仕事に最短でどれくらい、最長でどれくらい時間がかかるかを「分（ふん）」で入力します。\n\nだいたいの目安でOKです。どちらか片方だけでも入力できます。', example:'最短30分、最長60分 → 30〜60分' },
+  person:   { icon:'👤', title:'担当者とは？', body:'この仕事を主に担当する人の名前を書きます。複数人の場合は「、」で区切って書いてください。', example:'田中、田中・鈴木' },
+  notes:    { icon:'📌', title:'備考・注意事項とは？', body:'仕事をするうえで気をつけることや、補足として伝えておきたいことを書きます。なにも書かなくてもOKです。', example:'雨天時は作業時間が伸びる可能性あり' },
+  timeline: { icon:'📋', title:'作業フロー（時系列）とは？', body:'仕事の手順を順番に書きます。「＋ステップを追加する」ボタンを押すたびに行が増えます。\n\n【時刻・タイミング】いつやるか（例：8:00、作業開始時）\n【作業内容】何をするか\n【所要時間】何分かかるか（省略可）', example:'8:00 伝票確認（10〜15分）→ 8:15 ピッキング（30〜45分）' },
+};
+
+// サンプルデータ
+const SAMPLE_TASKS = [
+  { dept:'倉庫', name:'倉庫業務', work:'出荷作業', bin:'路線便', company:'○○物流', freq:'毎日', timing:'毎朝 8:00', durMin:'30', durMax:'60', person:'田中', notes:'雨天時はホームでの作業になるため時間が延びる場合あり',
+    timeline:[{time:'8:00',action:'伝票確認・ピッキングリスト作成',durMin:'10',durMax:'15'},{time:'8:15',action:'商品ピッキング',durMin:'20',durMax:'30'},{time:'8:45',action:'梱包・ラベル貼付',durMin:'10',durMax:'15'},{time:'9:00',action:'路線便への積み込み・引き渡し',durMin:'5',durMax:'10'}]},
+  { dept:'倉庫', name:'倉庫業務', work:'入庫作業', bin:'なし', company:'', freq:'毎日', timing:'午後 13:00', durMin:'20', durMax:'40', person:'鈴木', notes:'',
+    timeline:[{time:'13:00',action:'入荷数量・品番の確認',durMin:'5',durMax:'10'},{time:'13:10',action:'検品（傷・汚れチェック）',durMin:'10',durMax:'20'},{time:'13:30',action:'所定の棚への格納',durMin:'5',durMax:'10'}]},
+  { dept:'倉庫', name:'在庫管理', work:'在庫確認', bin:'なし', company:'', freq:'毎週', timing:'毎週月曜日 AM', durMin:'30', durMax:'45', person:'田中', notes:'差異が出た場合は在庫調整票を記入すること',
+    timeline:[{time:'始業後',action:'ハンディターミナルで在庫スキャン',durMin:'20',durMax:'30'},{time:'完了後',action:'システムと在庫数の照合・差異チェック',durMin:'10',durMax:'15'}]},
+  { dept:'製造', name:'製造業務', work:'設備点検', line:'第1ライン', machine:'プレス機A・B', freq:'毎日', timing:'始業前 7:50', durMin:'15', durMax:'20', person:'山田', notes:'異常があれば即リーダーへ報告',
+    timeline:[{time:'7:50',action:'外観・油漏れチェック',durMin:'5',durMax:'5'},{time:'7:55',action:'空運転で動作確認',durMin:'5',durMax:'10'},{time:'8:00',action:'点検記録票に記入',durMin:'3',durMax:'5'}]},
+  { dept:'製造', name:'品質管理', work:'品質検査', line:'検査工程', machine:'検査台1号', freq:'毎日', timing:'随時（ロット完了ごと）', durMin:'10', durMax:'20', person:'佐藤', notes:'不良品は赤タグをつけて隔離棚へ',
+    timeline:[{time:'完了後',action:'サンプリング（5個/ロット）',durMin:'3',durMax:'5'},{time:'',action:'寸法・外観検査',durMin:'5',durMax:'10'},{time:'',action:'検査記録に結果を記入',durMin:'2',durMax:'5'}]},
+  { dept:'製造', name:'設備保全', work:'設備清掃', line:'全ライン', machine:'', freq:'毎週', timing:'毎週金曜 終業前 17:00', durMin:'20', durMax:'30', person:'全員', notes:'清掃後は整理整頓チェックリストに記入',
+    timeline:[{time:'17:00',action:'担当エリアの床・設備の清掃',durMin:'15',durMax:'20'},{time:'17:20',action:'工具・治具の定位置戻し',durMin:'5',durMax:'10'}]},
+];
+
+// ===== ストレージ =====
+const TASKS_KEY    = 'wh_tasks_v3';
+const WELCOME_KEY  = 'wh_welcomed_v1';
+let tasks = JSON.parse(localStorage.getItem(TASKS_KEY) || '[]');
+let editIndex = -1, detailIndex = -1;
+let currentDept = { f: '倉庫', e: '倉庫' };
+
+function saveTasks() { localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); }
+
+// ===== 初回ウェルカム =====
+function closeWelcome() {
+  document.getElementById('welcome-modal').classList.remove('open');
+  localStorage.setItem(WELCOME_KEY, '1');
+  switchTab('add');
+}
+function openGuide()  { document.getElementById('guide-modal').classList.add('open'); }
+function closeGuide() { document.getElementById('guide-modal').classList.remove('open'); }
+
+// ===== ヘルプ =====
+function showHelp(key) {
+  const d = HELP_DATA[key]; if (!d) return;
+  document.getElementById('help-icon').textContent  = d.icon;
+  document.getElementById('help-title').textContent = d.title;
+  document.getElementById('help-body').textContent  = d.body;
+  const exWrap = document.getElementById('help-example');
+  const exText = document.getElementById('help-example-text');
+  if (d.example) { exText.textContent = d.example; exWrap.style.display = 'block'; }
+  else exWrap.style.display = 'none';
+  document.getElementById('help-modal').classList.add('open');
+}
+function closeHelp() { document.getElementById('help-modal').classList.remove('open'); }
+
+// ===== サンプルデータ =====
+function loadSampleData() {
+  document.getElementById('welcome-modal').classList.remove('open');
+  localStorage.setItem(WELCOME_KEY, '1');
+  const existing = tasks.length > 0;
+  if (existing && !confirm('現在のデータにサンプルを追加しますか？')) return;
+  tasks = existing ? [...tasks, ...SAMPLE_TASKS] : [...SAMPLE_TASKS];
+  saveTasks();
+  renderTable();
+  switchTab('list');
+  showToast('🎯 サンプルデータを読み込みました', 'ok');
+}
+
+// ===== タブ =====
+function switchTab(name) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab')[['list','add','settings'].indexOf(name)].classList.add('active');
+}
+
+// ===== トースト =====
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show toast-${type}`;
+  setTimeout(() => { t.className = `toast-${type}`; }, 2600);
+}
+
+// ===== 部門切替 =====
+function setDept(prefix, dept) {
+  currentDept[prefix] = dept;
+  const isWh = dept === '倉庫';
+  const wid = prefix === 'f' ? 'dept-btn-wh' : 'e-dept-btn-wh';
+  const mid = prefix === 'f' ? 'dept-btn-mfg' : 'e-dept-btn-mfg';
+  document.getElementById(wid).className = 'dept-btn' + (isWh ? ' active-wh' : '');
+  document.getElementById(mid).className = 'dept-btn' + (!isWh ? ' active-mfg' : '');
+  document.getElementById(`${prefix}-wh-fields`).style.display  = isWh  ? '' : 'none';
+  document.getElementById(`${prefix}-mfg-fields`).style.display = !isWh ? '' : 'none';
+  buildOptions(prefix, dept);
+}
+
+function buildOptions(prefix, dept, curName='', curWork='') {
+  const opts = DEPT_OPTIONS[dept];
+  const build = (id, list, cur, otherId) => {
+    const sel = document.getElementById(id);
+    const other = document.getElementById(otherId);
+    sel.innerHTML = list.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('');
+    if (cur && list.includes(cur)) { sel.value = cur; other.style.display = 'none'; }
+    else if (cur) { sel.value = 'その他'; other.value = cur; other.style.display = 'block'; }
+    else { other.style.display = 'none'; }
+  };
+  build(`${prefix}-name`, opts.names, curName, `${prefix}-name-other`);
+  build(`${prefix}-work`, opts.works, curWork, `${prefix}-work-other`);
+}
+
+// ===== ラジオ =====
+function initRadio(groupId) {
+  document.querySelectorAll(`#${groupId} .radio-label`).forEach(lbl => {
+    lbl.addEventListener('click', () => {
+      lbl.querySelector('input[type=radio]').checked = true;
+      document.querySelectorAll(`#${groupId} .radio-label`).forEach(l => l.classList.remove('checked'));
+      lbl.classList.add('checked');
+    });
+  });
+}
+function getRadio(groupId) { const r = document.querySelector(`#${groupId} input[type=radio]:checked`); return r ? r.value : ''; }
+function setRadio(groupId, val) {
+  document.querySelectorAll(`#${groupId} .radio-label`).forEach(lbl => {
+    const m = lbl.dataset.val === val;
+    lbl.classList.toggle('checked', m);
+    lbl.querySelector('input[type=radio]').checked = m;
+  });
+}
+
+// ===== その他入力 =====
+function onSelectOther(selId, otherId) {
+  const sel = document.getElementById(selId);
+  const other = document.getElementById(otherId);
+  const isOther = sel.value === 'その他';
+  other.style.display = isOther ? 'block' : 'none';
+  if (!isOther) other.value = '';
+}
+
+// ===== 時系列 =====
+function addStep(prefix, time='', action='', durMin='', durMax='') {
+  const container = document.getElementById(`${prefix}-timeline`);
+  const idx = container.children.length;
+  const row = document.createElement('div');
+  row.className = 'timeline-row';
+  row.innerHTML = `
+    <div class="step-num">${idx+1}</div>
+    <input type="text" class="time-input" placeholder="例: 8:00" value="${esc(time)}">
+    <input type="text" class="action-input" placeholder="作業内容を入力" value="${esc(action)}">
+    <div class="step-dur">
+      <input type="number" class="step-dur-min" placeholder="分" min="1" inputmode="numeric" value="${esc(durMin)}">
+      <span>〜</span>
+      <input type="number" class="step-dur-max" placeholder="分" min="1" inputmode="numeric" value="${esc(durMax)}">
+      <span>分</span>
+    </div>
+    <button type="button" class="del-btn" onclick="removeStep(this,'${prefix}')">×</button>`;
+  container.appendChild(row);
+}
+function removeStep(btn, prefix) {
+  btn.closest('.timeline-row').remove();
+  document.querySelectorAll(`#${prefix}-timeline .step-num`).forEach((el,i) => el.textContent = i+1);
+}
+function getTimeline(prefix) {
+  return [...document.querySelectorAll(`#${prefix}-timeline .timeline-row`)].map(row => ({
+    time:   row.querySelector('.time-input').value.trim(),
+    action: row.querySelector('.action-input').value.trim(),
+    durMin: row.querySelector('.step-dur-min').value,
+    durMax: row.querySelector('.step-dur-max').value,
+  })).filter(s => s.action);
+}
+function setTimeline(prefix, steps) {
+  document.getElementById(`${prefix}-timeline`).innerHTML = '';
+  (steps||[]).forEach(s => addStep(prefix, s.time, s.action, s.durMin, s.durMax));
+}
+function stepDurText(s) {
+  if (!s.durMin && !s.durMax) return '';
+  return s.durMin && s.durMax ? `${s.durMin}〜${s.durMax}分` : `${s.durMin||s.durMax}分`;
+}
+
+// ===== フォームデータ =====
+function getFormData(p) {
+  const dept = currentDept[p];
+  const nameVal = document.getElementById(`${p}-name`).value;
+  const name = nameVal === 'その他' ? document.getElementById(`${p}-name-other`).value.trim() : nameVal;
+  const workVal = document.getElementById(`${p}-work`).value;
+  const work = workVal === 'その他' ? document.getElementById(`${p}-work-other`).value.trim() : workVal;
+  const base = { dept, name, work,
+    freq:   document.getElementById(`${p}-freq`).value,
+    timing: document.getElementById(`${p}-timing`).value.trim(),
+    durMin: document.getElementById(`${p}-dur-min`).value,
+    durMax: document.getElementById(`${p}-dur-max`).value,
+    person: document.getElementById(`${p}-person`).value.trim(),
+    notes:  document.getElementById(`${p}-notes`).value.trim(),
+    timeline: getTimeline(p),
+  };
+  if (dept === '倉庫') { base.bin = getRadio(`${p}-bin-group`); base.company = document.getElementById(`${p}-company`).value.trim(); }
+  else { base.line = document.getElementById(`${p}-line`).value.trim(); base.machine = document.getElementById(`${p}-machine`).value.trim(); }
+  return base;
+}
+
+// ===== 追加 =====
+function addTask() {
+  const data = getFormData('f');
+  if (!data.name) { showToast('業務名を入力してください', 'err'); return; }
+  if (!data.work) { showToast('主な作業内容を入力してください', 'err'); return; }
+  tasks.push(data);
+  saveTasks();
+  clearForm();
+  showToast('✅ 業務を登録しました！', 'ok');
+  switchTab('list');
+  renderTable();
+}
+function clearForm() {
+  setDept('f', '倉庫');
+  setRadio('f-bin-group', '路線便');
+  ['f-company','f-line','f-machine','f-timing','f-dur-min','f-dur-max','f-person','f-notes'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('f-freq').value = '毎日';
+  document.getElementById('f-timeline').innerHTML = '';
+}
+
+// ===== ユーティリティ =====
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function durText(t) {
+  if (!t.durMin && !t.durMax) return '';
+  return t.durMin && t.durMax ? `${t.durMin}〜${t.durMax}分` : `${t.durMin||t.durMax}分`;
+}
+function freqBadge(freq) {
+  const m = {'毎日':'#fef3c7;color:#92400e','毎週':'#dbeafe;color:#1e40af','隔週':'#e0e7ff;color:#3730a3','毎月':'#d1fae5;color:#065f46','随時':'#f3f4f6;color:#4b5563'};
+  return `<span class="badge" style="background:${m[freq]||'#e5e7eb;color:#374151'}">${esc(freq)}</span>`;
+}
+function deptBadge(dept) {
+  return dept==='製造' ? `<span class="badge badge-mfg">🔧 製造</span>` : `<span class="badge badge-wh">🏭 倉庫</span>`;
+}
+function deptInfo(t) {
+  if (t.dept==='倉庫') {
+    const bin = t.bin && t.bin!=='なし' ? `<span class="badge badge-route" style="font-size:0.72rem">${esc(t.bin)}</span> ` : '';
+    return bin + esc(t.company||'');
+  }
+  return [t.line&&esc(t.line), t.machine&&`<span style="color:#6b7280">${esc(t.machine)}</span>`].filter(Boolean).join(' / ') || '—';
+}
+
+// ===== テーブル =====
+function resetFilters() {
+  document.getElementById('filter-dept').value = '';
+  document.getElementById('filter-freq').value = '';
+  document.getElementById('search').value = '';
+  renderTable();
+}
+
+function renderTable() {
+  const q     = (document.getElementById('search')?.value||'').trim().toLowerCase();
+  const deptF = document.getElementById('filter-dept')?.value||'';
+  const freqF = document.getElementById('filter-freq')?.value||'';
+  const tbody = document.getElementById('task-table');
+  const wrap  = document.getElementById('task-table-wrap');
+  const empty = document.getElementById('empty-state');
+
+  // 絞り込み中のとき解除ボタンを表示
+  const resetBtn = document.getElementById('filter-reset-btn');
+  if (resetBtn) resetBtn.style.display = (deptF || freqF || q) ? 'inline-block' : 'none';
+
+  const filtered = tasks.filter(t => {
+    if (deptF && t.dept!==deptF) return false;
+    if (freqF && t.freq!==freqF) return false;
+    if (q && ![t.name,t.work,t.dept,t.company,t.line,t.machine,t.person,t.timing,t.notes,...(t.timeline||[]).map(s=>s.action+s.time)].some(v=>String(v||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+
+  if (tasks.length === 0) {
+    wrap.style.display = 'none';
+    empty.style.display = '';
+  } else {
+    wrap.style.display = '';
+    empty.style.display = 'none';
+    tbody.innerHTML = filtered.map(t => {
+      const i = tasks.indexOf(t);
+      const tlHtml = (t.timeline||[]).slice(0,3).map(s =>
+        `<div class="tl-item"><span class="tl-time">${esc(s.time)}</span><span>${esc(s.action)}</span>${stepDurText(s)?`<span class="tl-dur">(${stepDurText(s)})</span>`:''}</div>`
+      ).join('') + ((t.timeline||[]).length>3?`<div style="color:#9ca3af;font-size:0.72rem">他 ${t.timeline.length-3} ステップ...</div>`:'');
+      return `<tr class="${t.dept==='製造'?'row-mfg':''}">
+        <td style="color:#9ca3af;font-size:0.8rem">${i+1}</td>
+        <td>${deptBadge(t.dept)}</td>
+        <td><strong>${esc(t.name)}</strong></td>
+        <td><span class="badge badge-work">${esc(t.work)}</span></td>
+        <td>${deptInfo(t)}</td>
+        <td>${freqBadge(t.freq)}</td>
+        <td>${esc(t.timing)}</td>
+        <td style="white-space:nowrap">${durText(t)}</td>
+        <td>${esc(t.person)}</td>
+        <td><div class="tl-preview">${tlHtml||'<span style="color:#ccc">—</span>'}</div></td>
+        <td style="white-space:nowrap">
+          <button class="btn-detail" onclick="openDetail(${i})">詳細</button>
+          <button class="btn-edit"   onclick="openEdit(${i})">編集</button>
+          <button class="btn-copy"   onclick="copyTask(${i})">コピー</button>
+          <button class="btn-danger" onclick="deleteTask(${i})">削除</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+  renderSummary();
+}
+
+function renderSummary() {
+  const wh=tasks.filter(t=>t.dept==='倉庫').length, mfg=tasks.filter(t=>t.dept==='製造').length;
+  const fc={};
+  tasks.forEach(t=>{ fc[t.freq]=(fc[t.freq]||0)+1; });
+  document.getElementById('summary').innerHTML = `
+    <div class="summary-item s-total"><div class="num">${tasks.length}</div><div class="lbl">全業務数</div></div>
+    <div class="summary-item s-wh">  <div class="num">${wh}</div>  <div class="lbl">🏭 倉庫</div></div>
+    <div class="summary-item s-mfg"> <div class="num">${mfg}</div> <div class="lbl">🔧 製造</div></div>
+    <div class="summary-item s-total"><div class="num">${fc['毎日']||0}</div><div class="lbl">毎日</div></div>
+    <div class="summary-item s-total"><div class="num">${fc['毎週']||0}</div><div class="lbl">毎週</div></div>
+    <div class="summary-item s-total"><div class="num">${fc['毎月']||0}</div><div class="lbl">毎月</div></div>`;
+}
+
+// ===== 削除 =====
+function deleteTask(i) {
+  if (!confirm(`「${tasks[i].name} / ${tasks[i].work}」を削除しますか？`)) return;
+  tasks.splice(i,1); saveTasks(); renderTable();
+  showToast('🗑️ 削除しました', 'ok');
+}
+
+// ===== 詳細モーダル =====
+function openDetail(i) {
+  detailIndex = i;
+  const t = tasks[i];
+  document.getElementById('dm-title').textContent = `${t.dept==='製造'?'🔧':'🏭'} ${t.name} ／ ${t.work}`;
+  let deptSection = t.dept==='倉庫'
+    ? `<div class="detail-section wh-sec"><div class="detail-section-title wh">🏭 倉庫部門の情報</div><div class="detail-item"><label>便の種類</label><p>${t.bin||'—'}</p></div><div class="detail-item"><label>物流会社</label><p>${t.company||'—'}</p></div></div>`
+    : `<div class="detail-section mfg-sec"><div class="detail-section-title mfg">🔧 製造部門の情報</div><div class="detail-item"><label>工程名/ライン</label><p>${t.line||'—'}</p></div><div class="detail-item"><label>設備・機器名</label><p>${t.machine||'—'}</p></div></div>`;
+  document.getElementById('dm-grid').innerHTML = `
+    <div class="detail-item"><label>部門</label><p>${deptBadge(t.dept)}</p></div>
+    <div class="detail-item"><label>頻度</label><p>${freqBadge(t.freq)}</p></div>
+    <div class="detail-item"><label>実施タイミング</label><p>${t.timing||'—'}</p></div>
+    <div class="detail-item"><label>所要時間</label><p>${durText(t)||'—'}</p></div>
+    <div class="detail-item"><label>担当者</label><p>${t.person||'—'}</p></div>
+    ${deptSection}
+    ${t.notes?`<div class="detail-item full"><label>備考・注意事項</label><p style="white-space:pre-wrap">${esc(t.notes)}</p></div>`:''}`;
+  const tlWrap=document.getElementById('dm-timeline-wrap'), tlEl=document.getElementById('dm-timeline');
+  if (t.timeline && t.timeline.length>0) {
+    tlWrap.style.display='block';
+    tlEl.innerHTML = t.timeline.map(s=>`<div class="tl-detail-row"><div class="tl-dot"></div><div class="tl-d-time">${esc(s.time)}</div><div class="tl-d-action">${esc(s.action)}${stepDurText(s)?`<span style="margin-left:10px;font-size:0.75rem;color:#6b7280;font-weight:700">${stepDurText(s)}</span>`:''}</div></div>`).join('');
+  } else tlWrap.style.display='none';
+  document.getElementById('detail-modal').classList.add('open');
+}
+function closeDetailModal() { document.getElementById('detail-modal').classList.remove('open'); }
+function openEditFromDetail() { closeDetailModal(); openEdit(detailIndex); }
+
+// ===== 編集モーダル =====
+function openEdit(i) {
+  editIndex = i;
+  const t = tasks[i];
+  setDept('e', t.dept||'倉庫');
+  buildOptions('e', t.dept||'倉庫', t.name, t.work);
+  if (t.dept==='倉庫') { setRadio('e-bin-group', t.bin||'路線便'); document.getElementById('e-company').value=t.company||''; }
+  else { document.getElementById('e-line').value=t.line||''; document.getElementById('e-machine').value=t.machine||''; }
+  document.getElementById('e-freq').value   =t.freq   ||'毎日';
+  document.getElementById('e-timing').value =t.timing ||'';
+  document.getElementById('e-dur-min').value=t.durMin ||'';
+  document.getElementById('e-dur-max').value=t.durMax ||'';
+  document.getElementById('e-person').value =t.person ||'';
+  document.getElementById('e-notes').value  =t.notes  ||'';
+  setTimeline('e', t.timeline);
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal() { document.getElementById('edit-modal').classList.remove('open'); editIndex=-1; }
+
+function copyTask(i) {
+  const t = tasks[i];
+  switchTab('add');
+  setDept('f', t.dept||'倉庫');
+  buildOptions('f', t.dept||'倉庫', t.name, t.work);
+  if (t.dept==='倉庫') { setRadio('f-bin-group', t.bin||'路線便'); document.getElementById('f-company').value=t.company||''; }
+  else { document.getElementById('f-line').value=t.line||''; document.getElementById('f-machine').value=t.machine||''; }
+  document.getElementById('f-freq').value   =t.freq   ||'毎日';
+  document.getElementById('f-timing').value =t.timing ||'';
+  document.getElementById('f-dur-min').value=t.durMin ||'';
+  document.getElementById('f-dur-max').value=t.durMax ||'';
+  document.getElementById('f-person').value =t.person ||'';
+  document.getElementById('f-notes').value  =t.notes  ||'';
+  setTimeline('f', t.timeline);
+  showToast('📋 コピーしました！内容を確認して登録してください', 'ok');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+function saveEdit() {
+  const data = getFormData('e');
+  if (!data.name) { showToast('業務名を入力してください', 'err'); return; }
+  tasks[editIndex]=data; saveTasks(); closeEditModal(); renderTable();
+  showToast('✅ 保存しました！', 'ok');
+}
+
+// ===== Excel =====
+function exportExcel() {
+  if (tasks.length===0) { showToast('登録されている業務がありません', 'err'); return; }
+  const wb = XLSX.utils.book_new();
+  const whT=tasks.filter(t=>t.dept==='倉庫'), mfgT=tasks.filter(t=>t.dept==='製造');
+  const allH=['No.','部門','業務名','主な作業内容','便の種類/工程名','物流会社/設備名','頻度','実施タイミング','所要時間','担当者','備考'];
+  XLSX.utils.book_append_sheet(wb, makeSheet([allH,...tasks.map((t,i)=>[i+1,t.dept,t.name,t.work,t.dept==='倉庫'?(t.bin||''):(t.line||''),t.dept==='倉庫'?(t.company||''):(t.machine||''),t.freq,t.timing,durText(t),t.person,t.notes])],[5,8,14,14,16,16,8,16,10,10,28]),'全業務一覧');
+  if (whT.length>0) { const h=['No.','業務名','主な作業内容','便の種類','物流会社','頻度','実施タイミング','所要時間','担当者','備考']; XLSX.utils.book_append_sheet(wb,makeSheet([h,...whT.map((t,i)=>[i+1,t.name,t.work,t.bin,t.company,t.freq,t.timing,durText(t),t.person,t.notes])],[5,14,14,12,16,8,16,10,10,28]),'倉庫部門'); }
+  if (mfgT.length>0) { const h=['No.','業務名','主な作業内容','工程名/ライン','設備・機器名','頻度','実施タイミング','所要時間','担当者','備考']; XLSX.utils.book_append_sheet(wb,makeSheet([h,...mfgT.map((t,i)=>[i+1,t.name,t.work,t.line,t.machine,t.freq,t.timing,durText(t),t.person,t.notes])],[5,14,14,16,16,8,16,10,10,28]),'製造部門'); }
+  const flowH=['No.','部門','業務名','主な作業内容','ステップ','時刻','作業内容','所要時間'];
+  const flowR=[];
+  tasks.forEach((t,i)=>{ if(t.timeline&&t.timeline.length>0){ t.timeline.forEach((s,si)=>flowR.push([i+1,si===0?t.dept:'',si===0?t.name:'',si===0?t.work:'',si+1,s.time,s.action,stepDurText(s)])); flowR.push(['','','','','','','','']); } });
+  if (flowR.length>0) XLSX.utils.book_append_sheet(wb,makeSheet([flowH,...flowR],[5,8,16,16,8,16,40,12]),'作業フロー詳細');
+  ['毎日','毎週','毎月'].forEach(freq=>{ const sub=tasks.filter(t=>t.freq===freq); if(sub.length>0){ const h=['No.','部門','業務名','主な作業内容','頻度','実施タイミング','所要時間','担当者']; XLSX.utils.book_append_sheet(wb,makeSheet([h,...sub.map((t,i)=>[i+1,t.dept,t.name,t.work,t.freq,t.timing,durText(t),t.person])],[5,8,14,14,8,16,10,10]),freq); } });
+  XLSX.writeFile(wb,`ルーチン業務一覧_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.xlsx`);
+  showToast('📥 Excelをダウンロードしました！', 'ok');
+}
+function makeSheet(data, colWidths) {
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=colWidths.map(w=>({wch:w}));
+  const range=XLSX.utils.decode_range(ws['!ref']||'A1');
+  for(let c=range.s.c;c<=range.e.c;c++){const cell=ws[XLSX.utils.encode_cell({r:0,c})];if(cell)cell.s={font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'1E3A5F'}},alignment:{horizontal:'center',vertical:'center',wrapText:true}};}
+  for(let r=1;r<data.length;r++){for(let c=0;c<colWidths.length;c++){const cell=ws[XLSX.utils.encode_cell({r,c})];if(cell)cell.s={alignment:{wrapText:true,vertical:'top'}};}}
+  return ws;
+}
+
+// ===== バックアップ =====
+function exportJson() {
+  const blob=new Blob([JSON.stringify(tasks,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`ルーチン業務バックアップ_${new Date().toISOString().slice(0,10)}.json`; a.click();
+  showToast('💾 バックアップを保存しました', 'ok');
+}
+function importJson(event) {
+  const file=event.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try {
+      const data=JSON.parse(e.target.result);
+      const arr=Array.isArray(data)?data:(data.tasks||[]);
+      if(!Array.isArray(arr)) throw new Error();
+      const mode=tasks.length>0?confirm(`現在 ${tasks.length} 件のデータがあります。\n「OK」で追加、「キャンセル」で上書きします。`):false;
+      tasks=mode?[...tasks,...arr]:arr;
+      saveTasks(); renderTable();
+      showToast(`✅ ${arr.length} 件を読み込みました`, 'ok');
+    } catch { showToast('ファイルの形式が正しくありません', 'err'); }
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+function clearAll() {
+  if(!confirm('全データを削除しますか？\nこの操作は元に戻せません。')) return;
+  tasks=[]; saveTasks(); renderTable();
+  showToast('🗑️ 全データを削除しました', 'ok');
+}
+
+// ===== モーダル外クリックで閉じる =====
+['detail-modal','edit-modal','help-modal','guide-modal'].forEach(id=>{
+  document.getElementById(id).addEventListener('click', e=>{ if(e.target===document.getElementById(id)) document.getElementById(id).classList.remove('open'); });
+});
+
+// ===== ガイドツアー =====
+const TOUR_STEPS = [
+  {
+    title: 'ようこそ！👋',
+    text: 'このツアーでアプリの使い方を順番に説明します。\n「次へ」ボタンで進んでください。いつでも「終了」で止められます。',
+    target: null,
+    tab: null,
+  },
+  {
+    title: '①「業務追加」タブを開く',
+    text: 'まずここを押して「業務追加」の画面を開きます。',
+    target: '.tabs .tab:nth-child(2)',
+    tab: 'add',
+  },
+  {
+    title: '②部門を選ぶ',
+    text: '倉庫か製造かを選びます。\n選んだ部門に合わせて入力項目が自動で変わります。',
+    target: '.dept-selector',
+    tab: 'add',
+  },
+  {
+    title: '③業務名・作業内容を選ぶ',
+    text: 'プルダウンから業務の種類と作業内容を選びます。\n一覧にない場合は「その他」を選んで自由に入力できます。',
+    target: '#tab-add .form-grid > .form-group:nth-child(1)',
+    tab: 'add',
+  },
+  {
+    title: '④わからない項目は「?」を押す',
+    text: '各項目の横にある「?」ボタンを押すと説明が表示されます。\n「路線便って何？」など気になることはここで確認できます。',
+    target: '#tab-add .form-grid > .form-group:nth-child(1) .help-btn',
+    tab: 'add',
+  },
+  {
+    title: '⑤頻度・タイミングを入力する',
+    text: 'この仕事をいつ・どれくらいの間隔でやるかを入力します。\n例）毎日 / 毎朝8:00',
+    target: '#f-freq',
+    tab: 'add',
+  },
+  {
+    title: '⑥所要時間を入力する',
+    text: '最短と最長でどれくらいかかるかを「分」で入力します。\nだいたいの目安でOKです。どちらか片方だけでも大丈夫です。',
+    target: '#f-dur-min',
+    tab: 'add',
+  },
+  {
+    title: '⑦作業フローを登録する',
+    text: '「＋ステップを追加する」を押すと、仕事の手順を1つずつ登録できます。\n時刻・作業内容・かかる時間をセットで書くとわかりやすくなります。',
+    target: '.add-step-btn',
+    tab: 'add',
+  },
+  {
+    title: '⑧「登録する」ボタンを押す',
+    text: '入力が終わったら最後にこのボタンを押せば保存完了です。\nデータはこのパソコンに自動で保存されるので次回も残っています。',
+    target: '#tab-add .btn-primary',
+    tab: 'add',
+  },
+  {
+    title: '⑨業務一覧で確認する',
+    text: '「業務一覧」タブを開くと登録した業務が一覧で見られます。\n倉庫・製造でフィルタしたり、キーワードで検索もできます。',
+    target: '.tabs .tab:nth-child(1)',
+    tab: 'list',
+  },
+  {
+    title: '⑩Excelで出力する',
+    text: 'このボタンを押すだけでExcelファイルがダウンロードされます。\n部門別・頻度別のシートも自動で作られます。',
+    target: '.btn-success',
+    tab: 'list',
+  },
+  {
+    title: '⑪バックアップを保存する',
+    text: '「バックアップ」ボタンでデータをファイルに保存できます。\nパソコンが変わっても「読み込み」ボタンで復元できるので定期的に保存しておきましょう。',
+    target: '.toolbar-right .btn-outline',
+    tab: 'list',
+  },
+  {
+    title: 'ツアー完了！🎉',
+    text: 'お疲れさまでした！\nわからないことがあれば、いつでもこのツアーをもう一度見られます。\nさっそく業務を登録してみましょう！',
+    target: null,
+    tab: null,
+  },
+];
+
+let tourStep = 0;
+
+function startTour() {
+  tourStep = 0;
+  buildTourDots();
+  showTourStep(0);
+}
+
+function endTour() {
+  document.getElementById('tour-overlay').classList.remove('active');
+  document.getElementById('tour-tooltip').classList.remove('active');
+  document.getElementById('tour-ring').classList.remove('active');
+}
+
+function tourNext() {
+  if (tourStep < TOUR_STEPS.length - 1) { tourStep++; showTourStep(tourStep); }
+  else endTour();
+}
+
+function tourPrev() {
+  if (tourStep > 0) { tourStep--; showTourStep(tourStep); }
+}
+
+function buildTourDots() {
+  const el = document.getElementById('tour-dots');
+  el.innerHTML = TOUR_STEPS.map((_,i) => `<div class="tour-dot" id="tdot-${i}"></div>`).join('');
+}
+
+function showTourStep(idx) {
+  const step = TOUR_STEPS[idx];
+  const isLast  = idx === TOUR_STEPS.length - 1;
+  const isFirst = idx === 0;
+
+  // タブ切替
+  if (step.tab) switchTab(step.tab);
+
+  // バッジ・テキスト更新
+  document.getElementById('tour-badge').textContent = `STEP ${idx + 1} / ${TOUR_STEPS.length}`;
+  document.getElementById('tour-title').textContent = step.title;
+  document.getElementById('tour-text').textContent  = step.text;
+  document.getElementById('tour-next').textContent  = isLast ? '✓ 完了' : '次へ ▶';
+  document.getElementById('tour-prev').style.display = isFirst ? 'none' : '';
+
+  // ドット更新
+  TOUR_STEPS.forEach((_,i) => {
+    const d = document.getElementById(`tdot-${i}`);
+    if (d) d.className = 'tour-dot' + (i === idx ? ' active' : '');
+  });
+
+  // ターゲット要素
+  const target = step.target ? document.querySelector(step.target) : null;
+  const overlay  = document.getElementById('tour-overlay');
+  const tooltip  = document.getElementById('tour-tooltip');
+  const ring     = document.getElementById('tour-ring');
+  const hole     = document.getElementById('tour-hole');
+
+  overlay.classList.add('active');
+  tooltip.classList.add('active');
+
+  if (!target) {
+    // ターゲットなし → 中央表示
+    hole.setAttribute('x', '-9999');
+    hole.setAttribute('y', '-9999');
+    hole.setAttribute('width', '0');
+    hole.setAttribute('height', '0');
+    ring.classList.remove('active');
+    posTooltipCenter(tooltip);
+    return;
+  }
+
+  // スクロールして見えるように
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  setTimeout(() => {
+    const rect = target.getBoundingClientRect();
+    const pad  = 10;
+    const hx = rect.left - pad;
+    const hy = rect.top  - pad;
+    const hw = rect.width  + pad * 2;
+    const hh = rect.height + pad * 2;
+
+    // SVGの穴
+    hole.setAttribute('x', hx);
+    hole.setAttribute('y', hy);
+    hole.setAttribute('width', hw);
+    hole.setAttribute('height', hh);
+
+    // パルスリング
+    ring.classList.add('active');
+    ring.style.left   = hx + 'px';
+    ring.style.top    = hy + 'px';
+    ring.style.width  = hw + 'px';
+    ring.style.height = hh + 'px';
+
+    // ツールチップ位置
+    posTooltipNear(tooltip, rect, pad);
+  }, 300);
+}
+
+function posTooltipCenter(tooltip) {
+  const tw = tooltip.offsetWidth || 300;
+  const th = tooltip.offsetHeight || 180;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  tooltip.style.left = Math.max(12, (vw - tw) / 2) + 'px';
+  tooltip.style.top  = Math.max(12, (vh - th) / 2) + 'px';
+  document.getElementById('tour-arrow-el').style.display = 'none';
+}
+
+function posTooltipNear(tooltip, rect, pad) {
+  const tw = 300, th = tooltip.offsetHeight || 200;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const arrowEl = document.getElementById('tour-arrow-el');
+  arrowEl.style.display = 'block';
+  arrowEl.className = 'tour-arrow top';
+
+  let left = rect.left + rect.width / 2 - tw / 2;
+  let top;
+  let arrowClass = 'top';
+
+  // 下に十分スペースがあれば下、なければ上
+  const spaceBelow = vh - (rect.bottom + pad);
+  const spaceAbove = rect.top - pad;
+
+  if (spaceBelow >= th + 24 || spaceBelow >= spaceAbove) {
+    top = rect.bottom + pad + 12;
+    arrowClass = 'top';
+  } else {
+    top = rect.top - pad - th - 12;
+    arrowClass = 'bottom';
+  }
+
+  // 左右が画面外に出ないよう補正
+  left = Math.max(12, Math.min(vw - tw - 12, left));
+  top  = Math.max(12, Math.min(vh - th - 12, top));
+
+  tooltip.style.left = left + 'px';
+  tooltip.style.top  = top  + 'px';
+  arrowEl.className = 'tour-arrow ' + arrowClass;
+
+  // 矢印のleft位置をターゲット中央に合わせる
+  const arrowCenter = rect.left + rect.width / 2 - left;
+  arrowEl.style.left   = Math.max(16, Math.min(tw - 32, arrowCenter)) + 'px';
+  arrowEl.style.marginLeft = '0';
+}
+
+// ===== AI機能 =====
+const AI_KEY_STORAGE = 'claude_api_key';
+
+function saveApiKey() {
+  const val = document.getElementById('ai-key-input').value.trim();
+  const st  = document.getElementById('ai-key-status');
+  if (!val) { st.textContent = '⚠ キーを入力してください'; st.className = 'ai-key-status err'; return; }
+  if (!val.startsWith('sk-ant-')) { st.textContent = '⚠ 正しい形式ではありません（sk-ant- で始まるキーを入力）'; st.className = 'ai-key-status err'; return; }
+  localStorage.setItem(AI_KEY_STORAGE, val);
+  document.getElementById('ai-key-input').value = '●'.repeat(24);
+  st.textContent = '✅ APIキーを保存しました'; st.className = 'ai-key-status ok';
+}
+
+function deleteApiKey() {
+  localStorage.removeItem(AI_KEY_STORAGE);
+  document.getElementById('ai-key-input').value = '';
+  const st = document.getElementById('ai-key-status');
+  st.textContent = '🗑 APIキーを削除しました'; st.className = 'ai-key-status err';
+}
+
+function openAiModal(title) {
+  document.getElementById('ai-modal-title').textContent = title;
+  document.getElementById('ai-loading').style.display = 'block';
+  document.getElementById('ai-result-wrap').style.display = 'none';
+  document.getElementById('ai-copy-btn').style.display = 'none';
+  document.getElementById('ai-save-btn').style.display = 'none';
+  const rt = document.getElementById('ai-result-text');
+  rt.textContent = ''; rt.style.color = '';
+  document.getElementById('ai-modal').classList.add('open');
+}
+function closeAiModal() { document.getElementById('ai-modal').classList.remove('open'); }
+
+function showAiResult(text) {
+  document.getElementById('ai-loading').style.display = 'none';
+  document.getElementById('ai-result-text').textContent = text;
+  document.getElementById('ai-result-wrap').style.display = 'block';
+  document.getElementById('ai-copy-btn').style.display = 'inline-flex';
+  document.getElementById('ai-save-btn').style.display = 'inline-flex';
+}
+function showAiError(msg) {
+  document.getElementById('ai-loading').style.display = 'none';
+  const rt = document.getElementById('ai-result-text');
+  rt.textContent = '❌ エラーが発生しました\n\n' + msg + '\n\n【よくある原因】\n・APIキーが正しくない\n・利用上限に達している\n・インターネットに接続されていない';
+  rt.style.color = '#dc2626';
+  document.getElementById('ai-result-wrap').style.display = 'block';
+}
+
+function copyAiResult() {
+  const text = document.getElementById('ai-result-text').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('コピーしました'));
+}
+function saveAiResult() {
+  const text  = document.getElementById('ai-result-text').textContent;
+  const title = document.getElementById('ai-modal-title').textContent.replace(' — 完了','');
+  const blob  = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${title}_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
+}
+
+async function callClaudeAPI(systemPrompt, userContent) {
+  const apiKey = localStorage.getItem(AI_KEY_STORAGE);
+  if (!apiKey) throw new Error('APIキーが設定されていません。\n「AI設定」セクションでAPIキーを入力して保存してください。');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2048,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    }),
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error?.message || `サーバーエラー（HTTP ${resp.status}）`);
+  }
+  const data = await resp.json();
+  return data.content[0].text;
+}
+
+async function aiAnalyze(type) {
+  if (tasks.length === 0) {
+    alert('業務データが登録されていません。\n先に業務を登録してから実行してください。');
+    return;
+  }
+  if (!localStorage.getItem(AI_KEY_STORAGE)) {
+    alert('AIを使うにはAPIキーの設定が必要です。\nこのページの「🤖 AI設定」セクションにAPIキーを入力して保存してください。');
+    return;
+  }
+  const taskText = tasks.map((t, i) => {
+    return [
+      `【業務${i+1}】部門:${t.dept} / ${t.name} / ${t.work}`,
+      t.freq    ? `  頻度:${t.freq}` : '',
+      t.timing  ? `  タイミング:${t.timing}` : '',
+      (t.durMin||t.durMax) ? `  所要時間:${t.durMin||'?'}〜${t.durMax||'?'}分` : '',
+      t.person  ? `  担当:${t.person}` : '',
+      t.notes   ? `  備考:${t.notes}` : '',
+      t.timeline?.length ? `  作業フロー: ${t.timeline.map(s=>s.action).join(' → ')}` : '',
+    ].filter(Boolean).join('\n');
+  }).join('\n\n');
+
+  const configs = {
+    report: {
+      title: '📊 業務改善レポート',
+      system: 'あなたは製造業・倉庫業の業務改善コンサルタントです。現場担当者が読んでもわかりやすい、シンプルな日本語でレポートを書いてください。専門用語は使わず、具体的で実践的なアドバイスを心がけてください。',
+      user:   `以下の現場業務データを分析して改善レポートを作成してください。\n\n【業務データ】\n${taskText}\n\n【レポート構成】\n\n📊 業務の全体サマリー\n（業務数・部門・頻度の傾向を2〜3文で）\n\n💡 改善・効率化アイデア（上位3つ）\n（どの業務をどう改善するか、具体的に）\n\n🤖 自動化・省力化の候補\n（システムやアプリで代替できそうな業務と期待効果）\n\n✅ まず今週やってみること\n（すぐ実践できる小さな改善を2〜3つ）\n\n合計800文字以内でお願いします。`,
+    },
+    manual: {
+      title: '📄 作業マニュアル',
+      system: 'あなたは製造業・倉庫業の業務マニュアル作成の専門家です。新入社員でも一人で読んでわかる、やさしい日本語でマニュアルを書いてください。',
+      user:   `以下の業務データをもとに「業務手順マニュアル」のたたき台を作成してください。\n\n【業務データ】\n${taskText}\n\n【ルール】\n・業務ごとに「目的」「担当者」「実施タイミング」「手順（番号付き）」「注意事項」をまとめる\n・手順は「〇〇してください」の形式で書く\n・新人が一人で読んで理解できる言葉を使う\n・合計1200文字以内でまとめる`,
+    },
+    ideas: {
+      title: '💡 自動化アイデア提案',
+      system: 'あなたは中小企業のDX・業務自動化アドバイザーです。製造・倉庫業のブルーカラー現場に合った、ITが苦手な人でも実践できる自動化・省力化のアイデアを提案してください。',
+      user:   `以下の業務一覧をもとに、自動化・デジタル化・省力化のアイデアを提案してください。\n\n【業務データ】\n${taskText}\n\n【提案の観点】\n\n🔴 すぐできる（費用ほぼゼロ）の改善\n（Excel関数・スマホアプリ・QRコード活用など）\n\n🟡 少しコストをかければできる改善\n（クラウドサービス・バーコード管理・簡易システム導入など）\n\n🟢 将来的に目指したい自動化\n（AI・ロボット・IoT活用など）\n\n各アイデアに「期待できる効果」も一緒に書いてください。合計1000文字以内でお願いします。`,
+    },
+  };
+
+  const cfg = configs[type];
+  openAiModal(cfg.title);
+  try {
+    const result = await callClaudeAPI(cfg.system, cfg.user);
+    document.getElementById('ai-modal-title').textContent = cfg.title + ' — 完了';
+    showAiResult(result);
+  } catch(e) {
+    document.getElementById('ai-modal-title').textContent = cfg.title + ' — エラー';
+    showAiError(e.message);
+  }
+}
+
+// ===== 初期化 =====
+initRadio('f-bin-group');
+initRadio('e-bin-group');
+setDept('f','倉庫');
+setDept('e','倉庫');
+renderTable();
+
+// APIキー設定済みの場合マスク表示
+(function() {
+  const key = localStorage.getItem(AI_KEY_STORAGE);
+  if (key) {
+    document.getElementById('ai-key-input').value = '●'.repeat(24);
+    const st = document.getElementById('ai-key-status');
+    st.textContent = '✅ APIキーは設定済みです'; st.className = 'ai-key-status ok';
+  }
+})();
+
+// 初回のみウェルカム表示
+if (!localStorage.getItem(WELCOME_KEY)) {
+  document.getElementById('welcome-modal').classList.add('open');
+}
+</script>
+</body>
+</html>
