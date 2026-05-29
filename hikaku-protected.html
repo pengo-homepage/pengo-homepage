@@ -391,6 +391,27 @@
     }
     .fab-tool.visible{display:block;}
 
+    /* ===== FILTER CHIPS ===== */
+    .filter-label{font-size:12px;color:#484f58;font-weight:600;margin-bottom:6px;}
+    .filter-group{margin-bottom:12px;}
+    .filter-group:last-child{margin-bottom:0;}
+    .fltr-chip{
+      padding:6px 13px;
+      border-radius:14px;
+      border:1px solid #30363d;
+      background:#0d1117;
+      color:#8b949e;
+      cursor:pointer;
+      font-size:12px;
+      transition:all .15s;
+      display:inline-block;
+    }
+    .fltr-chip:hover{border-color:#484f58;color:#e6edf3;}
+    .fltr-chip.on{border-color:#1e90ff;color:#1e90ff;background:rgba(30,144,255,.1);}
+    .fltr-row{display:flex;flex-wrap:wrap;gap:6px;}
+    .overseas-row{display:none;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #30363d;}
+    .overseas-row.visible{display:flex;}
+
     @media(max-width:480px){
       .price-amount{font-size:28px;}
       .lp-hero{padding:44px 16px 36px;}
@@ -441,12 +462,57 @@
     </div>
   </div>
 
+  <!-- filters -->
+  <div class="card">
+    <div class="field-label">⚙ 絞り込み・並び替え</div>
+
+    <div class="filter-group">
+      <div class="filter-label">並び替え</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('sort','default',this)">関連度順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','cheap',this)">安い順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','expensive',this)">高い順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','review',this)">評価順</div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">配送</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('shipping','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('shipping','free',this)">送料無料のみ</div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-label">在庫</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('stock','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('stock','instock',this)">在庫あり優先</div>
+      </div>
+    </div>
+
+    <div class="filter-group" style="margin-bottom:0;">
+      <div class="filter-label">サイト地域</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('region','japan',this)">🇯🇵 日本のみ</div>
+        <div class="fltr-chip" onclick="setFilter('region','global',this)">🌐 海外も表示</div>
+      </div>
+      <div class="overseas-row" id="overseasRow">
+        <span style="font-size:12px;color:#484f58;width:100%;margin-bottom:4px;">追加表示されるサイト：</span>
+        <span style="font-size:12px;background:#0d1117;border:1px solid #30363d;padding:4px 10px;border-radius:12px;">🌐 Amazon.com</span>
+        <span style="font-size:12px;background:#0d1117;border:1px solid #30363d;padding:4px 10px;border-radius:12px;">🛍 eBay</span>
+        <span style="font-size:12px;background:#0d1117;border:1px solid #30363d;padding:4px 10px;border-radius:12px;">🌏 AliExpress</span>
+      </div>
+    </div>
+  </div>
+
   <!-- site selection -->
   <div class="card">
     <div class="field-label">🌐 比較するサイトを選ぶ</div>
     <div class="select-row">
-      <button class="select-all-btn" onclick="selectAll()">すべて選択</button>
-      <button class="clear-btn" onclick="clearAll()">すべて解除</button>
+      <button class="select-all-btn" onclick="selectAll()" type="button">すべて選択</button>
+      <button class="clear-btn" onclick="clearAll()" type="button">すべて解除</button>
     </div>
     <div class="site-chips" id="siteChips"></div>
   </div>
@@ -529,7 +595,7 @@
       <div class="price-card">
         <h3>買い切り</h3>
         <div class="price-label">一度買えばずっと使える</div>
-        <div class="price-amount">¥700</div>
+        <div class="price-amount">¥980</div>
         <div class="price-unit">1回限り</div>
         <div class="price-features">
           <div class="price-feat">HTMLファイルをダウンロード</div>
@@ -544,7 +610,7 @@
         <div class="price-card-badge">おすすめ</div>
         <h3>月額プラン</h3>
         <div class="price-label">アップデート・サポート付き</div>
-        <div class="price-amount">¥500</div>
+        <div class="price-amount">¥480</div>
         <div class="price-unit">/ 月</div>
         <div class="price-features">
           <div class="price-feat">買い切りの内容すべて</div>
@@ -559,7 +625,7 @@
       <div class="price-card">
         <h3>カスタム発注</h3>
         <div class="price-label">自社仕様にアレンジ</div>
-        <div class="price-amount">¥1,000〜</div>
+        <div class="price-amount">¥5,000〜</div>
         <div class="price-unit">内容による</div>
         <div class="price-features">
           <div class="price-feat">サイト追加・変更</div>
@@ -647,28 +713,40 @@ const enc = encodeURIComponent;
 const SITES = [
   {
     id: 'amazon', name: 'Amazon', emoji: '🛒',
-    url: (q, mn, mx) => {
+    url: (q, mn, mx, f) => {
       let u = `https://www.amazon.co.jp/s?k=${enc(q)}`;
       if (mn > 0 || mx > 0) u += `&rh=p_36%3A${mn * 100}-${mx > 0 ? mx * 100 : ''}`;
+      if (f.sort === 'cheap') u += '&s=price-asc-rank';
+      else if (f.sort === 'expensive') u += '&s=price-desc-rank';
+      else if (f.sort === 'review') u += '&s=review-rank';
       return u;
     }
   },
   {
     id: 'rakuten', name: '楽天市場', emoji: '🛍',
-    url: (q, mn, mx) => {
+    url: (q, mn, mx, f) => {
       let u = `https://search.rakuten.co.jp/search/mall/${enc(q)}/`;
       const p = [];
       if (mn > 0) p.push(`min=${mn}`);
       if (mx > 0) p.push(`max=${mx}`);
+      if (f.sort === 'cheap') p.push('sort=%2Bprice');
+      else if (f.sort === 'expensive') p.push('sort=-price');
+      else if (f.sort === 'review') p.push('sort=-reviewCount');
+      if (f.shipping === 'free') p.push('f=1');
+      if (f.stock === 'instock') p.push('inStock=1');
       return p.length ? u + '?' + p.join('&') : u;
     }
   },
   {
     id: 'yahoo', name: 'Yahoo!ショッピング', emoji: '🏪',
-    url: (q, mn, mx) => {
+    url: (q, mn, mx, f) => {
       let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}`;
       if (mn > 0) u += `&min_price=${mn}`;
       if (mx > 0) u += `&max_price=${mx}`;
+      if (f.sort === 'cheap') u += '&sor=4';
+      else if (f.sort === 'expensive') u += '&sor=8';
+      else if (f.sort === 'review') u += '&sor=16';
+      if (f.shipping === 'free') u += '&ship_from=1';
       return u;
     }
   },
@@ -682,41 +760,100 @@ const SITES = [
   },
   {
     id: 'monotaro', name: 'モノタロウ', emoji: '🔧',
-    url: (q) => `https://www.monotaro.com/s/?c=&q=${enc(q)}`
+    url: (q, mn, mx, f) => {
+      let u = `https://www.monotaro.com/s/?c=&q=${enc(q)}`;
+      if (f.sort === 'cheap') u += '&sort=PRICE_ASC';
+      else if (f.sort === 'expensive') u += '&sort=PRICE_DESC';
+      return u;
+    }
   },
   {
     id: 'yodobashi', name: 'ヨドバシ.com', emoji: '📺',
-    url: (q) => `https://www.yodobashi.com/?word=${enc(q)}`
+    url: (q, mn, mx, f) => {
+      let u = `https://www.yodobashi.com/?word=${enc(q)}`;
+      if (f.sort === 'cheap') u += '&sortKind=1';
+      else if (f.sort === 'expensive') u += '&sortKind=2';
+      return u;
+    }
   },
   {
     id: 'mercari', name: 'メルカリ', emoji: '📦',
-    url: (q, mn, mx) => {
+    url: (q, mn, mx, f) => {
       let u = `https://jp.mercari.com/search?keyword=${enc(q)}&status=on_sale`;
       if (mn > 0) u += `&price_min=${mn}`;
       if (mx > 0) u += `&price_max=${mx}`;
+      if (f.sort === 'cheap') u += '&sort=price_asc';
+      else if (f.sort === 'expensive') u += '&sort=price_desc';
+      else if (f.sort === 'review') u += '&sort=like_desc';
+      if (f.shipping === 'free') u += '&shipping_payer[]=2';
       return u;
     }
   },
   {
     id: 'paypay', name: 'PayPayモール', emoji: '💳',
-    url: (q, mn, mx) => {
+    url: (q, mn, mx, f) => {
       let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}&tab=paypay`;
       if (mn > 0) u += `&min_price=${mn}`;
       if (mx > 0) u += `&max_price=${mx}`;
+      if (f.sort === 'cheap') u += '&sor=4';
+      else if (f.sort === 'expensive') u += '&sor=8';
+      if (f.shipping === 'free') u += '&ship_from=1';
       return u;
     }
   }
 ];
 
+const OVERSEAS = [
+  {
+    id: 'amazon_us', name: 'Amazon.com', emoji: '🌐',
+    url: (q, mn, mx, f) => {
+      let u = `https://www.amazon.com/s?k=${enc(q)}`;
+      if (f.sort === 'cheap') u += '&s=price-asc-rank';
+      else if (f.sort === 'expensive') u += '&s=price-desc-rank';
+      else if (f.sort === 'review') u += '&s=review-rank';
+      return u;
+    }
+  },
+  {
+    id: 'ebay', name: 'eBay', emoji: '🛍',
+    url: (q, mn, mx, f) => {
+      let u = `https://www.ebay.com/sch/i.html?_nkw=${enc(q)}`;
+      if (mn > 0) u += `&_udlo=${mn}`;
+      if (mx > 0) u += `&_udhi=${mx}`;
+      if (f.sort === 'cheap') u += '&_sop=15';
+      else if (f.sort === 'expensive') u += '&_sop=16';
+      return u;
+    }
+  },
+  {
+    id: 'aliexpress', name: 'AliExpress', emoji: '🌏',
+    url: (q) => `https://www.aliexpress.com/wholesale?SearchText=${enc(q)}`
+  }
+];
+
 const selected = new Set(SITES.map(s => s.id));
 let priceMin = 0, priceMax = 0;
+const filters = { sort: 'default', shipping: 'all', stock: 'all', region: 'japan' };
 const isApp = window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
+
+/* ===== FILTER HANDLER ===== */
+function setFilter(group, val, el) {
+  filters[group] = val;
+  el.closest('.fltr-row').querySelectorAll('.fltr-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  if (group === 'region') {
+    const row = document.getElementById('overseasRow');
+    row.classList.toggle('visible', val === 'global');
+    buildChips();
+  }
+}
 
 /* ===== BUILD SITE CHIPS ===== */
 function buildChips() {
+  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
   const el = document.getElementById('siteChips');
-  el.innerHTML = SITES.map(s => `
-    <div class="site-chip on" id="chip-${s.id}" onclick="toggleSite('${s.id}')" data-id="${s.id}">
+  el.innerHTML = allSites.map(s => `
+    <div class="site-chip ${selected.has(s.id) ? 'on' : ''}" id="chip-${s.id}" onclick="toggleSite('${s.id}')">
       ${s.emoji} ${s.name}
     </div>`).join('');
 }
@@ -729,10 +866,12 @@ function toggleSite(id) {
 }
 
 function selectAll() {
-  SITES.forEach(s => { selected.add(s.id); document.getElementById('chip-' + s.id).classList.add('on'); });
+  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  allSites.forEach(s => { selected.add(s.id); const c = document.getElementById('chip-' + s.id); if(c) c.classList.add('on'); });
 }
 function clearAll() {
-  SITES.forEach(s => { selected.delete(s.id); document.getElementById('chip-' + s.id).classList.remove('on'); });
+  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  allSites.forEach(s => { selected.delete(s.id); const c = document.getElementById('chip-' + s.id); if(c) c.classList.remove('on'); });
 }
 
 /* ===== PRICE CHIPS ===== */
@@ -741,7 +880,7 @@ function setPriceRange(mn, mx) {
   document.getElementById('priceMax').value = mx || '';
   priceMin = mn;
   priceMax = mx;
-  document.querySelectorAll('.price-chip').forEach(c => c.classList.remove('on'));
+  document.querySelectorAll('#priceChips .price-chip').forEach(c => c.classList.remove('on'));
   event.target.classList.add('on');
 }
 
@@ -754,7 +893,8 @@ function openAll() {
   if (!kw) { document.getElementById('kwInput').focus(); return; }
   if (selected.size === 0) { alert('サイトを1つ以上選んでください'); return; }
 
-  const targets = SITES.filter(s => selected.has(s.id));
+  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  const targets = allSites.filter(s => selected.has(s.id));
   const priceStr = priceMax > 0
     ? `〜${priceMax.toLocaleString()}円`
     : priceMin > 0 ? `${priceMin.toLocaleString()}円〜` : '';
@@ -767,16 +907,16 @@ function openAll() {
   if (isApp) {
     statusText.textContent = `🔗「${kw}」${priceStr ? `（${priceStr}）` : ''} — タップして各サイトを開く`;
     linkList.innerHTML = targets.map(s => `
-      <a href="${s.url(kw, priceMin, priceMax)}" target="_blank" rel="noopener noreferrer" class="site-link">
+      <a href="${s.url(kw, priceMin, priceMax, filters)}" target="_blank" rel="noopener noreferrer" class="site-link">
         <span style="font-size:18px;">${s.emoji}</span>
         <span>${s.name}で「${kw}」を検索</span>
         <span style="margin-left:auto;color:#484f58;font-size:12px;">開く →</span>
       </a>`).join('');
   } else {
-    targets.forEach(s => window.open(s.url(kw, priceMin, priceMax), '_blank', 'noopener,noreferrer'));
+    targets.forEach(s => window.open(s.url(kw, priceMin, priceMax, filters), '_blank', 'noopener,noreferrer'));
     statusText.innerHTML = `✅ <strong>「${kw}」</strong>${priceStr ? `（${priceStr}）` : ''} を ${targets.length}サイトで開きました！`;
     linkList.innerHTML = targets.map(s => `
-      <a href="${s.url(kw, priceMin, priceMax)}" target="_blank" rel="noopener noreferrer" class="site-link">
+      <a href="${s.url(kw, priceMin, priceMax, filters)}" target="_blank" rel="noopener noreferrer" class="site-link">
         <span style="font-size:18px;">${s.emoji}</span>
         <span>${s.name}</span>
         <span style="margin-left:auto;color:#484f58;font-size:12px;">再度開く →</span>
