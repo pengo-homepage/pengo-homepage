@@ -763,6 +763,113 @@ textarea.form-input { height: 70px; resize: vertical; margin-bottom: 14px; }
   .panel { box-shadow: none; border: 1px solid #ccc; }
   .ai-section { padding-bottom: 0; }
 }
+
+/* ===== DARK THEME OVERRIDE ===== */
+body { background: #0d1117; color: #e6edf3; }
+
+.header {
+  background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.panel {
+  background: #161b22;
+  border: 1px solid #30363d;
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+.panel-left  { border-top: 4px solid #3b82f6; }
+.panel-right { border-top: 4px solid #8b5cf6; }
+.panel-C     { border-top: 4px solid #10b981; }
+.panel-D     { border-top: 4px solid #f59e0b; }
+
+.photo-area { background: #1c2128; border-bottom: 1px solid #30363d; color: #484f58; }
+.photo-area:hover { background: #21262d; }
+
+.company-name { color: #e6edf3; }
+.panel-left  .company-name { color: #60a5fa; }
+.panel-right .company-name { color: #a78bfa; }
+.panel-C     .company-name { color: #34d399; }
+.panel-D     .company-name { color: #fbbf24; }
+
+.panel-total { color: #e6edf3; }
+.panel-meta  { color: #484f58; }
+
+.item-mini-row { border-bottom: 1px solid #21262d; color: #c9d1d9; }
+.item-mini-price.cheap { color: #3fb950; }
+
+.panel-notes { background: #21262d; color: #8b949e; }
+
+.status-badge.検討中 { background: rgba(245,158,11,.15); color: #fbbf24; }
+.status-badge.採用   { background: rgba(16,185,129,.15); color: #34d399; }
+.status-badge.却下   { background: rgba(239,68,68,.15);  color: #f87171; }
+
+.panel-btn-input       { background: rgba(59,130,246,.15); color: #60a5fa; }
+.panel-btn-input.right { background: rgba(139,92,246,.15); color: #a78bfa; }
+.panel-btn-C           { background: rgba(16,185,129,.15); color: #34d399; }
+.panel-btn-D           { background: rgba(245,158,11,.15); color: #fbbf24; }
+.panel-btn-edit        { background: #21262d; color: #8b949e; }
+
+.diff-box { background: #161b22; border: 1px solid #30363d; box-shadow: none; }
+.diff-label { color: #484f58; }
+.diff-amount { color: #3fb950; }
+.vs-badge { background: linear-gradient(135deg,#1e3a8a,#1d4ed8); box-shadow: 0 2px 8px rgba(30,58,138,.5); }
+
+.extra-panels-label { color: #484f58; }
+
+.modal { background: #161b22; color: #e6edf3; }
+.modal-handle { background: #30363d; }
+.modal-title { color: #e6edf3; }
+
+.form-label { color: #c9d1d9; }
+.form-input {
+  background: #0d1117;
+  border: 1.5px solid #30363d;
+  color: #e6edf3;
+}
+.form-input:focus { border-color: #1e90ff; box-shadow: 0 0 0 3px rgba(30,144,255,.15); }
+
+.items-section { background: #1c2128; }
+.items-section-title { color: #8b949e; }
+
+.item-input-row { background: #21262d; border: 1.5px solid #30363d; }
+.item-input-name {
+  background: #0d1117;
+  border: 1.5px solid #30363d;
+  color: #e6edf3;
+}
+.item-input-name:focus { border-color: #1e90ff; }
+.item-col label { color: #484f58; }
+.item-col input {
+  background: #0d1117;
+  border: 1.5px solid #30363d;
+  color: #e6edf3;
+}
+.item-col input:focus { border-color: #1e90ff; }
+.item-subtotal { background: rgba(63,185,80,.1); border: 1.5px solid rgba(63,185,80,.3); color: #3fb950; }
+.item-del-btn  { background: rgba(248,81,73,.15); color: #f85149; }
+
+.add-item-btn {
+  background: rgba(30,144,255,.08);
+  color: #1e90ff;
+  border: 2px dashed rgba(30,144,255,.3);
+}
+
+.panel-empty { color: #484f58; }
+.items-empty { color: #484f58; }
+.required-star { color: #f85149; }
+
+.checklist-modal { background: #161b22; color: #e6edf3; }
+.checklist-title { color: #e6edf3; }
+.checklist-subtitle { color: #8b949e; }
+.checklist-cat-title { color: #c9d1d9; border-bottom: 2px solid #30363d; }
+.checklist-item:hover { background: #21262d; }
+.checklist-item { border-bottom: 1px solid #21262d; }
+.checklist-item-text { color: #c9d1d9; }
+.checklist-item.done .checklist-item-text { color: #484f58; }
+.checklist-item input[type="checkbox"] { accent-color: #1e90ff; }
+.checklist-reset-btn { background: #21262d; border: 1.5px solid #30363d; color: #8b949e; }
+
+select.form-input option { background: #161b22; color: #e6edf3; }
 </style>
 </head>
 <body>
