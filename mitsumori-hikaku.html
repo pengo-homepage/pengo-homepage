@@ -889,6 +889,9 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
 .hist-footer{display:flex;gap:10px;margin-top:16px;}
 .hist-clear{flex:1;padding:12px;background:rgba(248,81,73,.1);color:#f85149;border:1.5px solid rgba(248,81,73,.3);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;}
 .hist-close{flex:1;padding:12px;background:#1c2535;color:#9db0c4;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;}
+.clear-area{max-width:860px;margin:6px auto 0;padding:0 10px;display:none;}
+.btn-clear-all{width:100%;padding:12px;background:#FEF2F2;color:#EF4444;border:1.5px solid #FECACA;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-clear-all:hover{background:#EF4444;color:#fff;border-color:#EF4444;}
 </style>
 </head>
 <body>
@@ -982,6 +985,11 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
   <div class="ai-body" id="ai-body">
     <div class="ai-empty">見積もりを2社以上入力するとAI分析が表示されます</div>
   </div>
+</div>
+
+<!-- ===== 全クリア ===== -->
+<div class="clear-area" id="clearArea">
+  <button type="button" class="btn-clear-all" onclick="clearAllData()">🗑️ 入力データを全クリア</button>
 </div>
 
 <!-- ===== 出力エリア ===== -->
@@ -1408,6 +1416,19 @@ function renderAll() {
   SLOT_KEYS.forEach(k => renderPanel(k));
   renderCenter();
   renderAI();
+  const hasData = SLOT_KEYS.some(k => load()[k] !== null);
+  document.getElementById('clearArea').style.display = hasData ? 'block' : 'none';
+}
+
+function clearAllData() {
+  if (!confirm('入力済みのデータをすべて削除しますか？')) return;
+  save({ left: null, right: null, C: null, D: null });
+  SLOT_KEYS.forEach(k => {
+    const inp = document.getElementById(`photo-input-${k}`);
+    if (inp) inp.value = '';
+  });
+  renderAll();
+  showToast('🗑️ 全データをクリアしました');
 }
 
 // ===== フォーム =====
