@@ -24,7 +24,7 @@
     *{box-sizing:border-box;margin:0;padding:0;}
     html{scroll-behavior:smooth;}
     body{
-      background:#0d1117;
+      background:#141d2b;
       color:#e6edf3;
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
       min-height:100vh;
@@ -46,8 +46,8 @@
 
     /* ===== HEADER ===== */
     .header{
-      background:rgba(22,27,34,.97);
-      border-bottom:1px solid #30363d;
+      background:rgba(28,37,53,.97);
+      border-bottom:1px solid #2d4060;
       padding:12px 16px;
       display:flex;
       align-items:center;
@@ -61,8 +61,8 @@
     .header-logo span{font-size:20px;}
     .btn-lp{
       background:none;
-      border:1px solid #30363d;
-      color:#8b949e;
+      border:1px solid #2d4060;
+      color:#9db0c4;
       padding:6px 14px;
       border-radius:8px;
       cursor:pointer;
@@ -71,6 +71,32 @@
       display:inline-block;
     }
     .btn-lp:hover{border-color:#1e90ff;color:#1e90ff;}
+    .btn-hist{
+      background:none;
+      border:1px solid #2d4060;
+      color:#9db0c4;
+      padding:6px 14px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:13px;
+    }
+    .btn-hist:hover{border-color:#00d4aa;color:#00d4aa;}
+
+    /* ===== 発注履歴 ===== */
+    .hikaku-hist-panel{background:#1c2535;border:1px solid #2d4060;border-radius:14px;padding:16px;margin-top:14px;display:none;}
+    .hikaku-hist-panel.open{display:block;}
+    .hikaku-hist-search{width:100%;background:#141d2b;border:1.5px solid #2d4060;color:#e6edf3;border-radius:8px;padding:9px 12px;font-size:14px;margin-bottom:12px;}
+    .hikaku-hist-search:focus{border-color:#1e90ff;outline:none;}
+    .hikaku-hist-item{background:#141d2b;border:1px solid #2d4060;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+    .hikaku-hist-info{flex:1;}
+    .hikaku-hist-kw{font-size:14px;font-weight:700;color:#e6edf3;}
+    .hikaku-hist-date{font-size:12px;color:#5a6f85;margin-top:2px;}
+    .hikaku-hist-retry{background:rgba(30,144,255,.15);color:#1e90ff;border:none;border-radius:7px;padding:5px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;}
+    .hikaku-hist-del{background:rgba(248,81,73,.12);color:#f85149;border:none;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;}
+    .hikaku-hist-empty{text-align:center;color:#5a6f85;padding:24px 0;font-size:14px;line-height:2;}
+    .hikaku-hist-footer{display:flex;gap:8px;margin-top:10px;}
+    .hikaku-hist-clearall{flex:1;padding:10px;background:rgba(248,81,73,.1);color:#f85149;border:1.5px solid rgba(248,81,73,.25);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;}
+    .hikaku-hist-closebtn{flex:1;padding:10px;background:#1c2535;color:#9db0c4;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;}
 
     /* ===== TOOL SECTION ===== */
     #tool{
@@ -83,22 +109,22 @@
       margin-bottom:24px;
     }
     .tool-title h2{font-size:20px;font-weight:700;margin-bottom:4px;}
-    .tool-title p{font-size:13px;color:#8b949e;}
+    .tool-title p{font-size:13px;color:#9db0c4;}
 
     .card{
-      background:#161b22;
-      border:1px solid #30363d;
+      background:#1c2535;
+      border:1px solid #2d4060;
       border-radius:14px;
       padding:20px;
       margin-bottom:14px;
     }
-    .field-label{font-size:12px;color:#8b949e;font-weight:700;letter-spacing:.5px;margin-bottom:8px;}
+    .field-label{font-size:12px;color:#9db0c4;font-weight:700;letter-spacing:.5px;margin-bottom:8px;}
 
     .input-main{
       width:100%;
       padding:13px 15px;
-      background:#0d1117;
-      border:1px solid #30363d;
+      background:#141d2b;
+      border:1px solid #2d4060;
       border-radius:10px;
       color:#e6edf3;
       font-size:16px;
@@ -106,15 +132,15 @@
       transition:border-color .2s;
     }
     .input-main:focus{border-color:#1e90ff;}
-    .input-main::placeholder{color:#484f58;}
+    .input-main::placeholder{color:#5a6f85;}
 
     /* price filter */
     .price-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
     .price-input{
       flex:1;
       padding:10px 12px;
-      background:#0d1117;
-      border:1px solid #30363d;
+      background:#141d2b;
+      border:1px solid #2d4060;
       border-radius:8px;
       color:#e6edf3;
       font-size:14px;
@@ -123,22 +149,22 @@
       min-width:0;
     }
     .price-input:focus{border-color:#1e90ff;}
-    .price-input::placeholder{color:#484f58;}
-    .price-sep{color:#484f58;font-size:14px;flex-shrink:0;}
+    .price-input::placeholder{color:#5a6f85;}
+    .price-sep{color:#5a6f85;font-size:14px;flex-shrink:0;}
 
     /* quick price chips */
     .price-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
     .price-chip{
       padding:5px 12px;
       border-radius:14px;
-      border:1px solid #30363d;
-      background:#0d1117;
-      color:#8b949e;
+      border:1px solid #2d4060;
+      background:#141d2b;
+      color:#9db0c4;
       cursor:pointer;
       font-size:12px;
       transition:all .15s;
     }
-    .price-chip:hover{border-color:#484f58;color:#e6edf3;}
+    .price-chip:hover{border-color:#5a6f85;color:#e6edf3;}
     .price-chip.on{border-color:#1e90ff;color:#1e90ff;background:rgba(30,144,255,.1);}
 
     /* site chips */
@@ -146,14 +172,14 @@
     .site-chip{
       padding:8px 14px;
       border-radius:20px;
-      border:2px solid #30363d;
-      background:#0d1117;
-      color:#8b949e;
+      border:2px solid #2d4060;
+      background:#141d2b;
+      color:#9db0c4;
       cursor:pointer;
       font-size:13px;
       transition:all .2s;
     }
-    .site-chip:hover{border-color:#484f58;}
+    .site-chip:hover{border-color:#5a6f85;}
     .site-chip.on{border-color:#1e90ff;background:rgba(30,144,255,.12);color:#e6edf3;}
 
     .select-row{
@@ -163,14 +189,14 @@
     }
     .select-all-btn,.clear-btn{
       font-size:12px;
-      color:#8b949e;
+      color:#9db0c4;
       background:none;
-      border:1px solid #30363d;
+      border:1px solid #2d4060;
       border-radius:6px;
       padding:4px 10px;
       cursor:pointer;
     }
-    .select-all-btn:hover,.clear-btn:hover{color:#e6edf3;border-color:#484f58;}
+    .select-all-btn:hover,.clear-btn:hover{color:#e6edf3;border-color:#5a6f85;}
 
     /* main button */
     .btn-search{
@@ -188,17 +214,17 @@
     }
     .btn-search:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(30,144,255,.4);}
     .btn-search:active{transform:none;}
-    .btn-search:disabled{background:#30363d;cursor:not-allowed;transform:none;box-shadow:none;}
+    .btn-search:disabled{background:#2d4060;cursor:not-allowed;transform:none;box-shadow:none;}
 
     /* status */
     .status-box{
-      background:#0d1117;
-      border:1px solid #30363d;
+      background:#141d2b;
+      border:1px solid #2d4060;
       border-radius:10px;
       padding:14px;
       margin-top:14px;
       font-size:14px;
-      color:#8b949e;
+      color:#9db0c4;
       min-height:48px;
       display:none;
     }
@@ -211,8 +237,8 @@
       align-items:center;
       gap:10px;
       padding:12px 14px;
-      background:#161b22;
-      border:1px solid #30363d;
+      background:#1c2535;
+      border:1px solid #2d4060;
       border-radius:10px;
       color:#e6edf3;
       text-decoration:none;
@@ -222,10 +248,10 @@
     .site-link:hover{border-color:#1e90ff;background:rgba(30,144,255,.08);}
 
     /* ===== LP SECTION ===== */
-    #lp{border-top:1px solid #30363d;padding-top:0;}
+    #lp{border-top:1px solid #2d4060;padding-top:0;}
 
     .lp-hero{
-      background:linear-gradient(180deg,#0d1117 0%,#111827 100%);
+      background:linear-gradient(180deg,#141d2b 0%,#1a2740 100%);
       text-align:center;
       padding:60px 20px 48px;
     }
@@ -254,7 +280,7 @@
       -webkit-text-fill-color:transparent;
       background-clip:text;
     }
-    .lp-hero p{color:#8b949e;font-size:15px;line-height:1.8;max-width:480px;margin:0 auto 28px;}
+    .lp-hero p{color:#9db0c4;font-size:15px;line-height:1.8;max-width:480px;margin:0 auto 28px;}
     .btn-hero{
       display:inline-block;
       background:linear-gradient(135deg,#1e90ff,#0066cc);
@@ -274,27 +300,27 @@
     .lp-features{max-width:720px;margin:0 auto;padding:48px 20px;}
     .section-label{text-align:center;margin-bottom:32px;}
     .section-label h2{font-size:22px;font-weight:700;margin-bottom:6px;}
-    .section-label p{color:#8b949e;font-size:14px;}
+    .section-label p{color:#9db0c4;font-size:14px;}
 
     .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
     .feature-card{
-      background:#161b22;
-      border:1px solid #30363d;
+      background:#1c2535;
+      border:1px solid #2d4060;
       border-radius:14px;
       padding:20px;
     }
     .feature-icon{font-size:28px;margin-bottom:10px;}
     .feature-card h3{font-size:14px;font-weight:700;margin-bottom:6px;}
-    .feature-card p{font-size:13px;color:#8b949e;line-height:1.7;}
+    .feature-card p{font-size:13px;color:#9db0c4;line-height:1.7;}
 
     /* sites list */
-    .lp-sites{background:#161b22;border-top:1px solid #30363d;border-bottom:1px solid #30363d;padding:36px 20px;text-align:center;}
-    .lp-sites h3{font-size:14px;color:#8b949e;margin-bottom:16px;font-weight:400;}
+    .lp-sites{background:#1c2535;border-top:1px solid #2d4060;border-bottom:1px solid #2d4060;padding:36px 20px;text-align:center;}
+    .lp-sites h3{font-size:14px;color:#9db0c4;margin-bottom:16px;font-weight:400;}
     .site-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
     .site-badge{
       padding:7px 16px;
-      background:#0d1117;
-      border:1px solid #30363d;
+      background:#141d2b;
+      border:1px solid #2d4060;
       border-radius:20px;
       font-size:13px;
       color:#e6edf3;
@@ -304,8 +330,8 @@
     .lp-pricing{max-width:720px;margin:0 auto;padding:48px 20px;}
     .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
     .price-card{
-      background:#161b22;
-      border:1px solid #30363d;
+      background:#1c2535;
+      border:1px solid #2d4060;
       border-radius:16px;
       padding:24px 20px;
       text-align:center;
@@ -329,11 +355,11 @@
       white-space:nowrap;
     }
     .price-card h3{font-size:15px;font-weight:700;margin-bottom:4px;}
-    .price-label{font-size:12px;color:#8b949e;margin-bottom:14px;}
+    .price-label{font-size:12px;color:#9db0c4;margin-bottom:14px;}
     .price-amount{font-size:32px;font-weight:800;color:#e6edf3;margin-bottom:4px;}
-    .price-unit{font-size:13px;color:#8b949e;margin-bottom:16px;}
+    .price-unit{font-size:13px;color:#9db0c4;margin-bottom:16px;}
     .price-features{text-align:left;margin-bottom:20px;}
-    .price-feat{font-size:13px;color:#8b949e;line-height:2;display:flex;align-items:flex-start;gap:6px;}
+    .price-feat{font-size:13px;color:#9db0c4;line-height:2;display:flex;align-items:flex-start;gap:6px;}
     .price-feat::before{content:'✓';color:#3fb950;flex-shrink:0;}
     .btn-buy{
       display:block;
@@ -349,28 +375,28 @@
     }
     .btn-buy-primary{background:linear-gradient(135deg,#1e90ff,#0066cc);color:#fff;}
     .btn-buy-primary:hover{box-shadow:0 4px 16px rgba(30,144,255,.4);}
-    .btn-buy-outline{background:none;border:1px solid #30363d;color:#e6edf3;}
+    .btn-buy-outline{background:none;border:1px solid #2d4060;color:#e6edf3;}
     .btn-buy-outline:hover{border-color:#1e90ff;color:#1e90ff;}
 
     /* FAQ */
     .lp-faq{max-width:680px;margin:0 auto;padding:0 20px 48px;}
-    .faq-item{border-bottom:1px solid #30363d;padding:16px 0;}
+    .faq-item{border-bottom:1px solid #2d4060;padding:16px 0;}
     .faq-q{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;gap:10px;}
     .faq-q::before{content:'Q.';color:#1e90ff;flex-shrink:0;}
-    .faq-a{font-size:13px;color:#8b949e;line-height:1.8;padding-left:22px;}
+    .faq-a{font-size:13px;color:#9db0c4;line-height:1.8;padding-left:22px;}
 
     /* footer */
     .footer{
-      background:#161b22;
-      border-top:1px solid #30363d;
+      background:#1c2535;
+      border-top:1px solid #2d4060;
       padding:20px;
       text-align:center;
       font-size:12px;
-      color:#484f58;
+      color:#5a6f85;
       line-height:2;
     }
-    .footer a{color:#484f58;text-decoration:none;}
-    .footer a:hover{color:#8b949e;}
+    .footer a{color:#5a6f85;text-decoration:none;}
+    .footer a:hover{color:#9db0c4;}
 
     /* scroll fab */
     .fab-tool{
@@ -392,25 +418,28 @@
     .fab-tool.visible{display:block;}
 
     /* ===== FILTER CHIPS ===== */
-    .filter-label{font-size:12px;color:#484f58;font-weight:600;margin-bottom:6px;}
+    .filter-label{font-size:12px;color:#5a6f85;font-weight:600;margin-bottom:6px;}
     .filter-group{margin-bottom:12px;}
     .filter-group:last-child{margin-bottom:0;}
     .fltr-chip{
       padding:6px 13px;
       border-radius:14px;
-      border:1px solid #30363d;
-      background:#0d1117;
-      color:#8b949e;
+      border:1px solid #2d4060;
+      background:#141d2b;
+      color:#9db0c4;
       cursor:pointer;
       font-size:12px;
       transition:all .15s;
       display:inline-block;
     }
-    .fltr-chip:hover{border-color:#484f58;color:#e6edf3;}
+    .fltr-chip:hover{border-color:#5a6f85;color:#e6edf3;}
     .fltr-chip.on{border-color:#1e90ff;color:#1e90ff;background:rgba(30,144,255,.1);}
     .fltr-row{display:flex;flex-wrap:wrap;gap:6px;}
-    .overseas-row{display:none;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #30363d;}
+    .overseas-row{display:none;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #2d4060;}
     .overseas-row.visible{display:flex;}
+    .tool-divider{height:1px;background:#1c2535;margin:12px 0;}
+    .input-brand{width:100%;background:#141d2b;border:1.5px solid #2d4060;color:#e6edf3;border-radius:8px;padding:9px 12px;font-size:14px;margin-top:6px;}
+    .input-brand:focus{border-color:#1e90ff;outline:none;box-shadow:0 0 0 3px rgba(30,144,255,.12);}
 
     @media(max-width:480px){
       .price-amount{font-size:28px;}
@@ -428,7 +457,10 @@
     <span>🐧</span>
     <span>かんたん比較ツール</span>
   </div>
-  <a href="#lp" class="btn-lp">詳細・購入</a>
+  <div style="display:flex;gap:8px;">
+    <button type="button" class="btn-hist" onclick="toggleHikakuHist()">📚 履歴</button>
+    <a href="#lp" class="btn-lp">詳細・購入</a>
+  </div>
 </header>
 
 <!-- ===== TOOL SECTION ===== -->
@@ -467,43 +499,110 @@
     <div class="field-label">⚙ 絞り込み・並び替え</div>
 
     <div class="filter-group">
-      <div class="filter-label">並び替え</div>
+      <div class="filter-label">🔀 並び替え</div>
       <div class="fltr-row">
         <div class="fltr-chip on" onclick="setFilter('sort','default',this)">関連度順</div>
         <div class="fltr-chip" onclick="setFilter('sort','cheap',this)">安い順</div>
         <div class="fltr-chip" onclick="setFilter('sort','expensive',this)">高い順</div>
         <div class="fltr-chip" onclick="setFilter('sort','review',this)">評価順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','points',this)">ポイント還元率順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','reviewCount',this)">レビュー件数順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','new',this)">新着順</div>
       </div>
     </div>
 
+    <div class="tool-divider"></div>
+
     <div class="filter-group">
-      <div class="filter-label">配送</div>
+      <div class="filter-label">🚚 配送</div>
       <div class="fltr-row">
         <div class="fltr-chip on" onclick="setFilter('shipping','all',this)">すべて</div>
         <div class="fltr-chip" onclick="setFilter('shipping','free',this)">送料無料のみ</div>
+        <div class="fltr-chip" onclick="setFilter('shipping','actual',this)">送料込み実質価格順</div>
+        <div class="fltr-chip" onclick="setFilter('shipping','express',this)">翌日配送あり</div>
       </div>
     </div>
 
+    <div class="tool-divider"></div>
+
     <div class="filter-group">
-      <div class="filter-label">在庫</div>
+      <div class="filter-label">📦 在庫</div>
       <div class="fltr-row">
         <div class="fltr-chip on" onclick="setFilter('stock','all',this)">すべて</div>
         <div class="fltr-chip" onclick="setFilter('stock','instock',this)">在庫あり優先</div>
+        <div class="fltr-chip" onclick="setFilter('stock','instockonly',this)">在庫あり限定</div>
       </div>
     </div>
 
-    <div class="filter-group" style="margin-bottom:0;">
-      <div class="filter-label">サイト地域</div>
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🏷️ 商品の状態</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('condition','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('condition','new',this)">新品のみ</div>
+        <div class="fltr-chip" onclick="setFilter('condition','used',this)">中古も含む</div>
+        <div class="fltr-chip" onclick="setFilter('condition','sale',this)">セール品のみ</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">⭐ レビュー</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('review','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('review','star4',this)">星4以上のみ</div>
+        <div class="fltr-chip" onclick="setFilter('review','star3',this)">星3以上のみ</div>
+        <div class="fltr-chip" onclick="setFilter('review','count100',this)">レビュー100件以上</div>
+        <div class="fltr-chip" onclick="setFilter('review','count50',this)">レビュー50件以上</div>
+        <div class="fltr-chip" onclick="setFilter('review','count10',this)">レビュー10件以上</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🛡️ 購入・保証 <span style="font-size:11px;color:#5a6f85;">（複数選択OK）</span></div>
+      <div class="fltr-row">
+        <div class="fltr-chip" onclick="toggleMulti('guarantee',this)">保証あり優先</div>
+        <div class="fltr-chip" onclick="toggleMulti('bulk',this)">まとめ買い割引あり</div>
+        <div class="fltr-chip" onclick="toggleMulti('points',this)">ポイント対応</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🏢 法人・業者向け <span style="font-size:11px;color:#5a6f85;">（複数選択OK）</span></div>
+      <div class="fltr-row">
+        <div class="fltr-chip" onclick="toggleMulti('corporate',this)">法人購入可のみ</div>
+        <div class="fltr-chip" onclick="toggleMulti('estimate',this)">見積もり対応あり</div>
+        <div class="fltr-chip" onclick="toggleMulti('quantity',this)">数量割引あり</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🌏 サイト地域</div>
       <div class="fltr-row">
         <div class="fltr-chip on" onclick="setFilter('region','japan',this)">🇯🇵 日本のみ</div>
         <div class="fltr-chip" onclick="setFilter('region','global',this)">🌐 海外も表示</div>
       </div>
       <div class="overseas-row" id="overseasRow">
-        <span style="font-size:12px;color:#484f58;width:100%;margin-bottom:4px;">追加表示されるサイト：</span>
-        <span style="font-size:12px;background:#0d1117;border:1px solid #30363d;padding:4px 10px;border-radius:12px;">🌐 Amazon.com</span>
-        <span style="font-size:12px;background:#0d1117;border:1px solid #30363d;padding:4px 10px;border-radius:12px;">🛍 eBay</span>
-        <span style="font-size:12px;background:#0d1117;border:1px solid #30363d;padding:4px 10px;border-radius:12px;">🌏 AliExpress</span>
+        <span style="font-size:12px;color:#5a6f85;width:100%;margin-bottom:4px;">追加表示されるサイト：</span>
+        <span style="font-size:12px;background:#141d2b;border:1px solid #2d4060;padding:4px 10px;border-radius:12px;">🌐 Amazon.com</span>
+        <span style="font-size:12px;background:#141d2b;border:1px solid #2d4060;padding:4px 10px;border-radius:12px;">🛍 eBay</span>
+        <span style="font-size:12px;background:#141d2b;border:1px solid #2d4060;padding:4px 10px;border-radius:12px;">🌏 AliExpress</span>
       </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group" style="margin-bottom:0;">
+      <div class="filter-label">🏭 ブランド・メーカー</div>
+      <input type="text" id="brandInput" class="input-brand" placeholder="例：ダイソン、パナソニック...">
     </div>
   </div>
 
@@ -526,6 +625,17 @@
   <div id="statusBox" class="status-box">
     <div id="statusText"></div>
     <div id="linkList" class="link-list"></div>
+  </div>
+
+  <!-- 発注履歴パネル -->
+  <div class="hikaku-hist-panel" id="hikaku-hist-panel">
+    <div style="font-size:15px;font-weight:700;color:#e6edf3;margin-bottom:12px;">📚 検索・発注履歴</div>
+    <input type="text" class="hikaku-hist-search" id="hikaku-hist-q" placeholder="🔍 キーワードで検索..." oninput="renderHikakuHist(this.value)">
+    <div id="hikaku-hist-list"></div>
+    <div class="hikaku-hist-footer">
+      <button type="button" class="hikaku-hist-clearall" onclick="clearHikakuHist()">🗑️ 全削除</button>
+      <button type="button" class="hikaku-hist-closebtn" onclick="toggleHikakuHist()">閉じる</button>
+    </div>
   </div>
 </section>
 
@@ -714,90 +824,133 @@ const SITES = [
   {
     id: 'amazon', name: 'Amazon', emoji: '🛒',
     url: (q, mn, mx, f) => {
-      let u = `https://www.amazon.co.jp/s?k=${enc(q)}`;
-      if (mn > 0 || mx > 0) u += `&rh=p_36%3A${mn * 100}-${mx > 0 ? mx * 100 : ''}`;
-      if (f.sort === 'cheap') u += '&s=price-asc-rank';
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.amazon.co.jp/s?k=${enc(kw)}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&s=price-asc-rank';
       else if (f.sort === 'expensive') u += '&s=price-desc-rank';
       else if (f.sort === 'review') u += '&s=review-rank';
+      else if (f.sort === 'reviewCount') u += '&s=review-rank';
+      else if (f.sort === 'new') u += '&s=date-desc-rank';
+      const rh = [];
+      if (mn > 0 || mx > 0) rh.push(`p_36%3A${mn*100}-${mx>0?mx*100:''}`);
+      if (f.shipping === 'free') rh.push('p_76%3A2227292051');
+      if (f.stock === 'instock' || f.stock === 'instockonly') rh.push('p_n_availability%3A1248801011');
+      if (f.condition === 'new') rh.push('p_n_condition-type%3A1294423011');
+      else if (f.condition === 'used') rh.push('p_n_condition-type%3A1294424011');
+      if (f.review === 'star4') rh.push('p_72%3A4-');
+      else if (f.review === 'star3') rh.push('p_72%3A3-');
+      if (rh.length) u += `&rh=${rh.join('%2C')}`;
       return u;
     }
   },
   {
     id: 'rakuten', name: '楽天市場', emoji: '🛍',
     url: (q, mn, mx, f) => {
-      let u = `https://search.rakuten.co.jp/search/mall/${enc(q)}/`;
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://search.rakuten.co.jp/search/mall/${enc(kw)}/`;
       const p = [];
       if (mn > 0) p.push(`min=${mn}`);
       if (mx > 0) p.push(`max=${mx}`);
       if (f.sort === 'cheap') p.push('sort=%2Bprice');
       else if (f.sort === 'expensive') p.push('sort=-price');
-      else if (f.sort === 'review') p.push('sort=-reviewCount');
+      else if (f.sort === 'review') p.push('sort=-reviewAverage');
+      else if (f.sort === 'reviewCount') p.push('sort=-reviewCount');
+      else if (f.sort === 'new') p.push('sort=-sellingDate');
+      else if (f.sort === 'points') p.push('sort=-pointRatio');
+      else if (f.sort === 'actual') p.push('sort=%2Bprice');
       if (f.shipping === 'free') p.push('f=1');
-      if (f.stock === 'instock') p.push('inStock=1');
+      if (f.stock === 'instock' || f.stock === 'instockonly') p.push('inStock=1');
+      if (f.review === 'star4') p.push('r=4');
+      else if (f.review === 'star3') p.push('r=3');
       return p.length ? u + '?' + p.join('&') : u;
     }
   },
   {
     id: 'yahoo', name: 'Yahoo!ショッピング', emoji: '🏪',
     url: (q, mn, mx, f) => {
-      let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}`;
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://shopping.yahoo.co.jp/search?p=${enc(kw)}`;
       if (mn > 0) u += `&min_price=${mn}`;
       if (mx > 0) u += `&max_price=${mx}`;
-      if (f.sort === 'cheap') u += '&sor=4';
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sor=4';
       else if (f.sort === 'expensive') u += '&sor=8';
       else if (f.sort === 'review') u += '&sor=16';
+      else if (f.sort === 'reviewCount') u += '&sor=20';
+      else if (f.sort === 'new') u += '&sor=14';
       if (f.shipping === 'free') u += '&ship_from=1';
+      else if (f.shipping === 'express') u += '&next_day=1';
+      if (f.stock === 'instock' || f.stock === 'instockonly') u += '&instock=1';
+      if (f.review === 'star4') u += '&star=4';
+      else if (f.review === 'star3') u += '&star=3';
       return u;
     }
   },
   {
     id: 'kakaku', name: '価格.com', emoji: '💴',
-    url: (q, mn, mx) => {
-      let u = `https://kakaku.com/search_results/${enc(q)}/`;
-      if (mn > 0 || mx > 0) u += `?min=${mn}&max=${mx}`;
-      return u;
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://kakaku.com/search_results/${enc(kw)}/`;
+      const p = [];
+      if (mn > 0) p.push(`min=${mn}`);
+      if (mx > 0) p.push(`max=${mx}`);
+      if (f.sort === 'cheap' || f.sort === 'actual') p.push('sort=tPrice');
+      else if (f.sort === 'new') p.push('sort=Newest');
+      else if (f.sort === 'review') p.push('sort=Satisfaction');
+      return p.length ? u + '?' + p.join('&') : u;
     }
   },
   {
     id: 'monotaro', name: 'モノタロウ', emoji: '🔧',
     url: (q, mn, mx, f) => {
-      let u = `https://www.monotaro.com/s/?c=&q=${enc(q)}`;
-      if (f.sort === 'cheap') u += '&sort=PRICE_ASC';
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.monotaro.com/s/?c=&q=${enc(kw)}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sort=PRICE_ASC';
       else if (f.sort === 'expensive') u += '&sort=PRICE_DESC';
+      else if (f.sort === 'review') u += '&sort=REVIEW_DESC';
+      else if (f.sort === 'new') u += '&sort=NEW';
       return u;
     }
   },
   {
     id: 'yodobashi', name: 'ヨドバシ.com', emoji: '📺',
     url: (q, mn, mx, f) => {
-      let u = `https://www.yodobashi.com/?word=${enc(q)}`;
-      if (f.sort === 'cheap') u += '&sortKind=1';
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.yodobashi.com/?word=${enc(kw)}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sortKind=1';
       else if (f.sort === 'expensive') u += '&sortKind=2';
+      else if (f.sort === 'new') u += '&sortKind=3';
+      else if (f.sort === 'review') u += '&sortKind=4';
       return u;
     }
   },
   {
     id: 'mercari', name: 'メルカリ', emoji: '📦',
     url: (q, mn, mx, f) => {
-      let u = `https://jp.mercari.com/search?keyword=${enc(q)}&status=on_sale`;
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://jp.mercari.com/search?keyword=${enc(kw)}&status=on_sale`;
       if (mn > 0) u += `&price_min=${mn}`;
       if (mx > 0) u += `&price_max=${mx}`;
-      if (f.sort === 'cheap') u += '&sort=price_asc';
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sort=price_asc';
       else if (f.sort === 'expensive') u += '&sort=price_desc';
-      else if (f.sort === 'review') u += '&sort=like_desc';
+      else if (f.sort === 'review' || f.sort === 'reviewCount') u += '&sort=like_desc';
+      else if (f.sort === 'new') u += '&sort=created_desc';
       if (f.shipping === 'free') u += '&shipping_payer[]=2';
+      if (f.condition === 'new') u += '&item_condition[]=1&item_condition[]=2';
       return u;
     }
   },
   {
     id: 'paypay', name: 'PayPayモール', emoji: '💳',
     url: (q, mn, mx, f) => {
-      let u = `https://shopping.yahoo.co.jp/search?p=${enc(q)}&tab=paypay`;
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://shopping.yahoo.co.jp/search?p=${enc(kw)}&tab=paypay`;
       if (mn > 0) u += `&min_price=${mn}`;
       if (mx > 0) u += `&max_price=${mx}`;
-      if (f.sort === 'cheap') u += '&sor=4';
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sor=4';
       else if (f.sort === 'expensive') u += '&sor=8';
+      else if (f.sort === 'new') u += '&sor=14';
       if (f.shipping === 'free') u += '&ship_from=1';
+      if (f.stock === 'instock' || f.stock === 'instockonly') u += '&instock=1';
       return u;
     }
   }
@@ -807,9 +960,12 @@ const OVERSEAS = [
   {
     id: 'amazon_us', name: 'Amazon.com', emoji: '🌐',
     url: (q, mn, mx, f) => {
-      let u = `https://www.amazon.com/s?k=${enc(q)}`;
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.amazon.com/s?k=${enc(kw)}`;
+      if (mn > 0 || mx > 0) u += `&low-price=${mn}&high-price=${mx > 0 ? mx : ''}`;
       if (f.sort === 'cheap') u += '&s=price-asc-rank';
       else if (f.sort === 'expensive') u += '&s=price-desc-rank';
+      else if (f.sort === 'new') u += '&s=date-desc-rank';
       else if (f.sort === 'review') u += '&s=review-rank';
       return u;
     }
@@ -817,23 +973,40 @@ const OVERSEAS = [
   {
     id: 'ebay', name: 'eBay', emoji: '🛍',
     url: (q, mn, mx, f) => {
-      let u = `https://www.ebay.com/sch/i.html?_nkw=${enc(q)}`;
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.ebay.com/sch/i.html?_nkw=${enc(kw)}`;
       if (mn > 0) u += `&_udlo=${mn}`;
       if (mx > 0) u += `&_udhi=${mx}`;
       if (f.sort === 'cheap') u += '&_sop=15';
       else if (f.sort === 'expensive') u += '&_sop=16';
+      else if (f.sort === 'new') u += '&_sop=10';
+      if (f.condition === 'new') u += '&LH_ItemCondition=3';
+      else if (f.condition === 'used') u += '&LH_ItemCondition=4';
       return u;
     }
   },
   {
     id: 'aliexpress', name: 'AliExpress', emoji: '🌏',
-    url: (q) => `https://www.aliexpress.com/wholesale?SearchText=${enc(q)}`
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.aliexpress.com/wholesale?SearchText=${enc(kw)}`;
+      if (f.sort === 'cheap') u += '&SortType=price_asc';
+      else if (f.sort === 'expensive') u += '&SortType=price_desc';
+      else if (f.sort === 'new') u += '&SortType=newlyListed_desc';
+      return u;
+    }
   }
 ];
 
 const selected = new Set(SITES.map(s => s.id));
 let priceMin = 0, priceMax = 0;
-const filters = { sort: 'default', shipping: 'all', stock: 'all', region: 'japan' };
+const filters = {
+  sort: 'default', shipping: 'all', stock: 'all', region: 'japan',
+  condition: 'all', review: 'all',
+  guarantee: false, bulk: false, points: false,
+  corporate: false, estimate: false, quantity: false,
+  brand: ''
+};
 const isApp = window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
 
 /* ===== FILTER HANDLER ===== */
@@ -846,6 +1019,11 @@ function setFilter(group, val, el) {
     row.classList.toggle('visible', val === 'global');
     buildChips();
   }
+}
+
+function toggleMulti(key, el) {
+  filters[key] = !filters[key];
+  el.classList.toggle('on', filters[key]);
 }
 
 /* ===== BUILD SITE CHIPS ===== */
@@ -889,9 +1067,11 @@ function openAll() {
   const kw = document.getElementById('kwInput').value.trim();
   priceMin = parseInt(document.getElementById('priceMin').value) || 0;
   priceMax = parseInt(document.getElementById('priceMax').value) || 0;
+  filters.brand = document.getElementById('brandInput')?.value.trim() || '';
 
   if (!kw) { document.getElementById('kwInput').focus(); return; }
   if (selected.size === 0) { alert('サイトを1つ以上選んでください'); return; }
+  saveHikakuHist(kw);
 
   const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
   const targets = allSites.filter(s => selected.has(s.id));
@@ -910,7 +1090,7 @@ function openAll() {
       <a href="${s.url(kw, priceMin, priceMax, filters)}" target="_blank" rel="noopener noreferrer" class="site-link">
         <span style="font-size:18px;">${s.emoji}</span>
         <span>${s.name}で「${kw}」を検索</span>
-        <span style="margin-left:auto;color:#484f58;font-size:12px;">開く →</span>
+        <span style="margin-left:auto;color:#5a6f85;font-size:12px;">開く →</span>
       </a>`).join('');
   } else {
     targets.forEach(s => window.open(s.url(kw, priceMin, priceMax, filters), '_blank', 'noopener,noreferrer'));
@@ -919,9 +1099,67 @@ function openAll() {
       <a href="${s.url(kw, priceMin, priceMax, filters)}" target="_blank" rel="noopener noreferrer" class="site-link">
         <span style="font-size:18px;">${s.emoji}</span>
         <span>${s.name}</span>
-        <span style="margin-left:auto;color:#484f58;font-size:12px;">再度開く →</span>
+        <span style="margin-left:auto;color:#5a6f85;font-size:12px;">再度開く →</span>
       </a>`).join('');
   }
+}
+
+/* ===== 発注履歴 ===== */
+const HIKAKU_HIST_KEY = 'hikaku-history-v1';
+
+function saveHikakuHist(kw) {
+  const hist = JSON.parse(localStorage.getItem(HIKAKU_HIST_KEY) || '[]');
+  const exists = hist.findIndex(h => h.kw === kw);
+  if (exists !== -1) hist.splice(exists, 1);
+  hist.unshift({ id: Date.now(), kw, date: new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}) });
+  if (hist.length > 100) hist.length = 100;
+  localStorage.setItem(HIKAKU_HIST_KEY, JSON.stringify(hist));
+}
+
+function toggleHikakuHist() {
+  const panel = document.getElementById('hikaku-hist-panel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) renderHikakuHist('');
+}
+
+function renderHikakuHist(q) {
+  const hist = JSON.parse(localStorage.getItem(HIKAKU_HIST_KEY) || '[]');
+  const query = (q||'').trim().toLowerCase();
+  const filtered = query ? hist.filter(h => h.kw.toLowerCase().includes(query)) : hist;
+  const el = document.getElementById('hikaku-hist-list');
+  if (!filtered.length) {
+    el.innerHTML = '<div class="hikaku-hist-empty">📭 履歴がありません<br><small>検索すると自動で保存されます</small></div>';
+    return;
+  }
+  el.innerHTML = filtered.map(h => `
+    <div class="hikaku-hist-item">
+      <div class="hikaku-hist-info">
+        <div class="hikaku-hist-kw">🔍 ${h.kw}</div>
+        <div class="hikaku-hist-date">📅 ${h.date}</div>
+      </div>
+      <button type="button" class="hikaku-hist-retry" onclick="reSearch('${h.kw.replace(/'/g,"\\'")}')">再検索</button>
+      <button type="button" class="hikaku-hist-del" onclick="deleteHikakuHistItem(${h.id})">削除</button>
+    </div>`).join('');
+}
+
+function reSearch(kw) {
+  document.getElementById('kwInput').value = kw;
+  document.getElementById('hikaku-hist-panel').classList.remove('open');
+  document.getElementById('tool').scrollIntoView({ behavior:'smooth', block:'start' });
+  setTimeout(() => openAll(), 400);
+}
+
+function deleteHikakuHistItem(id) {
+  let hist = JSON.parse(localStorage.getItem(HIKAKU_HIST_KEY) || '[]');
+  hist = hist.filter(h => h.id !== id);
+  localStorage.setItem(HIKAKU_HIST_KEY, JSON.stringify(hist));
+  renderHikakuHist(document.getElementById('hikaku-hist-q')?.value || '');
+}
+
+function clearHikakuHist() {
+  if (!confirm('すべての履歴を削除しますか？')) return;
+  localStorage.removeItem(HIKAKU_HIST_KEY);
+  renderHikakuHist('');
 }
 
 /* ===== SCROLL ===== */
