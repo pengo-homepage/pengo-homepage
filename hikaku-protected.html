@@ -180,19 +180,75 @@
       padding:9px 16px;border-radius:22px;
       border:2px solid #E2E8F0;background:#F8FAFC;
       color:#64748B;cursor:pointer;font-size:13px;font-weight:600;
-      transition:all .2s ease;
+      transition:all .2s ease;position:relative;
     }
     .site-chip:hover{border-color:#2563EB;color:#2563EB;background:#EFF6FF;}
     .site-chip.on{border-color:#2563EB;background:#DBEAFE;color:#2563EB;}
+    .chip-badge{
+      position:absolute;top:-7px;right:-7px;
+      width:20px;height:20px;border-radius:50%;
+      background:#2563EB;color:#fff;font-size:10px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;border:2px solid #fff;
+      box-shadow:0 1px 4px rgba(37,99,235,.35);
+    }
 
     .select-row{display:flex;gap:8px;margin-bottom:10px;}
-    .select-all-btn,.clear-btn{
-      font-size:12px;font-weight:600;color:#64748B;
-      background:#F8FAFC;border:1.5px solid #E2E8F0;
+    .btn-reset-order{
+      font-size:12px;font-weight:600;color:#EF4444;
+      background:#FEF2F2;border:1.5px solid #FECACA;
       border-radius:8px;padding:6px 14px;cursor:pointer;transition:all .2s;
     }
-    .select-all-btn:hover{color:#2563EB;border-color:#2563EB;background:#EFF6FF;}
-    .clear-btn:hover{color:#EF4444;border-color:#FECACA;background:#FEF2F2;}
+    .btn-reset-order:hover{background:#EF4444;color:#fff;border-color:#EF4444;}
+
+    .order-display{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:24px;}
+    .order-tag{
+      display:inline-flex;align-items:center;gap:4px;
+      background:#DBEAFE;color:#2563EB;
+      font-size:12px;font-weight:700;
+      padding:3px 10px;border-radius:14px;
+      border:1px solid #BFDBFE;
+    }
+    .order-empty{font-size:12px;color:#94A3B8;}
+
+    /* step flow */
+    .progress-wrap{margin:12px 0 4px;}
+    .progress-label{font-size:12px;color:#64748B;font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between;}
+    .progress-track{height:8px;background:#E2E8F0;border-radius:8px;overflow:hidden;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#2563EB,#60A5FA);border-radius:8px;transition:width .4s ease;}
+    .btn-step{
+      width:100%;padding:16px 20px;margin-top:12px;
+      background:#2563EB;color:#fff;border:none;border-radius:14px;
+      font-size:16px;font-weight:700;cursor:pointer;
+      transition:all .2s;display:flex;align-items:center;gap:10px;text-align:left;
+    }
+    .btn-step:hover{background:#1D4ED8;transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.35);}
+    .btn-step:active{transform:none;}
+    .btn-step .step-label{flex:1;}
+    .btn-step .step-arrow{font-size:20px;flex-shrink:0;}
+    .step-queue{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+    .step-queue-item{
+      display:flex;align-items:center;gap:10px;
+      padding:9px 14px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;
+      font-size:13px;font-weight:600;color:#64748B;transition:all .2s;
+    }
+    .step-queue-item.done{border-color:#BBF7D0;background:#F0FDF4;color:#16A34A;}
+    .step-num{
+      width:22px;height:22px;border-radius:50%;flex-shrink:0;
+      background:#E2E8F0;color:#64748B;font-size:10px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .step-queue-item.done .step-num{background:#BBF7D0;color:#16A34A;}
+    .step-done-wrap{text-align:center;padding:14px 0 6px;}
+    .step-done-icon{font-size:42px;margin-bottom:8px;}
+    .step-done-msg{font-size:17px;font-weight:800;color:#0F172A;margin-bottom:4px;}
+    .step-done-sub{font-size:13px;color:#64748B;margin-bottom:16px;}
+    .btn-retry{
+      padding:10px 28px;background:#EFF6FF;color:#2563EB;
+      border:1.5px solid #BFDBFE;border-radius:12px;
+      font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;
+    }
+    .btn-retry:hover{background:#2563EB;color:#fff;border-color:#2563EB;}
 
     /* search button */
     .btn-search{
@@ -531,12 +587,12 @@
 
   <!-- site selection -->
   <div class="card">
-    <div class="field-label">🌐 比較するサイトを選ぶ</div>
+    <div class="field-label">🌐 比較するサイトを選ぶ <span style="font-size:11px;color:#94A3B8;font-weight:400;">（タップした順番で開きます）</span></div>
     <div class="select-row">
-      <button class="select-all-btn" onclick="selectAll()" type="button">すべて選択</button>
-      <button class="clear-btn" onclick="clearAll()" type="button">すべて解除</button>
+      <button class="btn-reset-order" onclick="clearAll()" type="button">🔄 順番をリセット</button>
     </div>
     <div class="site-chips" id="siteChips"></div>
+    <div class="order-display" id="orderDisplay"><span class="order-empty">サイトをタップして選択・順番を決めてください</span></div>
   </div>
 
   <!-- search button -->
@@ -544,16 +600,15 @@
     🔍 比較する
   </button>
 
-  <!-- status / links -->
+  <!-- status / step flow -->
   <div id="statusBox" class="status-box">
     <div class="status-header">
       <div id="statusText"></div>
       <div class="status-btns">
-        <button type="button" class="btn-close-tabs" id="btnCloseTabs" onclick="closeAllTabs()" style="display:none">🗂 全タブを閉じる</button>
         <button type="button" class="btn-close-status" onclick="closeStatus()">✕ 閉じる</button>
       </div>
     </div>
-    <div id="linkList" class="link-list"></div>
+    <div id="stepContent"></div>
   </div>
 
   <!-- 検索履歴パネル -->
@@ -574,8 +629,8 @@
   <!-- hero -->
   <div class="lp-hero">
     <div class="lp-badge">📊 ショッピング比較ツール</div>
-    <h1>8つのサイトを<br><em>一気に比較。</em><br>最安値がすぐ見つかる。</h1>
-    <p>キーワードを1回入力するだけで、Amazon・楽天・Yahoo!など8つのサイトを同時に開いて価格比較できます。</p>
+    <h1>好きなサイトを<br><em>順番に比較。</em><br>最安値がすぐ見つかる。</h1>
+    <p>見たい順にサイトをタップして選ぶだけ。Amazon・楽天・Yahoo!など8サイトを1つずつ丁寧に比較できます。</p>
     <button class="btn-hero" onclick="scrollToTool()">▲ ツールを使ってみる</button>
   </div>
 
@@ -588,8 +643,8 @@
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">⚡</div>
-        <h3>ワンクリックで8サイト同時検索</h3>
-        <p>キーワードを入れてボタンを押すだけ。毎回サイトを開き直す手間がゼロになります。</p>
+        <h3>順番タップで最大8サイト比較</h3>
+        <p>見たい順にサイトを選んで「比較する」を押すだけ。1つずつ確認しながら丁寧に比較できます。</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">💰</div>
@@ -617,10 +672,10 @@
       <div class="site-badge">🛍 楽天市場</div>
       <div class="site-badge">🏪 Yahoo!ショッピング</div>
       <div class="site-badge">💴 価格.com</div>
-      <div class="site-badge">🔧 モノタロウ</div>
       <div class="site-badge">📺 ヨドバシ.com</div>
       <div class="site-badge">📦 メルカリ</div>
-      <div class="site-badge">💳 PayPayモール</div>
+      <div class="site-badge">🛍️ Qoo10</div>
+      <div class="site-badge">👗 ZOZOTOWN</div>
     </div>
   </div>
 
@@ -912,7 +967,8 @@ const OVERSEAS = [
   }
 ];
 
-const selected = new Set(SITES.map(s => s.id));
+let orderedSites = [];
+let stepState = { active: false, current: 0, targets: [], kw: '' };
 let priceMin = 0, priceMax = 0;
 const filters = {
   sort: 'default', shipping: 'all', stock: 'all', region: 'japan',
@@ -921,8 +977,6 @@ const filters = {
   corporate: false, estimate: false, quantity: false,
   brand: ''
 };
-const isApp = window.matchMedia('(display-mode: standalone)').matches || !!window.navigator.standalone;
-let openedTabs = [];
 
 /* ===== FILTER HANDLER ===== */
 function setFilter(group, val, el) {
@@ -941,30 +995,54 @@ function toggleMulti(key, el) {
   el.classList.toggle('on', filters[key]);
 }
 
-/* ===== BUILD SITE CHIPS ===== */
+/* ===== BUILD SITE CHIPS (ordered-tap) ===== */
 function buildChips() {
   const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  orderedSites = orderedSites.filter(id => allSites.some(s => s.id === id));
   const el = document.getElementById('siteChips');
-  el.innerHTML = allSites.map(s => `
-    <div class="site-chip ${selected.has(s.id) ? 'on' : ''}" id="chip-${s.id}" onclick="toggleSite('${s.id}')">
-      ${s.emoji} ${s.name}
-    </div>`).join('');
+  el.innerHTML = allSites.map(s => {
+    const idx = orderedSites.indexOf(s.id);
+    const on = idx !== -1;
+    const badge = on ? `<span class="chip-badge">${idx + 1}</span>` : '';
+    return `<div class="site-chip${on ? ' on' : ''}" id="chip-${s.id}" onclick="toggleSite('${s.id}')">${s.emoji} ${s.name}${badge}</div>`;
+  }).join('');
+  renderOrderDisplay();
 }
 buildChips();
 
 function toggleSite(id) {
-  const el = document.getElementById('chip-' + id);
-  if (selected.has(id)) { selected.delete(id); el.classList.remove('on'); }
-  else { selected.add(id); el.classList.add('on'); }
+  const idx = orderedSites.indexOf(id);
+  if (idx !== -1) {
+    orderedSites.splice(idx, 1);
+  } else {
+    orderedSites.push(id);
+  }
+  buildChips();
+}
+
+function renderOrderDisplay() {
+  const el = document.getElementById('orderDisplay');
+  if (!el) return;
+  if (orderedSites.length === 0) {
+    el.innerHTML = '<span class="order-empty">サイトをタップして選択・順番を決めてください</span>';
+    return;
+  }
+  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  el.innerHTML = orderedSites.map((id, i) => {
+    const s = allSites.find(x => x.id === id);
+    return s ? `<span class="order-tag">${i+1}. ${s.emoji} ${s.name}</span>` : '';
+  }).join('');
 }
 
 function selectAll() {
   const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
-  allSites.forEach(s => { selected.add(s.id); const c = document.getElementById('chip-' + s.id); if(c) c.classList.add('on'); });
+  allSites.forEach(s => { if (!orderedSites.includes(s.id)) orderedSites.push(s.id); });
+  buildChips();
 }
+
 function clearAll() {
-  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
-  allSites.forEach(s => { selected.delete(s.id); const c = document.getElementById('chip-' + s.id); if(c) c.classList.remove('on'); });
+  orderedSites = [];
+  buildChips();
 }
 
 /* ===== PRICE CHIPS ===== */
@@ -977,7 +1055,7 @@ function setPriceRange(mn, mx) {
   event.target.classList.add('on');
 }
 
-/* ===== SEARCH ===== */
+/* ===== SEARCH (step-by-step) ===== */
 function openAll() {
   const kw = document.getElementById('kwInput').value.trim();
   priceMin = parseInt(document.getElementById('priceMin').value) || 0;
@@ -985,52 +1063,88 @@ function openAll() {
   filters.brand = document.getElementById('brandInput')?.value.trim() || '';
 
   if (!kw) { document.getElementById('kwInput').focus(); return; }
-  if (selected.size === 0) { alert('サイトを1つ以上選んでください'); return; }
+  if (orderedSites.length === 0) { alert('サイトを1つ以上選んでください'); return; }
   saveHikakuHist(kw);
 
   const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
-  const targets = allSites.filter(s => selected.has(s.id));
+  const targets = orderedSites.map(id => allSites.find(s => s.id === id)).filter(Boolean);
   const priceStr = priceMax > 0
     ? `〜${priceMax.toLocaleString()}円`
     : priceMin > 0 ? `${priceMin.toLocaleString()}円〜` : '';
 
+  stepState = { active: true, current: 0, targets, kw, priceStr };
+
   const statusBox = document.getElementById('statusBox');
   const statusText = document.getElementById('statusText');
-  const linkList = document.getElementById('linkList');
   statusBox.classList.add('visible');
-
-  if (isApp) {
-    statusText.textContent = `🔗「${kw}」${priceStr ? `（${priceStr}）` : ''} — タップして各サイトを開く`;
-    linkList.innerHTML = targets.map(s => `
-      <a href="${s.url(kw, priceMin, priceMax, filters)}" target="_blank" rel="noopener noreferrer" class="site-link">
-        <span style="font-size:18px;">${s.emoji}</span>
-        <span>${s.name}で「${kw}」を検索</span>
-        <span style="margin-left:auto;color:#94A3B8;font-size:12px;">開く →</span>
-      </a>`).join('');
-  } else {
-    openedTabs = targets.map(s => window.open(s.url(kw, priceMin, priceMax, filters), '_blank'));
-    document.getElementById('btnCloseTabs').style.display = '';
-    statusText.innerHTML = `✅ <strong>「${kw}」</strong>${priceStr ? `（${priceStr}）` : ''} を ${targets.length}サイトで開きました！`;
-    linkList.innerHTML = targets.map(s => `
-      <a href="${s.url(kw, priceMin, priceMax, filters)}" target="_blank" rel="noopener noreferrer" class="site-link">
-        <span style="font-size:18px;">${s.emoji}</span>
-        <span>${s.name}</span>
-        <span style="margin-left:auto;color:#94A3B8;font-size:12px;">再度開く →</span>
-      </a>`).join('');
-  }
+  statusText.innerHTML = `🔍 <strong>「${kw}」</strong>${priceStr ? `（${priceStr}）` : ''} を ${targets.length}サイトで比較します`;
+  renderStep();
+  statusBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-function closeAllTabs() {
-  openedTabs.forEach(w => { try { if (w && !w.closed) w.close(); } catch(e) {} });
-  openedTabs = [];
-  document.getElementById('btnCloseTabs').style.display = 'none';
+function renderStep() {
+  const { current, targets, kw, priceStr } = stepState;
+  const el = document.getElementById('stepContent');
+  const total = targets.length;
+
+  if (current >= total) {
+    el.innerHTML = `
+      <div class="step-done-wrap">
+        <div class="step-done-icon">✅</div>
+        <div class="step-done-msg">比較完了！</div>
+        <div class="step-done-sub">${total}サイトをすべて開きました。各タブで価格を比較してください。</div>
+        <button type="button" class="btn-retry" onclick="retrySearch()">🔄 もう一度検索する</button>
+      </div>
+      <div class="step-queue">${targets.map((s, i) => `
+        <div class="step-queue-item done">
+          <span class="step-num">✓</span>
+          <span>${s.emoji} ${s.name}</span>
+        </div>`).join('')}
+      </div>`;
+    return;
+  }
+
+  const pct = Math.round((current / total) * 100);
+  const next = targets[current];
+
+  el.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-label"><span>${current}/${total} サイト完了</span><span>${pct}%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <button type="button" class="btn-step" onclick="advanceStep()">
+      <span class="step-label">${current === 0 ? '最初のサイトを開く' : '次のサイトを開く'}<br><span style="font-size:14px;opacity:.85">${next.emoji} ${next.name}</span></span>
+      <span class="step-arrow">→</span>
+    </button>
+    <div class="step-queue">${targets.map((s, i) => `
+      <div class="step-queue-item${i < current ? ' done' : ''}">
+        <span class="step-num">${i < current ? '✓' : i + 1}</span>
+        <span>${s.emoji} ${s.name}</span>
+        ${i === current ? '<span style="margin-left:auto;font-size:11px;color:#2563EB;font-weight:700;">← 次</span>' : ''}
+      </div>`).join('')}
+    </div>`;
+}
+
+function advanceStep() {
+  const { current, targets, kw } = stepState;
+  if (current >= targets.length) return;
+  const s = targets[current];
+  window.open(s.url(kw, priceMin, priceMax, filters), '_blank');
+  stepState.current++;
+  renderStep();
+}
+
+function retrySearch() {
+  closeStatus();
+  document.getElementById('kwInput').focus();
+  document.getElementById('tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function closeStatus() {
+  stepState = { active: false, current: 0, targets: [], kw: '' };
   document.getElementById('statusBox').classList.remove('visible');
   document.getElementById('statusText').innerHTML = '';
-  document.getElementById('linkList').innerHTML = '';
-  document.getElementById('btnCloseTabs').style.display = 'none';
+  document.getElementById('stepContent').innerHTML = '';
 }
 
 /* ===== 検索履歴 ===== */
