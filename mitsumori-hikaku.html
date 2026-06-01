@@ -892,33 +892,7 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
 .clear-area{max-width:860px;margin:6px auto 0;padding:0 10px;display:none;}
 .btn-clear-all{width:100%;padding:12px;background:#FEF2F2;color:#EF4444;border:1.5px solid #FECACA;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-clear-all:hover{background:#EF4444;color:#fff;border-color:#EF4444;}
-/* AI読み取り */
-.panel-btn-ai{background:#1e3a5f;color:#60a5fa;margin-top:6px;font-size:13px;border:1px solid #2d4f7c;}
-.panel-btn-ai:hover{background:#2563eb;color:#fff;}
-.ai-reader-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:none;align-items:flex-end;justify-content:center;}
-.ai-reader-overlay.open{display:flex;}
-.ai-reader-modal{background:#1c2535;border-radius:20px 20px 0 0;width:100%;max-width:540px;max-height:88vh;overflow-y:auto;padding:16px 18px 32px;}
-.ai-reader-handle{width:40px;height:4px;background:#2d4060;border-radius:4px;margin:0 auto 16px;}
-.ai-reader-title{font-size:17px;font-weight:700;color:#e6edf3;margin-bottom:14px;}
-.ai-reader-label{font-size:12px;color:#9db0c4;font-weight:700;margin-bottom:6px;margin-top:12px;letter-spacing:.3px;}
-.ai-reader-input{width:100%;background:#141d2b;border:1.5px solid #2d4060;color:#e6edf3;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;transition:border-color .2s;}
-.ai-reader-input:focus{border-color:#2563eb;}
-.ai-slot-row{display:flex;gap:8px;}
-.ai-slot-btn{flex:1;padding:10px;background:#141d2b;border:2px solid #2d4060;color:#9db0c4;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;transition:all .2s;}
-.ai-slot-btn.on{border-color:#2563eb;background:#1e3a5f;color:#60a5fa;}
-.ai-key-save-row{font-size:12px;color:#9db0c4;margin-top:7px;display:flex;align-items:center;gap:6px;}
-.ai-file-area{background:#141d2b;border:2px dashed #2d4060;border-radius:12px;padding:20px;text-align:center;cursor:pointer;color:#9db0c4;font-size:13px;transition:all .2s;margin-top:4px;line-height:1.8;}
-.ai-file-area:hover{border-color:#2563eb;background:#1a2840;}
-.ai-read-btn{width:100%;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px;transition:all .2s;}
-.ai-read-btn:hover:not(:disabled){background:#1d4ed8;}
-.ai-read-btn:disabled{background:#2d4060;color:#5a6f85;cursor:not-allowed;}
-.ai-result-company{font-size:15px;font-weight:700;color:#60a5fa;padding:8px 0 6px;}
-.ai-result-item{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 0;border-bottom:1px solid #2d4060;color:#e6edf3;}
-.ai-result-meta{color:#9db0c4;flex-shrink:0;margin-left:10px;font-size:12px;}
-.ai-result-notes{font-size:12px;color:#9db0c4;background:#141d2b;border-radius:6px;padding:8px;margin-top:8px;line-height:1.6;}
-.ai-apply-btn{width:100%;padding:14px;background:#059669;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;transition:all .2s;}
-.ai-apply-btn:hover{background:#047857;}
-.ai-error-area{display:none;color:#f85149;font-size:13px;padding:10px;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.2);border-radius:8px;margin-top:10px;line-height:1.5;}
+
 </style>
 </head>
 <body>
@@ -1109,50 +1083,6 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
   </div>
 </div>
 
-<!-- ===== AI読み取りモーダル ===== -->
-<div class="ai-reader-overlay" id="ai-reader-modal">
-  <div class="ai-reader-modal">
-    <div class="ai-reader-handle"></div>
-    <div class="ai-reader-title">🤖 AI見積書読み取り</div>
-
-    <div class="ai-reader-label">入力先スロット</div>
-    <div class="ai-slot-row">
-      <button type="button" class="ai-slot-btn" id="ai-slot-A" onclick="aiSelectSlot('left')">A</button>
-      <button type="button" class="ai-slot-btn" id="ai-slot-B" onclick="aiSelectSlot('right')">B</button>
-      <button type="button" class="ai-slot-btn" id="ai-slot-C" onclick="aiSelectSlot('C')">C</button>
-      <button type="button" class="ai-slot-btn" id="ai-slot-D" onclick="aiSelectSlot('D')">D</button>
-    </div>
-
-    <div class="ai-reader-label">Anthropic APIキー</div>
-    <input type="password" class="ai-reader-input" id="ai-api-key" placeholder="sk-ant-api03-..." autocomplete="off">
-    <div class="ai-key-save-row">
-      <input type="checkbox" id="ai-key-save" checked>
-      <label for="ai-key-save">端末に保存する（次回省略）</label>
-    </div>
-
-    <div class="ai-reader-label">見積書ファイル（写真 / PDF）</div>
-    <div class="ai-file-area" id="ai-file-area" onclick="document.getElementById('ai-file-input').click()">
-      <div style="font-size:36px;">📄</div>
-      <div>タップして写真・PDFを選択</div>
-      <div style="font-size:11px;opacity:.7;">JPG・PNG・PDF対応｜カメラ撮影も可</div>
-    </div>
-    <input type="file" id="ai-file-input" accept="image/*,application/pdf" style="display:none" onchange="handleAIFile(event)">
-
-    <button type="button" class="ai-read-btn" id="ai-read-btn" onclick="runAIRead()" disabled>📖 読み取り開始</button>
-
-    <div id="ai-result-area" style="display:none">
-      <div class="ai-reader-label" style="margin-top:14px;">📊 読み取り結果</div>
-      <div id="ai-result-preview"></div>
-      <button type="button" class="ai-apply-btn" id="ai-apply-btn" onclick="applyAIResult()">✅ スロットAに入力する</button>
-    </div>
-
-    <div class="ai-error-area" id="ai-error-area"></div>
-
-    <div class="modal-btns" style="margin-top:16px;">
-      <button type="button" class="btn-cancel" onclick="closeAIReader()">閉じる</button>
-    </div>
-  </div>
-</div>
 
 <div class="toast" id="toast"></div>
 
@@ -1276,8 +1206,7 @@ function renderPanel(side) {
   if (!e || !e.companyName) {
     const msg = side==='C' ? '業者 C を追加' : side==='D' ? '業者 D を追加' : 'まだ入力されていません';
     bodyEl.innerHTML = `<div class="panel-empty"><div class="panel-empty-icon">📋</div>${msg}</div>
-      <button type="button" class="panel-btn ${btnCls}" onclick="openForm('${side}')">＋ 手動入力</button>
-      <button type="button" class="panel-btn panel-btn-ai" onclick="openAIReader('${side}')">🤖 AI読み取り</button>`;
+      <button type="button" class="panel-btn ${btnCls}" onclick="openForm('${side}')">＋ 入力する</button>`;
     return;
   }
 
@@ -1298,8 +1227,7 @@ function renderPanel(side) {
     ${e.status?`<span class="status-badge ${esc(e.status)}">${esc(e.status)}</span>`:''}
     <div class="items-mini">${itemsHtml||'<div class="items-empty">（項目なし）</div>'}</div>
     ${e.notes?`<div class="panel-notes visible">📝 ${esc(e.notes)}</div>`:''}
-    <button type="button" class="panel-btn panel-btn-edit" onclick="openForm('${side}')">✏️ 編集する</button>
-    <button type="button" class="panel-btn panel-btn-ai" onclick="openAIReader('${side}')">🤖 AI再読み取り</button>`;
+    <button type="button" class="panel-btn panel-btn-edit" onclick="openForm('${side}')">✏️ 編集する</button>`;
 }
 
 // ===== 中央差額 + 決定ボタン =====
@@ -1989,178 +1917,6 @@ function clearAllHistory() {
 
 document.getElementById('history-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeHistory();
-});
-
-// ===== AI読み取り =====
-const AI_KEY_STORAGE = 'ai-reader-api-key';
-let aiReaderState = { slot: 'left', fileData: null, mimeType: null, isPDF: false, result: null };
-
-function openAIReader(slot) {
-  aiReaderState = { slot, fileData: null, mimeType: null, isPDF: false, result: null };
-  const savedKey = localStorage.getItem(AI_KEY_STORAGE) || '';
-  document.getElementById('ai-api-key').value = savedKey;
-  document.getElementById('ai-file-area').innerHTML =
-    '<div style="font-size:36px;">📄</div><div>タップして写真・PDFを選択</div><div style="font-size:11px;opacity:.7;">JPG・PNG・PDF対応｜カメラ撮影も可</div>';
-  document.getElementById('ai-file-input').value = '';
-  document.getElementById('ai-read-btn').disabled = true;
-  document.getElementById('ai-result-area').style.display = 'none';
-  const errEl = document.getElementById('ai-error-area');
-  errEl.style.display = 'none'; errEl.textContent = '';
-  aiSelectSlot(slot);
-  document.getElementById('ai-reader-modal').classList.add('open');
-}
-
-function closeAIReader() {
-  document.getElementById('ai-reader-modal').classList.remove('open');
-}
-
-function aiSelectSlot(slot) {
-  aiReaderState.slot = slot;
-  const map = { left:'A', right:'B', C:'C', D:'D' };
-  ['left','right','C','D'].forEach(k => {
-    const btn = document.getElementById(`ai-slot-${map[k]}`);
-    if (btn) btn.classList.toggle('on', k === slot);
-  });
-  const applyBtn = document.getElementById('ai-apply-btn');
-  if (applyBtn) applyBtn.textContent = `✅ スロット${map[slot]}に入力する`;
-}
-
-function handleAIFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const isPDF = file.type === 'application/pdf';
-  if (!isPDF && !file.type.startsWith('image/')) {
-    showToast('❌ 画像またはPDFを選択してください'); return;
-  }
-  aiReaderState.isPDF = isPDF;
-  aiReaderState.mimeType = file.type;
-  const reader = new FileReader();
-  reader.onload = e => {
-    const full = e.target.result;
-    aiReaderState.fileData = full.split(',')[1];
-    const fileArea = document.getElementById('ai-file-area');
-    if (!isPDF) {
-      fileArea.innerHTML = `<img src="${full}" style="max-height:130px;max-width:100%;border-radius:8px;object-fit:contain;">
-        <div style="font-size:12px;color:#9db0c4;margin-top:6px;">${esc(file.name)}</div>`;
-    } else {
-      fileArea.innerHTML = `<div style="font-size:36px;">📋</div>
-        <div style="font-size:13px;font-weight:700;color:#60a5fa;">${esc(file.name)}</div>
-        <div style="font-size:11px;color:#9db0c4;">PDFファイル</div>`;
-    }
-    document.getElementById('ai-read-btn').disabled = false;
-  };
-  reader.readAsDataURL(file);
-}
-
-async function runAIRead() {
-  const apiKey = document.getElementById('ai-api-key').value.trim();
-  if (!apiKey) { showToast('❌ APIキーを入力してください'); return; }
-  if (!aiReaderState.fileData) { showToast('❌ ファイルを選択してください'); return; }
-  if (document.getElementById('ai-key-save').checked) {
-    localStorage.setItem(AI_KEY_STORAGE, apiKey);
-  }
-  const readBtn = document.getElementById('ai-read-btn');
-  readBtn.disabled = true; readBtn.textContent = '⏳ 読み取り中...';
-  document.getElementById('ai-result-area').style.display = 'none';
-  const errEl = document.getElementById('ai-error-area');
-  errEl.style.display = 'none'; errEl.textContent = '';
-
-  const prompt = `この見積書から情報を抽出してJSONのみを返してください。
-
-{
-  "companyName": "業者名または会社名（不明ならnull）",
-  "items": [
-    { "name": "品番または品名", "quantity": 数量, "unitPrice": 単価 }
-  ],
-  "notes": "特記事項・備考（なければnull）"
-}
-
-ルール：数値はカンマなし数値型、税抜単価優先、合計行は不要、JSON以外返さない。`;
-
-  try {
-    const headers = {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    };
-    if (aiReaderState.isPDF) headers['anthropic-beta'] = 'pdfs-2024-09-25';
-
-    const contentBlock = aiReaderState.isPDF
-      ? { type:'document', source:{ type:'base64', media_type:'application/pdf', data:aiReaderState.fileData } }
-      : { type:'image',    source:{ type:'base64', media_type:aiReaderState.mimeType, data:aiReaderState.fileData } };
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST', headers,
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2048,
-        messages: [{ role:'user', content:[contentBlock, { type:'text', text:prompt }] }]
-      })
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error?.message || `APIエラー (${res.status})`);
-    }
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '';
-    const m = text.match(/\{[\s\S]*\}/);
-    if (!m) throw new Error('JSONを取得できませんでした。もう一度お試しください。');
-    const result = JSON.parse(m[0]);
-    aiReaderState.result = result;
-    showAIResult(result);
-
-  } catch (err) {
-    errEl.textContent = `❌ ${err.message}`;
-    errEl.style.display = 'block';
-  } finally {
-    readBtn.disabled = false;
-    readBtn.textContent = '📖 読み取り開始';
-  }
-}
-
-function showAIResult(result) {
-  const itemsHtml = (result.items||[]).map(item =>
-    `<div class="ai-result-item">
-      <span>${esc(item.name||'（品名なし）')}</span>
-      <span class="ai-result-meta">${item.quantity??1}個 × ${fmt(item.unitPrice||0)}</span>
-    </div>`
-  ).join('');
-  document.getElementById('ai-result-preview').innerHTML =
-    `<div class="ai-result-company">🏢 ${esc(result.companyName||'（業者名不明）')}</div>` +
-    `<div>${itemsHtml||'<div style="color:#5a6f85;font-size:12px;padding:6px 0;">（項目なし）</div>'}</div>` +
-    (result.notes ? `<div class="ai-result-notes">📝 ${esc(result.notes)}</div>` : '');
-  aiSelectSlot(aiReaderState.slot);
-  document.getElementById('ai-result-area').style.display = 'block';
-}
-
-function applyAIResult() {
-  const { result, slot } = aiReaderState;
-  if (!result || !slot) return;
-  const data = load();
-  const existing = data[slot] || {};
-  const tax = existing.taxRate ?? 10;
-  const items = (result.items||[]).map(i => ({
-    name: i.name||'', quantity: i.quantity??1, unitPrice: i.unitPrice||0,
-    subtotal: (i.quantity??1) * (i.unitPrice||0)
-  }));
-  const sub = items.reduce((s,i) => s + i.subtotal, 0);
-  const taxAmt = Math.floor(sub * tax / 100);
-  data[slot] = {
-    ...existing,
-    companyName: result.companyName || existing.companyName || '（業者名不明）',
-    items, taxRate: tax, subtotal: sub, taxAmount: taxAmt, total: sub + taxAmt,
-    notes: result.notes || existing.notes || '',
-    status: existing.status || '検討中',
-    date: existing.date || new Date().toISOString().split('T')[0]
-  };
-  save(data); renderAll(); closeAIReader();
-  showToast(`✅ スロット${SLOT_LABEL[slot]}に入力しました`);
-}
-
-document.getElementById('ai-reader-modal').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closeAIReader();
 });
 
 // ===== 起動 =====
