@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>見積もり比較</title>
+<title>見積もり比較ツール｜デモ</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -892,6 +892,11 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
 .clear-area{max-width:860px;margin:6px auto 0;padding:0 10px;display:none;}
 .btn-clear-all{width:100%;padding:12px;background:#FEF2F2;color:#EF4444;border:1.5px solid #FECACA;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
 .btn-clear-all:hover{background:#EF4444;color:#fff;border-color:#EF4444;}
+/* デモバナー */
+.demo-banner{background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:12px 16px;text-align:center;font-size:13px;line-height:1.7;}
+.demo-banner strong{font-size:14px;display:block;margin-bottom:4px;}
+.btn-demo-reset{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;cursor:pointer;margin-top:6px;transition:all .2s;}
+.btn-demo-reset:hover{background:rgba(255,255,255,.35);}
 
 </style>
 </head>
@@ -902,6 +907,13 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
   <p>左右に入力してかんたん比較（最大4社）</p>
   <button type="button" onclick="openHistory()" style="position:absolute;top:50%;left:14px;transform:translateY(-50%);background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;padding:6px 13px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">📚 履歴</button>
   <a href="#lp-mitsumori" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#fff;padding:6px 13px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">詳細・購入</a>
+</div>
+
+<!-- デモバナー -->
+<div class="demo-banner">
+  <strong>📊 これはデモ版です</strong>
+  架空のサンプルデータが入っています。実際の見積書を入力して比較できます。<br>
+  <button type="button" class="btn-demo-reset" onclick="resetDemoData()">🔄 サンプルデータに戻す</button>
 </div>
 
 <!-- ===== 比較エリア A vs B ===== -->
@@ -1125,7 +1137,7 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
 
 <script>
 // ===== 定数 =====
-const DATA_KEY   = 'mitsumori-v2';
+const DATA_KEY   = 'mitsumori-demo-v1';
 const SLOT_KEYS  = ['left', 'right', 'C', 'D'];
 const SLOT_LABEL = { left:'A', right:'B', C:'C', D:'D' };
 const SLOT_CLS   = { left:'left', right:'right', C:'C', D:'D' };
@@ -1919,7 +1931,63 @@ document.getElementById('history-modal').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeHistory();
 });
 
+// ===== デモ用サンプルデータ =====
+const DEMO_SAMPLE = {
+  left: {
+    companyName: '鈴木塗装工業',
+    date: '2026-05-28', expiryDate: '2026-06-30',
+    items: [
+      { name: '外壁塗装（シリコン系）', quantity: 180, unitPrice: 2800, subtotal: 504000 },
+      { name: '足場組立・解体',         quantity: 1,   unitPrice: 85000, subtotal: 85000  },
+      { name: '養生費',                  quantity: 1,   unitPrice: 35000, subtotal: 35000  },
+      { name: '廃材処分費',              quantity: 1,   unitPrice: 15000, subtotal: 15000  }
+    ],
+    taxRate: 10, subtotal: 639000, taxAmount: 63900, total: 702900,
+    notes: '2年保証付き・追加費用なし・着工まで2週間・見積もり通り施工',
+    status: '検討中'
+  },
+  right: {
+    companyName: '山本リフォーム',
+    date: '2026-05-30', expiryDate: '2026-06-28',
+    items: [
+      { name: '外壁塗装（シリコン系）', quantity: 180, unitPrice: 2500, subtotal: 450000 },
+      { name: '足場組立・解体',         quantity: 1,   unitPrice: 92000, subtotal: 92000  },
+      { name: '養生費',                  quantity: 1,   unitPrice: 40000, subtotal: 40000  },
+      { name: '廃材処分費',              quantity: 1,   unitPrice: 12000, subtotal: 12000  }
+    ],
+    taxRate: 10, subtotal: 594000, taxAmount: 59400, total: 653400,
+    notes: '1年保証・翌週から着工可・地元業者・分割払い対応',
+    status: '検討中'
+  },
+  C: {
+    companyName: '田中建装',
+    date: '2026-05-29', expiryDate: '2026-07-15',
+    items: [
+      { name: '外壁塗装（フッ素系）',   quantity: 180, unitPrice: 3200, subtotal: 576000 },
+      { name: '足場・養生一式',          quantity: 1,   unitPrice: 110000, subtotal: 110000 }
+    ],
+    taxRate: 10, subtotal: 686000, taxAmount: 68600, total: 754600,
+    notes: '3年保証付き・廃材処分込み・認定施工店・地域密着20年の実績・アフターメンテナンスあり',
+    status: '検討中'
+  },
+  D: null
+};
+
+function initDemoData() {
+  if (!localStorage.getItem(DATA_KEY)) {
+    localStorage.setItem(DATA_KEY, JSON.stringify(DEMO_SAMPLE));
+  }
+}
+
+function resetDemoData() {
+  if (!confirm('サンプルデータに戻しますか？\n入力済みの内容は削除されます。')) return;
+  localStorage.setItem(DATA_KEY, JSON.stringify(DEMO_SAMPLE));
+  renderAll();
+  showToast('🔄 サンプルデータに戻しました');
+}
+
 // ===== 起動 =====
+initDemoData();
 renderAll();
 renderChecklistBody();
 </script>
@@ -2010,6 +2078,59 @@ input,textarea,select{user-select:text;-webkit-user-select:text;}
         <div class="lpm-feat-icon">✅</div>
         <h4>発注前チェックリスト</h4>
         <p>取付費・保証・納期確認など、見落としがちな項目を網羅したチェックリスト付き。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="lpm-section">
+    <div class="lpm-section-title">
+      <h3>料金プラン</h3>
+      <p>用途に合わせてお選びください</p>
+    </div>
+    <div class="lpm-pricing">
+      <div class="lpm-plan">
+        <h4>買い切り</h4>
+        <div class="lpm-plan-sub">一度買えばずっと使える</div>
+        <div class="lpm-plan-price">¥2,980</div>
+        <div class="lpm-plan-unit">1回限り</div>
+        <div class="lpm-plan-feats">
+          <div class="lpm-plan-feat">HTMLファイルをダウンロード</div>
+          <div class="lpm-plan-feat">4社比較・AI分析・出力対応</div>
+          <div class="lpm-plan-feat">PC・タブレット対応</div>
+          <div class="lpm-plan-feat">1ユーザー・1端末</div>
+        </div>
+        <!-- BASE購入URLに差し替えてください -->
+        <a href="https://pengohome.base.shop/" target="_blank" rel="noopener" class="lpm-buy lpm-buy-outline">購入する →</a>
+      </div>
+
+      <div class="lpm-plan featured">
+        <div class="lpm-plan-badge">おすすめ</div>
+        <h4>月額プラン</h4>
+        <div class="lpm-plan-sub">アップデート・サポート付き</div>
+        <div class="lpm-plan-price">¥980</div>
+        <div class="lpm-plan-unit">/ 月</div>
+        <div class="lpm-plan-feats">
+          <div class="lpm-plan-feat">買い切りの内容すべて</div>
+          <div class="lpm-plan-feat">機能アップデートを自動反映</div>
+          <div class="lpm-plan-feat">LINEまたはメールサポート</div>
+          <div class="lpm-plan-feat">新機能の優先対応</div>
+        </div>
+        <!-- 月額購入URLに差し替えてください -->
+        <a href="https://pengohome.base.shop/" target="_blank" rel="noopener" class="lpm-buy lpm-buy-fill">申し込む（準備中）</a>
+      </div>
+
+      <div class="lpm-plan">
+        <h4>カスタム発注</h4>
+        <div class="lpm-plan-sub">自社仕様にアレンジ</div>
+        <div class="lpm-plan-price">¥9,800〜</div>
+        <div class="lpm-plan-unit">内容による</div>
+        <div class="lpm-plan-feats">
+          <div class="lpm-plan-feat">会社名・ロゴ・カラー変更</div>
+          <div class="lpm-plan-feat">比較項目のカスタマイズ</div>
+          <div class="lpm-plan-feat">社内システム連携相談</div>
+          <div class="lpm-plan-feat">複数端末ライセンス</div>
+        </div>
+        <a href="mailto:tokyoribengi@gmail.com?subject=見積比較ツール カスタム相談" class="lpm-buy lpm-buy-outline">相談する（無料）</a>
       </div>
     </div>
   </div>

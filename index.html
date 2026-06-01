@@ -1,563 +1,853 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>業務改善のペンギン | 現場×AIで働き方を変える</title>
-  <meta name="description" content="製造業・倉庫業の現場から、AIを使った業務改善を発信中。非IT系の現場人間が作ったルーチン業務管理ツールも公開中。">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>業務改善のペンギン | 製造業・倉庫業の現場改善</title>
+<meta name="description" content="製造業・倉庫業・現場事務のムダな作業を減らします。紙帳票のタブレット化・Excel自動化・見積もり比較・手順書作成。現場経験者が一緒に考えます。">
+<style>
+/* ===== RESET ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:#fff;color:#111827;
+  font-family:-apple-system,BlinkMacSystemFont,'Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic UI','Meiryo',sans-serif;
+  line-height:1.7;-webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none;}
 
-    :root {
-      --orange: #FF6B35;
-      --yellow: #FFD700;
-      --navy: #1a1a2e;
-      --dark: #2d2d2d;
-      --light: #f8f4ef;
-      --white: #ffffff;
-      --gray: #888;
-    }
+/* ===== VARIABLES ===== */
+:root{
+  --bg:#fff;
+  --bg2:#F8FAFC;
+  --bg3:#F0FDFA;
+  --bd:#E2E8F0;
+  --bd2:#CBD5E1;
+  --tx:#111827;
+  --tx2:#374151;
+  --tx3:#6b7280;
+  --ac:#0F766E;
+  --ac2:#0D6360;
+  --ac-light:#F0FDFA;
+  --ac-mid:#CCFBF1;
+  --mw:1060px;
+  --r:14px;
+  --sh:0 2px 16px rgba(0,0,0,.06);
+  --sh2:0 8px 32px rgba(0,0,0,.09);
+}
 
-    body {
-      font-family: 'Noto Sans JP', sans-serif;
-      background: var(--light);
-      color: var(--dark);
-      line-height: 1.7;
-    }
+/* ===== HEADER ===== */
+.header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  height:64px;padding:0 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--bd);
+  transition:box-shadow .25s;
+}
+.header.scrolled{box-shadow:0 2px 16px rgba(0,0,0,.07);border-bottom-color:transparent;}
+.header-logo{
+  display:flex;align-items:center;gap:9px;
+  font-size:15px;font-weight:800;color:var(--tx);
+}
+.logo-mark{font-size:24px;line-height:1;}
+.header-nav{display:flex;align-items:center;gap:32px;}
+.header-nav a{font-size:13px;color:var(--tx2);letter-spacing:.04em;transition:color .2s;}
+.header-nav a:hover{color:var(--ac);}
+.btn-cta{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--ac);color:#fff;
+  padding:9px 22px;border-radius:8px;
+  font-size:13px;font-weight:700;letter-spacing:.02em;
+  border:none;cursor:pointer;transition:all .2s;
+}
+.btn-cta:hover{background:var(--ac2);transform:translateY(-1px);box-shadow:0 6px 18px rgba(15,118,110,.3);}
+.hamburger{
+  display:none;background:none;border:1.5px solid var(--bd2);
+  color:var(--tx2);padding:7px 11px;border-radius:8px;cursor:pointer;font-size:18px;line-height:1;
+}
 
-    .hero {
-      background: linear-gradient(135deg, var(--navy) 0%, #2a2a5a 100%);
-      color: var(--white);
-      text-align: center;
-      padding: 60px 20px 80px;
-      position: relative;
-      overflow: hidden;
-    }
+/* ===== MOBILE MENU ===== */
+.mobile-menu{
+  position:fixed;inset:0;z-index:99;
+  background:rgba(255,255,255,.98);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.mobile-menu.open{opacity:1;pointer-events:all;}
+.mobile-menu a{font-size:20px;font-weight:700;color:var(--tx);}
+.mobile-menu a:hover{color:var(--ac);}
+.mobile-menu-close{
+  position:absolute;top:18px;right:18px;
+  background:none;border:1.5px solid var(--bd2);color:var(--tx2);
+  padding:8px 12px;border-radius:8px;cursor:pointer;font-size:20px;line-height:1;
+}
 
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -60px; right: -60px;
-      width: 300px; height: 300px;
-      background: var(--orange);
-      border-radius: 50%;
-      opacity: 0.08;
-    }
+/* ===== HERO ===== */
+.hero{
+  padding:130px 40px 96px;
+  background:linear-gradient(160deg,#F0FDFA 0%,#fff 55%,#ECFDF5 100%);
+  border-bottom:1px solid var(--bd);position:relative;overflow:hidden;
+}
+.hero-shape{
+  position:absolute;top:-80px;right:-60px;
+  width:480px;height:480px;border-radius:50%;
+  background:radial-gradient(circle,rgba(15,118,110,.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{max-width:var(--mw);margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center;}
+.hero-content{}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--ac-light);border:1px solid var(--ac-mid);
+  color:var(--ac);font-size:12px;font-weight:700;
+  padding:5px 16px;border-radius:99px;letter-spacing:.06em;
+  margin-bottom:28px;
+}
+.hero-title{
+  font-size:clamp(32px,5.5vw,58px);font-weight:900;
+  line-height:1.18;letter-spacing:-.025em;color:var(--tx);
+  margin-bottom:20px;
+}
+.hero-title .ac{color:var(--ac);}
+.hero-sub{
+  font-size:clamp(15px,2vw,18px);color:var(--tx2);
+  line-height:1.85;max-width:500px;margin-bottom:16px;font-weight:500;
+}
+.hero-desc{
+  font-size:14px;color:var(--tx3);line-height:1.95;
+  max-width:460px;margin-bottom:40px;
+  padding-left:14px;border-left:3px solid var(--ac-mid);
+}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--ac);color:#fff;
+  padding:14px 32px;border-radius:10px;
+  font-size:15px;font-weight:700;
+  border:none;cursor:pointer;transition:all .22s;
+}
+.btn-primary:hover{background:var(--ac2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(15,118,110,.28);}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:7px;
+  background:transparent;color:var(--tx);
+  padding:14px 32px;border-radius:10px;
+  font-size:15px;font-weight:600;
+  border:1.5px solid var(--bd2);cursor:pointer;transition:all .22s;
+}
+.btn-outline:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-light);}
+.hero-visual{
+  background:var(--bg2);border:1.5px solid var(--bd);
+  border-radius:20px;padding:28px 24px;
+  min-width:220px;box-shadow:var(--sh2);
+}
+.hero-stat{text-align:center;padding:14px 0;}
+.hero-stat+.hero-stat{border-top:1px solid var(--bd);}
+.hero-stat-num{font-size:30px;font-weight:900;color:var(--ac);letter-spacing:-.02em;line-height:1.1;}
+.hero-stat-label{font-size:12px;color:var(--tx2);margin-top:4px;line-height:1.5;}
 
-    .hero::after {
-      content: '';
-      position: absolute;
-      bottom: -80px; left: -40px;
-      width: 250px; height: 250px;
-      background: var(--yellow);
-      border-radius: 50%;
-      opacity: 0.07;
-    }
+/* ===== SECTION ===== */
+.sec{padding:88px 40px;}
+.sec-alt{background:var(--bg2);}
+.sec-inner{max-width:var(--mw);margin:0 auto;}
+.sec-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--ac);font-weight:700;
+  letter-spacing:.1em;margin-bottom:12px;
+}
+.sec-eyebrow::before{content:'';width:20px;height:2px;background:var(--ac);border-radius:1px;}
+.sec-title{
+  font-size:clamp(24px,3.8vw,40px);font-weight:800;
+  color:var(--tx);line-height:1.28;letter-spacing:-.02em;margin-bottom:12px;
+}
+.sec-lead{font-size:15px;color:var(--tx2);line-height:1.85;max-width:440px;margin-bottom:52px;}
 
-    .hero-icon {
-      font-size: 80px;
-      margin-bottom: 16px;
-      display: block;
-      filter: drop-shadow(0 4px 12px rgba(255,107,53,0.4));
-    }
+/* ===== PAIN POINTS ===== */
+.pains-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
+.pain-card{
+  background:var(--bg);border:1.5px solid var(--bd);
+  border-radius:var(--r);padding:24px 22px;
+  display:flex;align-items:flex-start;gap:14px;
+  transition:all .22s;
+}
+.pain-card:hover{border-color:var(--ac-mid);box-shadow:var(--sh);transform:translateY(-2px);}
+.pain-ico{
+  width:40px;height:40px;flex-shrink:0;
+  background:var(--ac-light);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.pain-body{}
+.pain-ttl{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:5px;line-height:1.4;}
+.pain-txt{font-size:13px;color:var(--tx2);line-height:1.75;}
 
-    .hero h1 {
-      font-size: clamp(22px, 5vw, 36px);
-      font-weight: 900;
-      margin-bottom: 8px;
-      letter-spacing: 0.04em;
-    }
+/* ===== CAN DO ===== */
+.cando-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;}
+.cando-card{
+  background:var(--bg);border:1.5px solid var(--bd);
+  border-radius:var(--r);padding:28px 20px;text-align:center;
+  transition:all .22s;
+}
+.cando-card:hover{border-color:var(--ac);box-shadow:var(--sh2);transform:translateY(-3px);}
+.cando-ico{
+  width:52px;height:52px;margin:0 auto 16px;
+  background:var(--ac-light);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+}
+.cando-ttl{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:7px;line-height:1.5;}
+.cando-txt{font-size:12px;color:var(--tx2);line-height:1.75;}
 
-    .hero h1 span { color: var(--yellow); }
+/* ===== CASES ===== */
+.cases-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
+.case-card{
+  background:var(--bg);border:1.5px solid var(--bd);
+  border-radius:var(--r);padding:26px 22px;
+  transition:all .22s;position:relative;overflow:hidden;
+}
+.case-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--ac);border-radius:3px 0 0 3px;
+  transform:scaleY(0);transform-origin:bottom;transition:transform .3s;
+}
+.case-card:hover{border-color:var(--ac-mid);box-shadow:var(--sh2);transform:translateY(-2px);}
+.case-card:hover::before{transform:scaleY(1);}
+.case-tag{
+  display:inline-block;font-size:11px;font-weight:700;
+  color:var(--ac);background:var(--ac-light);
+  padding:3px 11px;border-radius:99px;margin-bottom:12px;
+}
+.case-ttl{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:8px;line-height:1.45;}
+.case-txt{font-size:13px;color:var(--tx2);line-height:1.75;}
+.case-metric{
+  margin-top:14px;padding-top:11px;border-top:1px solid var(--bd);
+  font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:5px;flex-wrap:wrap;
+}
+.cm-before{color:var(--tx3);text-decoration:line-through;}
+.cm-arrow{color:var(--tx3);}
+.cm-after{color:var(--ac);font-weight:700;}
+.cm-rate{
+  margin-left:auto;background:var(--ac-light);color:var(--ac);
+  font-size:11px;font-weight:700;padding:2px 9px;border-radius:99px;white-space:nowrap;
+}
 
-    .hero-sub {
-      font-size: 14px;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 20px;
-      letter-spacing: 0.06em;
-    }
+/* ===== SERVICES ===== */
+.srv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.srv-card{
+  background:var(--bg);border:1.5px solid var(--bd);
+  border-radius:var(--r);padding:30px 24px;
+  transition:all .22s;
+}
+.srv-card:hover{border-color:var(--ac);box-shadow:var(--sh2);transform:translateY(-3px);}
+.srv-num{
+  font-size:11px;font-weight:800;color:var(--ac);
+  letter-spacing:.1em;margin-bottom:14px;display:block;
+}
+.srv-ico{font-size:28px;margin-bottom:14px;display:block;}
+.srv-ttl{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:9px;}
+.srv-txt{font-size:13px;color:var(--tx2);line-height:1.8;}
 
-    .hero-tags {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 16px;
-    }
+/* ===== TOOLS ===== */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px;}
+.tool-card{
+  background:var(--bg);border:1.5px solid var(--bd);
+  border-radius:var(--r);overflow:hidden;
+  display:flex;flex-direction:column;
+  transition:all .22s;
+}
+.tool-card:hover{border-color:var(--ac);box-shadow:var(--sh2);transform:translateY(-3px);}
+.tool-head{padding:22px 22px 0;display:flex;align-items:flex-start;gap:12px;}
+.tool-ico{
+  width:46px;height:46px;flex-shrink:0;
+  background:var(--ac);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.tool-name{font-size:15px;font-weight:700;color:var(--tx);line-height:1.4;margin-bottom:5px;}
+.tool-badge{
+  display:inline-block;font-size:10px;font-weight:700;
+  padding:2px 9px;border-radius:99px;
+}
+.badge-free{background:#DCFCE7;color:#15803D;}
+.badge-paid{background:var(--ac-light);color:var(--ac);}
+.badge-ai{background:#FEF3C7;color:#B45309;}
+.tool-body{padding:14px 22px;flex:1;}
+.tool-desc{font-size:13px;color:var(--tx2);line-height:1.75;margin-bottom:12px;}
+.tool-feats{list-style:none;display:flex;flex-direction:column;gap:5px;}
+.tool-feats li{font-size:12px;color:var(--tx2);display:flex;align-items:flex-start;gap:6px;}
+.tool-feats li::before{content:'✓';color:var(--ac);font-weight:700;flex-shrink:0;}
+.tool-foot{
+  padding:13px 22px 18px;border-top:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;
+}
+.tool-price{font-size:17px;font-weight:800;color:var(--tx);}
+.tool-price small{font-size:11px;font-weight:400;color:var(--tx3);}
+.tool-actions{display:flex;gap:6px;}
+.btn-tdemo{
+  font-size:12px;font-weight:600;color:var(--ac);
+  background:var(--ac-light);border:1px solid var(--ac-mid);
+  padding:7px 13px;border-radius:7px;cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.btn-tdemo:hover{background:var(--ac-mid);}
+.btn-tbuy{
+  font-size:12px;font-weight:700;color:#fff;
+  background:var(--ac);border:none;
+  padding:7px 13px;border-radius:7px;cursor:pointer;transition:all .18s;white-space:nowrap;
+}
+.btn-tbuy:hover{background:var(--ac2);transform:translateY(-1px);}
 
-    .hero-tags span {
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: var(--white);
-      font-size: 12px;
-      padding: 4px 12px;
-      border-radius: 20px;
-    }
+/* ===== FLOW ===== */
+.flow-wrap{max-width:600px;}
+.flow-item{
+  display:grid;grid-template-columns:52px 1fr;
+  gap:0;position:relative;
+}
+.flow-item:not(:last-child)::after{
+  content:'';position:absolute;
+  left:24px;top:52px;bottom:0;
+  width:2px;background:var(--bd2);
+}
+.flow-step{
+  width:40px;height:40px;flex-shrink:0;
+  background:var(--ac);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;
+  margin:16px 8px 0 0;position:relative;z-index:1;
+}
+.flow-body{padding:18px 0 34px;}
+.flow-ttl{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:5px;}
+.flow-txt{font-size:13px;color:var(--tx2);line-height:1.75;}
 
-    .section {
-      padding: 56px 20px;
-      max-width: 680px;
-      margin: 0 auto;
-    }
+/* ===== FINAL CTA ===== */
+.cta-sec{
+  background:linear-gradient(135deg,#0F766E 0%,#065F46 100%);
+  padding:96px 40px;text-align:center;
+}
+.cta-inner{max-width:560px;margin:0 auto;}
+.cta-title{
+  font-size:clamp(24px,4vw,40px);font-weight:900;
+  color:#fff;line-height:1.35;letter-spacing:-.02em;margin-bottom:14px;
+}
+.cta-sub{font-size:15px;color:rgba(255,255,255,.82);line-height:1.9;margin-bottom:40px;}
+.cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.btn-white{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#fff;color:#0F766E;
+  padding:14px 32px;border-radius:10px;
+  font-size:15px;font-weight:700;
+  border:none;cursor:pointer;transition:all .22s;
+}
+.btn-white:hover{background:#F0FDFA;transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.2);}
+.btn-white-outline{
+  display:inline-flex;align-items:center;gap:7px;
+  background:transparent;color:#fff;
+  padding:14px 32px;border-radius:10px;
+  font-size:15px;font-weight:600;
+  border:1.5px solid rgba(255,255,255,.5);cursor:pointer;transition:all .22s;
+}
+.btn-white-outline:hover{background:rgba(255,255,255,.1);border-color:#fff;}
+.cta-note{font-size:12px;color:rgba(255,255,255,.55);margin-top:18px;}
 
-    .section-label {
-      display: inline-block;
-      background: var(--orange);
-      color: var(--white);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      padding: 4px 12px;
-      border-radius: 4px;
-      margin-bottom: 12px;
-    }
+/* ===== FOOTER ===== */
+.footer{
+  border-top:1px solid var(--bd);background:var(--bg2);
+  padding:36px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-logo{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:700;color:var(--tx);
+}
+.footer-links{display:flex;gap:24px;}
+.footer-links a{font-size:13px;color:var(--tx2);transition:color .2s;}
+.footer-links a:hover{color:var(--ac);}
+.footer-copy{font-size:12px;color:var(--tx3);}
 
-    .section h2 {
-      font-size: clamp(20px, 4vw, 28px);
-      font-weight: 900;
-      margin-bottom: 24px;
-      line-height: 1.4;
-    }
+/* ===== FADE IN ===== */
+.fade{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease;}
+.fade.in{opacity:1;transform:none;}
 
-    .about-bg { background: var(--white); }
-
-    .profile-card {
-      background: var(--light);
-      border-radius: 16px;
-      padding: 28px;
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-      margin-bottom: 24px;
-    }
-
-    .profile-avatar { font-size: 56px; flex-shrink: 0; line-height: 1; }
-
-    .profile-info h3 { font-size: 18px; font-weight: 900; margin-bottom: 4px; }
-    .profile-id { font-size: 13px; color: var(--gray); margin-bottom: 12px; }
-    .profile-info p { font-size: 14px; line-height: 1.8; }
-
-    .about-list { list-style: none; display: grid; gap: 12px; }
-
-    .about-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 14px;
-      padding: 12px 16px;
-      background: var(--light);
-      border-radius: 10px;
-      border-left: 3px solid var(--orange);
-    }
-
-    .about-list li .icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-
-    .app-bg {
-      background: linear-gradient(180deg, var(--light) 0%, #fff8f0 100%);
-    }
-
-    .app-card {
-      background: var(--white);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      margin-bottom: 24px;
-    }
-
-    .app-header {
-      background: linear-gradient(135deg, var(--orange), #e8521e);
-      color: var(--white);
-      padding: 28px 28px 24px;
-    }
-
-    .app-header h3 { font-size: 20px; font-weight: 900; margin-bottom: 8px; }
-    .app-header p { font-size: 13px; opacity: 0.9; }
-
-    /* 在庫管理ツール用ヘッダー色 */
-    .app-header.teal {
-      background: linear-gradient(135deg, #1D9E75, #0F6E56);
-    }
-
-    .app-body { padding: 28px; }
-
-    .app-features { list-style: none; display: grid; gap: 10px; margin-bottom: 24px; }
-
-    .app-features li {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 14px;
-      font-weight: 700;
-    }
-
-    .app-features li::before { content: '✅'; font-size: 16px; flex-shrink: 0; }
-
-    .app-badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-
-    .badge {
-      background: #fff3ec;
-      color: var(--orange);
-      border: 1px solid #ffd4c2;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 4px 12px;
-      border-radius: 20px;
-    }
-
-    .badge.teal {
-      background: #e8fff6;
-      color: #0F6E56;
-      border-color: #9FE1CB;
-    }
-
-    .app-note {
-      font-size: 13px;
-      color: var(--gray);
-      background: var(--light);
-      padding: 12px 16px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-    }
-
-    .btn {
-      display: block;
-      text-align: center;
-      padding: 14px 20px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-
-    .btn:active { transform: scale(0.97); }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--orange), #e8521e);
-      color: var(--white);
-      box-shadow: 0 4px 16px rgba(255,107,53,0.35);
-    }
-
-    .btn-teal {
-      background: linear-gradient(135deg, #1D9E75, #0F6E56);
-      color: var(--white);
-      box-shadow: 0 4px 16px rgba(29,158,117,0.35);
-    }
-
-    .btn-outline {
-      border: 2px solid var(--orange);
-      color: var(--orange);
-      background: var(--white);
-    }
-
-    .btn-outline-teal {
-      border: 2px solid #1D9E75;
-      color: #1D9E75;
-      background: var(--white);
-    }
-
-    .app-header.blue {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-    }
-
-    .badge.blue {
-      background: #eff6ff;
-      color: #1d4ed8;
-      border-color: #bfdbfe;
-    }
-
-    .btn-blue {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: var(--white);
-      box-shadow: 0 4px 16px rgba(37,99,235,0.35);
-    }
-
-    .btn-outline-blue {
-      border: 2px solid #2563eb;
-      color: #2563eb;
-      background: var(--white);
-    }
-
-    .app-header.green {
-      background: linear-gradient(135deg, #059669, #047857);
-    }
-
-    .badge.green {
-      background: #ecfdf5;
-      color: #065f46;
-      border-color: #6ee7b7;
-    }
-
-    .btn-green {
-      background: linear-gradient(135deg, #059669, #047857);
-      color: var(--white);
-      box-shadow: 0 4px 16px rgba(5,150,105,0.35);
-    }
-
-    .btn-outline-green {
-      border: 2px solid #059669;
-      color: #059669;
-      background: var(--white);
-    }
-
-    .sns-bg { background: var(--white); }
-
-    .sns-grid { display: grid; gap: 14px; }
-
-    .sns-card {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding: 18px 20px;
-      border-radius: 14px;
-      text-decoration: none;
-      color: var(--dark);
-      font-weight: 700;
-      transition: transform 0.15s, box-shadow 0.15s;
-      border: 2px solid transparent;
-    }
-
-    .sns-card:active { transform: scale(0.97); }
-    .sns-card.x { background: #000; color: #fff; }
-    .sns-card.instagram {
-      background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-      color: #fff;
-    }
-    .sns-card.note { background: #41c9b4; color: #fff; }
-
-    .sns-icon { font-size: 28px; flex-shrink: 0; }
-    .sns-info .label { font-size: 12px; opacity: 0.8; font-weight: 400; }
-    .sns-info .name { font-size: 16px; font-weight: 900; }
-    .sns-arrow { margin-left: auto; opacity: 0.7; font-size: 18px; }
-
-    footer {
-      background: var(--navy);
-      color: rgba(255,255,255,0.6);
-      text-align: center;
-      padding: 32px 20px;
-      font-size: 12px;
-    }
-
-    footer .footer-icon { font-size: 32px; margin-bottom: 8px; display: block; }
-    footer strong { color: var(--white); }
-
-    @media (max-width: 480px) {
-      .profile-card { flex-direction: column; gap: 12px; }
-      .profile-avatar { font-size: 48px; }
-    }
-  </style>
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  .header{padding:0 20px;}
+  .header-nav{display:none;}
+  .hamburger{display:flex;}
+  .hero{padding:104px 20px 72px;}
+  .hero-inner{grid-template-columns:1fr;gap:36px;}
+  .hero-visual{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
+  .hero-stat+.hero-stat{border-top:none;border-left:1px solid var(--bd);}
+  .sec{padding:64px 20px;}
+  .cta-sec{padding:72px 20px;}
+  .footer{padding:28px 20px;flex-direction:column;align-items:flex-start;gap:18px;}
+}
+@media(max-width:480px){
+  .hero-btns,.cta-btns{flex-direction:column;align-items:stretch;}
+  .btn-primary,.btn-outline,.btn-white,.btn-white-outline{justify-content:center;}
+  .hero-visual{grid-template-columns:1fr;}
+  .hero-stat+.hero-stat{border-left:none;border-top:1px solid var(--bd);}
+  .cando-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
 </head>
 <body>
 
-  <!-- HERO -->
-  <header class="hero">
-    <span class="hero-icon">🐧</span>
-    <h1>業務改善の<span>ペンギン</span></h1>
-    <p class="hero-sub">現場 × AI で働き方を変える</p>
-    <div class="hero-tags">
-      <span>🏭 製造業・倉庫業</span>
-      <span>🤖 生成AI活用</span>
-      <span>📋 業務改善</span>
-      <span>👨‍👩‍👧‍👦 32歳・五人家族</span>
+<!-- ===== HEADER ===== -->
+<header class="header" id="mainHeader">
+  <a href="#top" class="header-logo">
+    <span class="logo-mark">🐧</span>
+    <span>業務改善のペンギン</span>
+  </a>
+  <nav class="header-nav">
+    <a href="#pains">困りごと</a>
+    <a href="#cases">改善例</a>
+    <a href="#tools">ツール</a>
+    <a href="#services">サービス</a>
+    <a href="#flow">相談の流れ</a>
+    <a href="mailto:tokyoribengi@gmail.com?subject=業務改善のご相談" class="btn-cta">無料相談する</a>
+  </nav>
+  <button class="hamburger" onclick="openMenu()" aria-label="メニュー">☰</button>
+</header>
+
+<!-- ===== MOBILE MENU ===== -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="closeMenu()">✕</button>
+  <a href="#pains"    onclick="closeMenu()">困りごと</a>
+  <a href="#cando"    onclick="closeMenu()">できること</a>
+  <a href="#cases"    onclick="closeMenu()">改善例</a>
+  <a href="#tools"    onclick="closeMenu()">ツール</a>
+  <a href="#services" onclick="closeMenu()">サービス</a>
+  <a href="#flow"     onclick="closeMenu()">相談の流れ</a>
+  <a href="mailto:tokyoribengi@gmail.com?subject=業務改善のご相談" class="btn-cta" style="font-size:16px;padding:14px 40px;">無料相談する</a>
+</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="top">
+  <div class="hero-shape"></div>
+  <div class="hero-inner">
+    <div class="hero-content">
+      <div class="hero-badge">🐧 製造業・倉庫業・現場事務</div>
+      <h1 class="hero-title">
+        現場を知る人が作る<br>
+        <span class="ac">業務改善</span>
+      </h1>
+      <p class="hero-sub">製造業・倉庫業のムダな作業を、<br>AIとツールで減らします。</p>
+      <p class="hero-desc">
+        製造・倉庫の現場で実際に働きながら、紙の在庫表のタブレット化、
+        Excel作業の自動化、作業手順書作成支援などを行ってきました。
+        現場で本当に使える改善を、一緒に考えます。
+      </p>
+      <div class="hero-btns">
+        <a href="mailto:tokyoribengi@gmail.com?subject=業務改善のご相談" class="btn-primary">無料相談する →</a>
+        <a href="#services" class="btn-outline">サービスを見る</a>
+      </div>
     </div>
-  </header>
-
-  <!-- ABOUT -->
-  <div class="about-bg">
-    <div class="section">
-      <span class="section-label">ABOUT</span>
-      <h2>自分のことを<br>少し紹介します</h2>
-
-      <div class="profile-card">
-        <div class="profile-avatar">🐧</div>
-        <div class="profile-info">
-          <h3>業務改善のペンギン</h3>
-          <p class="profile-id">@pengo_365</p>
-          <p>地方に住んで工場・倉庫で働く32歳。<br>三人の子どもを持つ五人家族のパパです。<br>現場の「慣れてしまってる無駄」をAIで解決中。</p>
-        </div>
+    <div class="hero-visual">
+      <div class="hero-stat">
+        <div class="hero-stat-num">5つ</div>
+        <div class="hero-stat-label">の改善サービス</div>
       </div>
-
-      <ul class="about-list">
-        <li><span class="icon">🏭</span><span>正社員として製造業務・倉庫業務・在庫管理に従事。現場歴10年以上。</span></li>
-        <li><span class="icon">🤖</span><span>ChatGPT・Gemini・Copilot・Claude Codeを使って実務を効率化。IT会社でもプログラマーでもない、ずっと現場側の人間。</span></li>
-        <li><span class="icon">💡</span><span>「現場の負担を少しでも軽くしたい」その思いで、自分が使えるツールを自分で作り始めた。</span></li>
-        <li><span class="icon">🔥</span><span>現場経験 × AI。この組み合わせがかなり強い時代になると思ってる。</span></li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- TOOL -->
-  <div class="app-bg">
-    <div class="section">
-      <span class="section-label">TOOL</span>
-      <h2>現場で自分が作った<br>ツールを公開中</h2>
-
-      <!-- ルーチン業務管理アプリ -->
-      <div class="app-card">
-        <div class="app-header">
-          <h3>📋 ルーチン業務管理アプリ</h3>
-          <p>毎日・毎週の繰り返し業務を、ブラウザだけで管理できるツール</p>
-        </div>
-        <div class="app-body">
-          <ul class="app-features">
-            <li>インストール不要。ブラウザで開くだけ</li>
-            <li>点検・清掃・記録などの繰り返し業務を管理</li>
-            <li>入力データはそのままExcelに出力</li>
-            <li>パソコンが苦手な人でも使える</li>
-            <li>スマホ・タブレットにも対応</li>
-          </ul>
-
-          <div class="app-badge-row">
-            <span class="badge">HTML単一ファイル</span>
-            <span class="badge">インストール不要</span>
-            <span class="badge">Excel出力</span>
-            <span class="badge">無料</span>
-          </div>
-
-          <p class="app-note">💬 「Excelでやってたけど、これの方が簡単だった」という声をいただいています。まだ試作段階ですが、ぜひ試してみてください。</p>
-
-          <a href="./demo.html" class="btn btn-primary" style="margin-bottom:10px;">▶ デモを試してみる（無料）</a>
-          <a href="https://x.com/ss8710307199902" class="btn btn-outline" target="_blank" rel="noopener">📩 導入の相談はDMへ</a>
-        </div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">無料</div>
+        <div class="hero-stat-label">で相談できる</div>
       </div>
-
-      <!-- 在庫管理表 -->
-      <div class="app-card">
-        <div class="app-header teal">
-          <h3>📦 在庫管理表</h3>
-          <p>ロット別の入出荷を管理し、残数をリアルタイムで自動計算するツール</p>
-        </div>
-        <div class="app-body">
-          <ul class="app-features">
-            <li>インストール不要。ブラウザで開くだけ</li>
-            <li>ロット番号・入庫日・数量をまとめて管理</li>
-            <li>仕向け先ごと（A社・B社）に出荷数を入力</li>
-            <li>残数をリアルタイムで自動計算</li>
-            <li>タブレット対応。現場でそのまま使える</li>
-          </ul>
-
-          <div class="app-badge-row">
-            <span class="badge teal">HTML単一ファイル</span>
-            <span class="badge teal">インストール不要</span>
-            <span class="badge teal">残数自動計算</span>
-            <span class="badge teal">無料</span>
-          </div>
-
-          <p class="app-note">📊 紙の在庫表をタブレット化した経験をもとに設計。現場で実際に使っていたフォーマットを再現しています。</p>
-
-          <a href="./在庫管理表.html" class="btn btn-teal" style="margin-bottom:10px;">▶ ツールを試してみる（無料）</a>
-          <a href="https://x.com/ss8710307199902" class="btn btn-outline-teal" target="_blank" rel="noopener">📩 導入の相談はDMへ</a>
-        </div>
-      </div>
-
-      <!-- 見積もり比較ツール -->
-      <div class="app-card">
-        <div class="app-header blue">
-          <h3>📊 見積もり比較ツール</h3>
-          <p style="font-size:13px;opacity:.75;margin-top:2px;margin-bottom:4px;">🏢 法人・事業者向け｜調達・購買・総務担当者に</p>
-          <p>最大4社の相見積もりを一画面で並べて比較。AIが最適な業者を自動で提案</p>
-        </div>
-        <div class="app-body">
-          <ul class="app-features">
-            <li>最大4社の見積もりを同時に入力・比較</li>
-            <li>AIが金額・保証・備考を分析してベストを提案</li>
-            <li>Amazon・モノタロウ・楽天などでネット価格を一発検索</li>
-            <li>提出前の確認チェックリスト（取付費・保証・納期など）付き</li>
-            <li>印刷・Excel・FAX・メール出力に対応</li>
-          </ul>
-
-          <div class="app-badge-row">
-            <span class="badge blue">🏢 法人・事業者向け</span>
-            <span class="badge blue">HTML単一ファイル</span>
-            <span class="badge blue">インストール不要</span>
-            <span class="badge blue">4社比較対応</span>
-            <span class="badge blue">AI分析</span>
-            <span class="badge blue">💴 月額¥980〜</span>
-          </div>
-
-          <p class="app-note">💼 「どっちの業者にすればいいか迷う」を解決するツール。調達・購買・総務担当者の相見積もり業務をサポートします。</p>
-
-          <a href="./mitsumori-hikaku.html" class="btn btn-blue" style="margin-bottom:10px;">▶ デモを試してみる（無料）</a>
-          <a href="https://pengohome.base.shop/" class="btn btn-outline-blue" target="_blank" rel="noopener" style="margin-bottom:10px;">🛒 購入する（¥980/月〜）</a>
-          <a href="https://x.com/ss8710307199902" class="btn btn-outline-blue" target="_blank" rel="noopener">📩 導入の相談はDMへ</a>
-        </div>
-      </div>
-
-      <!-- かんたん比較ツール -->
-      <div class="app-card">
-        <div class="app-header green">
-          <h3>🛒 かんたん比較ツール</h3>
-          <p>Amazon・楽天・Yahoo!など8サイトを一気に開いて価格比較</p>
-        </div>
-        <div class="app-body">
-          <div class="badges">
-            <span class="badge green">💴 販売中 ¥980</span>
-            <span class="badge">📱 スマホ対応</span>
-            <span class="badge">🔒 コピー対策済み</span>
-          </div>
-
-          <ul class="features">
-            <li>キーワード1回入力 → 8サイト同時検索</li>
-            <li>価格フィルター付き（〜1万円などの絞り込み）</li>
-            <li>モノタロウ・ヨドバシ・メルカリにも対応</li>
-            <li>HTMLファイル1つ・インストール不要</li>
-          </ul>
-
-          <p class="app-note">🏭 製造・倉庫・小売業の発注担当者向け。毎日のサイト開き直し作業がゼロになります。</p>
-
-          <a href="./hikaku-protected.html" class="btn btn-green" style="margin-bottom:10px;">▶ デモを試してみる（無料）</a>
-          <a href="https://pengohome.base.shop/items/145668497" class="btn btn-outline-green" target="_blank" rel="noopener">🛒 購入する（¥980）</a>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- SNS -->
-  <div class="sns-bg" id="sns">
-    <div class="section">
-      <span class="section-label">SNS</span>
-      <h2>各SNSで<br>発信しています</h2>
-
-      <div class="sns-grid">
-        <a href="https://x.com/ss8710307199902" class="sns-card x" target="_blank" rel="noopener">
-          <span class="sns-icon">𝕏</span>
-          <div class="sns-info">
-            <div class="label">X (Twitter)</div>
-            <div class="name">業務改善のペンギン</div>
-          </div>
-          <span class="sns-arrow">→</span>
-        </a>
-
-        <a href="https://www.instagram.com/pengo_365/" class="sns-card instagram" target="_blank" rel="noopener">
-          <span class="sns-icon">📷</span>
-          <div class="sns-info">
-            <div class="label">Instagram</div>
-            <div class="name">@pengo_365</div>
-          </div>
-          <span class="sns-arrow">→</span>
-        </a>
-
-        <a href="https://note.com/nice_otter2073" class="sns-card note" target="_blank" rel="noopener">
-          <span class="sns-icon">📝</span>
-          <div class="sns-info">
-            <div class="label">note</div>
-            <div class="name">業務改善のペンギン</div>
-          </div>
-          <span class="sns-arrow">→</span>
-        </a>
+      <div class="hero-stat">
+        <div class="hero-stat-num">現場</div>
+        <div class="hero-stat-label">経験者が担当</div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer>
-    <span class="footer-icon">🐧</span>
-    <p><strong>業務改善のペンギン</strong></p>
-    <p style="margin-top:6px;">現場 × AI で、もっと働きやすい毎日を。</p>
-  </footer>
+<!-- ===== PAIN POINTS ===== -->
+<section class="sec sec-alt" id="pains">
+  <div class="sec-inner">
+    <div class="sec-eyebrow fade">困りごと</div>
+    <h2 class="sec-title fade">こんなお困りごとは<br>ありませんか？</h2>
+    <p class="sec-lead fade">製造・倉庫の現場でよく聞く「なんとかしたい」をまとめました。</p>
+    <div class="pains-grid fade">
+      <div class="pain-card">
+        <div class="pain-ico">📋</div>
+        <div class="pain-body">
+          <div class="pain-ttl">紙の在庫表・点検表を毎回手書き</div>
+          <div class="pain-txt">書いて、転記して、集計して…という繰り返し作業が毎日続いている</div>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-ico">📊</div>
+        <div class="pain-body">
+          <div class="pain-ttl">Excelの集計・並び替えに時間がかかる</div>
+          <div class="pain-txt">毎月同じ手作業をしている。もっと楽にできるはずなのに方法がわからない</div>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-ico">💴</div>
+        <div class="pain-body">
+          <div class="pain-ttl">見積もり比較を毎回手作業でやっている</div>
+          <div class="pain-txt">複数社の見積もりを紙で並べて見比べる作業が面倒で時間がかかる</div>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-ico">📝</div>
+        <div class="pain-body">
+          <div class="pain-ttl">作業手順書を作るのが大変</div>
+          <div class="pain-txt">「ちゃんとした手順書を作りたい」けど何から始めればいいかわからない</div>
+        </div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-ico">🤔</div>
+        <div class="pain-body">
+          <div class="pain-ttl">現場に合う改善方法がわからない</div>
+          <div class="pain-txt">問題はわかっているが、自分たちだけでは解決策が見つからない</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- ===== CAN DO ===== -->
+<section class="sec" id="cando">
+  <div class="sec-inner">
+    <div class="sec-eyebrow fade">できること</div>
+    <h2 class="sec-title fade">業務改善のペンギンが<br>できること</h2>
+    <p class="sec-lead fade">現場で本当に使えるものだけを、一緒に作ります。</p>
+    <div class="cando-grid fade">
+      <div class="cando-card">
+        <div class="cando-ico">📱</div>
+        <div class="cando-ttl">紙帳票のタブレット化相談</div>
+        <div class="cando-txt">手書き在庫表・点検表をデジタル化する方法を一緒に考えます</div>
+      </div>
+      <div class="cando-card">
+        <div class="cando-ico">⚙️</div>
+        <div class="cando-ttl">Excel作業の自動化</div>
+        <div class="cando-txt">集計・転記・並び替えなど、繰り返し作業の効率化をサポート</div>
+      </div>
+      <div class="cando-card">
+        <div class="cando-ico">💴</div>
+        <div class="cando-ttl">見積もり比較ツールの導入</div>
+        <div class="cando-txt">複数社の見積もりをわかりやすく比較できるツールを導入します</div>
+      </div>
+      <div class="cando-card">
+        <div class="cando-ico">📋</div>
+        <div class="cando-ttl">作業手順書作成支援</div>
+        <div class="cando-txt">現場作業を整理して、誰が見てもわかる手順書に仕上げます</div>
+      </div>
+      <div class="cando-card">
+        <div class="cando-ico">🔍</div>
+        <div class="cando-ttl">現場業務の整理と改善提案</div>
+        <div class="cando-txt">現状のヒアリングから改善案のご提案まで、幅広くお手伝いします</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CASES ===== -->
+<section class="sec sec-alt" id="cases">
+  <div class="sec-inner">
+    <div class="sec-eyebrow fade">改善例</div>
+    <h2 class="sec-title fade">実際に取り組んできた<br>業務改善事例</h2>
+    <p class="sec-lead fade">現場での経験をもとに、実際に行った改善の一部をご紹介します。</p>
+    <div class="cases-grid fade">
+      <div class="case-card">
+        <div class="case-tag">Excel自動化</div>
+        <div class="case-ttl">売上集計業務の自動化</div>
+        <div class="case-txt">貼り付け後の不要行削除・並び替え・出荷数集計・価格計算をすべて手作業で実施。Copilotを活用しExcelマクロを作成し、全工程を自動処理化した。</div>
+        <div class="case-metric">
+          <span class="cm-before">60〜90分</span>
+          <span class="cm-arrow">→</span>
+          <span class="cm-after">1〜2分</span>
+          <span class="cm-rate">約97〜99%削減</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-tag">タブレット化</div>
+        <div class="case-ttl">在庫管理表のタブレット化</div>
+        <div class="case-txt">紙の在庫管理表を手書き運用。iPadでロット・入庫日・出荷予定を管理できる仕組みへ移行し、記入ミスと情報共有の遅れを改善した。</div>
+        <div class="case-metric">
+          <span class="cm-before">10〜15分</span>
+          <span class="cm-arrow">→</span>
+          <span class="cm-after">約5分</span>
+          <span class="cm-rate">約50〜67%削減</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-tag">Excel自動化</div>
+        <div class="case-ttl">重量計算入力の自動化</div>
+        <div class="case-txt">出荷入力ごとに品番確認・重量確認・電卓計算・転記を毎回実施。Excelに重量マスターを登録し、数量入力だけで重量が自動計算される仕組みを構築。計算ミスも削減。</div>
+        <div class="case-metric">
+          <span class="cm-before">10〜15分</span>
+          <span class="cm-arrow">→</span>
+          <span class="cm-after">2〜5分</span>
+          <span class="cm-rate">約50〜80%削減</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-tag">タブレット化</div>
+        <div class="case-ttl">紙伝票の電子化</div>
+        <div class="case-txt">手書き伝票の品番・数量・ロット記入・修正・提出に毎回工数がかかっていた。タブレット化でプルダウン選択・数量入力・データ保存で完結する運用へ移行。</div>
+        <div class="case-metric">
+          <span class="cm-before">5〜10分</span>
+          <span class="cm-arrow">→</span>
+          <span class="cm-after">30秒〜1分</span>
+          <span class="cm-rate">想定80〜95%削減</span>
+        </div>
+      </div>
+      <div class="case-card">
+        <div class="case-tag">ペーパーレス化</div>
+        <div class="case-ttl">日常点検表の電子化</div>
+        <div class="case-txt">紙による日常点検管理で保管・集計・検索に手間が発生。タブレット運用へ移行し、紙管理削減・検索性向上・保管スペース削減を実現した。</div>
+      </div>
+      <div class="case-card">
+        <div class="case-tag">AI活用</div>
+        <div class="case-ttl">AI活用による業務改善アプリ作成</div>
+        <div class="case-txt">業務の棚卸し・標準化が属人化していた。Claude Codeを活用してルーチン業務棚卸し・手順書作成・改善アイデア抽出を行うアプリを作成し、改善活動を仕組み化した。</div>
+      </div>
+      <div class="case-card">
+        <div class="case-tag">ポカヨケ</div>
+        <div class="case-ttl">出荷数量照合機能の改善</div>
+        <div class="case-txt">ロット複数品において出荷数量の思い込みミスが発生。i-Reporterの入力シートを改良し、出荷予定数量と現場入力数量を照合してOK/NGを自動表示する仕組みを構築した。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TOOLS ===== -->
+<section class="sec" id="tools">
+  <div class="sec-inner">
+    <div class="sec-eyebrow fade">ツール</div>
+    <h2 class="sec-title fade">現場で自分が作った<br>ツールを公開中</h2>
+    <p class="sec-lead fade">HTMLファイル1枚で動くシンプルな業務ツール。インストール不要、ブラウザですぐ使えます。</p>
+    <div class="tools-grid fade">
+
+      <div class="tool-card">
+        <div class="tool-head">
+          <div class="tool-ico">📋</div>
+          <div>
+            <div class="tool-name">ルーチン業務管理アプリ</div>
+            <span class="tool-badge badge-free">無料版あり</span>
+          </div>
+        </div>
+        <div class="tool-body">
+          <p class="tool-desc">製造業・倉庫業の繰り返し業務を一元管理。担当者・部署・カテゴリで整理して実施記録をデジタル化。</p>
+          <ul class="tool-feats">
+            <li>業務一覧・担当者・カテゴリ管理</li>
+            <li>部署別・カテゴリ別の絞り込み</li>
+            <li>実施記録の入力・管理</li>
+            <li>Excel出力対応</li>
+          </ul>
+        </div>
+        <div class="tool-foot">
+          <div class="tool-price" style="font-size:13px;color:var(--tx2);">まずはご相談ください</div>
+          <div class="tool-actions">
+            <a href="mailto:tokyoribengi@gmail.com?subject=ルーチン業務管理アプリについて" class="btn-tbuy">連絡する →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-head">
+          <div class="tool-ico">💴</div>
+          <div>
+            <div class="tool-name">見積もり比較ツール</div>
+            <span class="tool-badge badge-paid">¥2,980</span>
+          </div>
+        </div>
+        <div class="tool-body">
+          <p class="tool-desc">複数社の見積もりを一画面で比較。金額・項目・条件の違いをひと目で把握できます。</p>
+          <ul class="tool-feats">
+            <li>最大4社の見積もりを並べて比較</li>
+            <li>単価・数量・合計を自動計算</li>
+            <li>写真・メモの添付対応</li>
+            <li>スマホ・タブレット対応</li>
+          </ul>
+        </div>
+        <div class="tool-foot">
+          <div class="tool-price">¥2,980 <small>買い切り</small></div>
+          <div class="tool-actions">
+            <a href="mitsumori-demo.html" target="_blank" class="btn-tdemo">デモを見る</a>
+            <a href="https://pengohome.base.shop" target="_blank" rel="noopener" class="btn-tbuy">購入する →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-head">
+          <div class="tool-ico">🤖</div>
+          <div>
+            <div class="tool-name">見積もり比較ツール AI版</div>
+            <span class="tool-badge badge-ai">APIキー所持者向け</span>
+          </div>
+        </div>
+        <div class="tool-body">
+          <p class="tool-desc">標準版の全機能に加え、見積書の写真・PDFをAIが読み取り、金額・品番・業者名を自動抽出します。<br><strong style="color:#B45309;font-size:12px;">※ Anthropic APIキーをお持ちの方向けです。</strong></p>
+          <ul class="tool-feats">
+            <li>標準版の全機能を含む</li>
+            <li>写真/PDFから金額・品番を自動抽出</li>
+            <li>手入力なしでデータ入力できる</li>
+            <li>APIキーは自分のものを使うので情報が外部に渡らない</li>
+            <li>Anthropic APIキー（console.anthropic.comで取得）が必要</li>
+          </ul>
+        </div>
+        <div class="tool-foot">
+          <div class="tool-price">¥4,980 <small>買い切り</small></div>
+          <div class="tool-actions">
+            <a href="https://pengohome.base.shop" target="_blank" rel="noopener" class="btn-tbuy">購入する →</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-head">
+          <div class="tool-ico">🛒</div>
+          <div>
+            <div class="tool-name">かんたん価格比較ツール</div>
+            <span class="tool-badge badge-paid">¥980</span>
+          </div>
+        </div>
+        <div class="tool-body">
+          <p class="tool-desc">Amazon・楽天・Yahoo!ショッピングなど複数サイトの価格を一括比較。タップした順に順番よく開きます。</p>
+          <ul class="tool-feats">
+            <li>Amazon・楽天・Yahoo等に対応</li>
+            <li>タップした順番にサイトを開く</li>
+            <li>価格帯フィルター対応</li>
+            <li>スマホ・PC両対応</li>
+          </ul>
+        </div>
+        <div class="tool-foot">
+          <div class="tool-price">¥980 <small>買い切り</small></div>
+          <div class="tool-actions">
+            <a href="https://pengohome.base.shop/items/145668497" target="_blank" rel="noopener" class="btn-tbuy">購入する →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===== SERVICES ===== -->
+<section class="sec" id="services">
+  <div class="sec-inner">
+    <div class="sec-eyebrow fade">サービス</div>
+    <h2 class="sec-title fade">サービス内容</h2>
+    <p class="sec-lead fade">まずは無料相談から。内容に応じてお見積もりします。</p>
+    <div class="srv-grid fade">
+      <div class="srv-card">
+        <span class="srv-num">SERVICE 01</span>
+        <span class="srv-ico">💬</span>
+        <div class="srv-ttl">業務改善相談</div>
+        <div class="srv-txt">現場の困りごとをヒアリングし、改善できそうな作業を一緒に整理します。まずはここから始めましょう。</div>
+      </div>
+      <div class="srv-card">
+        <span class="srv-num">SERVICE 02</span>
+        <span class="srv-ico">📊</span>
+        <div class="srv-ttl">Excel・スプレッドシート改善</div>
+        <div class="srv-txt">集計・並び替え・転記・比較作業などを効率化します。関数・マクロを活用した実用的な改善を行います。</div>
+      </div>
+      <div class="srv-card">
+        <span class="srv-num">SERVICE 03</span>
+        <span class="srv-ico">💴</span>
+        <div class="srv-ttl">見積もり比較ツール</div>
+        <div class="srv-txt">複数社の見積もりをわかりやすく比較できる形にします。金額・項目・条件が一目でわかります。</div>
+      </div>
+      <div class="srv-card">
+        <span class="srv-num">SERVICE 04</span>
+        <span class="srv-ico">📋</span>
+        <div class="srv-ttl">作業手順書作成支援</div>
+        <div class="srv-txt">現場作業を整理し、誰が見ても迷わない手順書に仕上げます。新人教育・業務標準化に活用できます。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FLOW ===== -->
+<section class="sec sec-alt" id="flow">
+  <div class="sec-inner">
+    <div class="sec-eyebrow fade">相談の流れ</div>
+    <h2 class="sec-title fade">相談の流れ</h2>
+    <p class="sec-lead fade">まずは気軽にお困りごとをお送りください。<br>詳細でなくても大丈夫です。</p>
+    <div class="flow-wrap fade">
+      <div class="flow-item">
+        <div class="flow-step">1</div>
+        <div class="flow-body">
+          <div class="flow-ttl">お困りごとを送る</div>
+          <div class="flow-txt">メールで、今困っていることを教えてください。「こんなこと相談していいのかな」くらいで十分です。</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">2</div>
+        <div class="flow-body">
+          <div class="flow-ttl">内容を確認</div>
+          <div class="flow-txt">内容を確認し、必要に応じて追加でヒアリングします。</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">3</div>
+        <div class="flow-body">
+          <div class="flow-ttl">改善方法を提案</div>
+          <div class="flow-txt">現場に合った改善方法をご提案します。費用や期間も合わせてお伝えします。</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">4</div>
+        <div class="flow-body">
+          <div class="flow-ttl">必要に応じてツール作成</div>
+          <div class="flow-txt">ご要望に合わせてExcel改善・ツール作成・手順書作成などを行います。</div>
+        </div>
+      </div>
+      <div class="flow-item">
+        <div class="flow-step">5</div>
+        <div class="flow-body">
+          <div class="flow-ttl">納品・使い方説明</div>
+          <div class="flow-txt">完成後は使い方を丁寧にご説明します。使ってみてわからないことがあればフォローします。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="cta-sec" id="contact">
+  <div class="cta-inner fade">
+    <h2 class="cta-title">現場のムダ作業、<br>一度整理してみませんか？</h2>
+    <p class="cta-sub">まずはお気軽にご相談ください。<br>「こんなこと相談していいのかな」くらいで十分です。</p>
+    <div class="cta-btns">
+      <a href="mailto:tokyoribengi@gmail.com?subject=業務改善のご相談" class="btn-white">無料相談する →</a>
+      <a href="#services" class="btn-white-outline">サービスを見る</a>
+    </div>
+    <p class="cta-note">返信はメールにてお送りします（平日対応）</p>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-logo">
+    <span>🐧</span>
+    <span>業務改善のペンギン</span>
+  </div>
+  <div class="footer-links">
+    <a href="mailto:tokyoribengi@gmail.com">お問い合わせ</a>
+    <a href="https://pengohome.base.shop" target="_blank" rel="noopener">ツール販売（BASE）</a>
+  </div>
+  <div class="footer-copy">© 2025 業務改善のペンギン</div>
+</footer>
+
+<script>
+window.addEventListener('scroll', () => {
+  document.getElementById('mainHeader').classList.toggle('scrolled', window.scrollY > 20);
+}, { passive: true });
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if (id === '#') return;
+    const el = document.querySelector(id);
+    if (el) { e.preventDefault(); window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 72, behavior: 'smooth' }); }
+  });
+});
+
+function openMenu()  { document.getElementById('mobileMenu').classList.add('open');  document.body.style.overflow = 'hidden'; }
+function closeMenu() { document.getElementById('mobileMenu').classList.remove('open'); document.body.style.overflow = ''; }
+
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.1 });
+document.querySelectorAll('.fade').forEach(el => io.observe(el));
+</script>
 </body>
 </html>
