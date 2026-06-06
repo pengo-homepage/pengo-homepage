@@ -413,6 +413,100 @@
     .fab-tool:hover{background:#1D4ED8;transform:translateY(-1px);}
     .fab-tool.visible{display:block;}
 
+    /* ===== AI CHATBOT ===== */
+    .ai-fab{
+      position:fixed;bottom:24px;right:16px;
+      width:56px;height:56px;border-radius:50%;
+      background:linear-gradient(135deg,#0F766E,#0891B2);
+      color:#fff;font-size:24px;border:none;cursor:pointer;
+      box-shadow:0 4px 18px rgba(15,118,110,.45);
+      display:flex;align-items:center;justify-content:center;
+      z-index:900;transition:transform .2s,box-shadow .2s;
+    }
+    .ai-fab:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(15,118,110,.5);}
+    .ai-fab-badge{
+      position:absolute;top:2px;right:2px;
+      width:14px;height:14px;border-radius:50%;
+      background:#10B981;border:2px solid #fff;
+      display:none;
+    }
+    .ai-fab-badge.on{display:block;}
+    .ai-chat-panel{
+      position:fixed;bottom:90px;right:12px;
+      width:calc(100vw - 24px);max-width:360px;
+      background:#fff;border-radius:20px;
+      box-shadow:0 8px 40px rgba(0,0,0,.18);
+      z-index:899;display:none;flex-direction:column;
+      overflow:hidden;
+      max-height:calc(100vh - 120px);
+    }
+    .ai-chat-panel.open{display:flex;}
+    .ai-chat-head{
+      background:linear-gradient(135deg,#0F766E,#0891B2);
+      padding:14px 16px;display:flex;align-items:center;gap:10px;
+      flex-shrink:0;
+    }
+    .ai-chat-head-icon{font-size:20px;}
+    .ai-chat-head-info{flex:1;}
+    .ai-chat-head-title{font-size:14px;font-weight:700;color:#fff;}
+    .ai-chat-head-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:1px;}
+    .ai-chat-toggle{
+      display:flex;align-items:center;gap:6px;
+      background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);
+      color:#fff;border-radius:20px;padding:4px 10px;
+      font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;
+    }
+    .ai-chat-close{
+      background:rgba(255,255,255,.2);border:none;color:#fff;
+      width:30px;height:30px;border-radius:50%;cursor:pointer;
+      font-size:16px;display:flex;align-items:center;justify-content:center;
+    }
+    .ai-chat-key-area{
+      padding:12px 14px;border-bottom:1px solid #F1F5F9;
+      font-size:12px;color:#64748B;
+      display:flex;align-items:center;gap:8px;
+      flex-shrink:0;
+    }
+    .ai-chat-key-area input{
+      flex:1;border:1.5px solid #E2E8F0;border-radius:8px;
+      padding:6px 10px;font-size:12px;outline:none;
+      font-family:inherit;color:#334155;
+    }
+    .ai-chat-key-area input:focus{border-color:#0F766E;}
+    .ai-chat-key-save{font-size:11px;cursor:pointer;white-space:nowrap;color:#0F766E;font-weight:700;}
+    .ai-chat-msgs{
+      flex:1;overflow-y:auto;padding:14px;
+      display:flex;flex-direction:column;gap:10px;
+      min-height:120px;
+    }
+    .ai-msg{max-width:88%;border-radius:14px;padding:10px 13px;font-size:13px;line-height:1.65;}
+    .ai-msg-bot{background:#F0FDFA;color:#134e4a;align-self:flex-start;border-bottom-left-radius:4px;}
+    .ai-msg-user{background:linear-gradient(135deg,#0F766E,#0891B2);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+    .ai-msg-loading{background:#F8FAFC;color:#94A3B8;align-self:flex-start;border-bottom-left-radius:4px;}
+    .ai-chat-input-row{
+      padding:10px 12px;border-top:1px solid #F1F5F9;
+      display:flex;gap:8px;align-items:flex-end;flex-shrink:0;
+    }
+    .ai-chat-input{
+      flex:1;border:1.5px solid #E2E8F0;border-radius:12px;
+      padding:9px 12px;font-size:14px;resize:none;
+      outline:none;font-family:inherit;max-height:90px;
+      min-height:40px;line-height:1.5;color:#334155;
+    }
+    .ai-chat-input:focus{border-color:#0F766E;}
+    .ai-chat-send{
+      width:40px;height:40px;border-radius:12px;border:none;
+      background:linear-gradient(135deg,#0F766E,#0891B2);
+      color:#fff;font-size:18px;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;transition:opacity .2s;
+    }
+    .ai-chat-send:disabled{opacity:.4;cursor:default;}
+    .ai-off-msg{
+      padding:16px;text-align:center;color:#94A3B8;font-size:13px;
+      border-bottom:1px solid #F1F5F9;
+    }
+
     @media(max-width:480px){
       .hero{padding:36px 16px 30px;}
       .hero-title{letter-spacing:-.3px;}
@@ -579,6 +673,44 @@
 
     <div class="tool-divider"></div>
 
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🏪 購入場所</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('storeType','all',this);buildChips()">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('storeType','online',this);buildChips()">🌐 ネットのみ</div>
+        <div class="fltr-chip" onclick="setFilter('storeType','store',this);buildChips()">🏪 実店舗あり</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">✅ 正規販売店</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" id="chip-official-all" onclick="filters.officialOnly=false;document.getElementById('chip-official-all').classList.add('on');document.getElementById('chip-official-only').classList.remove('on');buildChips()">すべて</div>
+        <div class="fltr-chip" id="chip-official-only" onclick="filters.officialOnly=true;document.getElementById('chip-official-only').classList.add('on');document.getElementById('chip-official-all').classList.remove('on');buildChips()">正規店のみ</div>
+      </div>
+      <div style="font-size:11px;color:#94A3B8;margin-top:4px;">※ フリマ・並行輸入サイトを除外します</div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">💳 支払い方法</div>
+      <div class="fltr-row" style="flex-wrap:wrap;">
+        <div class="fltr-chip on" onclick="setFilter('payment','all',this);buildChips()">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('payment','paypay',this);buildChips()">🟡 PayPay</div>
+        <div class="fltr-chip" onclick="setFilter('payment','dpay',this);buildChips()">🔴 d払い</div>
+        <div class="fltr-chip" onclick="setFilter('payment','rakutenpay',this);buildChips()">🛍 楽天Pay</div>
+        <div class="fltr-chip" onclick="setFilter('payment','credit',this);buildChips()">💳 クレカ</div>
+        <div class="fltr-chip" onclick="setFilter('payment','convenience',this);buildChips()">🏪 コンビニ払い</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
     <div class="filter-group" style="margin-bottom:0;">
       <div class="filter-label">🏭 ブランド・メーカー</div>
       <input type="text" id="brandInput" class="input-brand" placeholder="例：ダイソン、パナソニック...">
@@ -593,6 +725,12 @@
     </div>
     <div class="site-chips" id="siteChips"></div>
     <div class="order-display" id="orderDisplay"><span class="order-empty">サイトをタップして選択・順番を決めてください</span></div>
+  </div>
+
+  <!-- ブランド名警告 -->
+  <div id="brand-warn" style="display:none;align-items:center;gap:10px;background:#FEF9C3;border:1.5px solid #FDE047;border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#854D0E;">
+    <span style="font-size:18px;">⚠️</span>
+    <span>ブランド名・メーカー名を入力すると、正規品を見つけやすくなります。「絞り込み」の「ブランド・メーカー」欄からどうぞ。</span>
   </div>
 
   <!-- search button -->
@@ -622,6 +760,37 @@
     </div>
   </div>
 </section>
+
+<!-- ===== AI CHATBOT ===== -->
+<button class="ai-fab" id="aiFab" onclick="toggleAIChat()" title="AIに相談する">
+  🤖
+  <span class="ai-fab-badge on" id="aiFabBadge"></span>
+</button>
+
+<div class="ai-chat-panel" id="aiChatPanel">
+  <div class="ai-chat-head">
+    <span class="ai-chat-head-icon">🤖</span>
+    <div class="ai-chat-head-info">
+      <div class="ai-chat-head-title">AI購入アドバイザー</div>
+      <div class="ai-chat-head-sub">最安値・正規品・怪しい商品を相談できます</div>
+    </div>
+    <button type="button" class="ai-chat-toggle" id="aiToggleBtn" onclick="toggleAIOnOff()">ON</button>
+    <button type="button" class="ai-chat-close" onclick="toggleAIChat()">✕</button>
+  </div>
+
+  <div class="ai-off-msg" id="aiOffMsg" style="display:none;">
+    AIをONにすると回答できます。右上のボタンで切り替えてください。
+  </div>
+
+  <div class="ai-chat-msgs" id="aiChatMsgs">
+    <div class="ai-msg ai-msg-bot">こんにちは！商品の比較・正規品の見分け方・どのサイトで買うべきかなど、何でも聞いてください😊</div>
+  </div>
+
+  <div class="ai-chat-input-row">
+    <textarea class="ai-chat-input" id="aiChatInput" placeholder="例：ダイソンの掃除機、どこで買うのがおすすめ？" rows="1" oninput="autoResize(this)" onkeydown="aiChatEnter(event)"></textarea>
+    <button type="button" class="ai-chat-send" id="aiChatSend" onclick="sendAIChat()">➤</button>
+  </div>
+</div>
 
 <!-- ===== LP SECTION ===== -->
 <section id="lp">
@@ -748,11 +917,103 @@ document.addEventListener('keydown', e => {
   console.log(w, 'color:#EF4444;font-size:14px;font-weight:bold;');
 })();
 
+/* ===== AI CHATBOT ===== */
+let aiOn = true;
+let aiChatHistory = [];
+
+function toggleAIChat() {
+  const panel = document.getElementById('aiChatPanel');
+  panel.classList.toggle('open');
+  if (panel.classList.contains('open')) {
+    setTimeout(() => document.getElementById('aiChatInput').focus(), 200);
+  }
+}
+
+function toggleAIOnOff() {
+  aiOn = !aiOn;
+  const btn = document.getElementById('aiToggleBtn');
+  const offMsg = document.getElementById('aiOffMsg');
+  const inputRow = document.querySelector('.ai-chat-input-row');
+  btn.textContent = aiOn ? 'ON' : 'OFF';
+  btn.style.background = aiOn ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.2)';
+  offMsg.style.display = aiOn ? 'none' : 'block';
+  if (inputRow) inputRow.style.display = aiOn ? 'flex' : 'none';
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+function aiChatEnter(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAIChat(); }
+}
+
+function appendMsg(text, type) {
+  const msgs = document.getElementById('aiChatMsgs');
+  const div = document.createElement('div');
+  div.className = `ai-msg ai-msg-${type}`;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendAIChat() {
+  if (!aiOn) return;
+  const input = document.getElementById('aiChatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('aiChatSend').disabled = true;
+
+  appendMsg(text, 'user');
+  aiChatHistory.push({ role: 'user', content: text });
+
+  const loading = appendMsg('考え中…', 'loading');
+
+  const kw = document.getElementById('kwInput')?.value.trim() || '';
+  const brand = document.getElementById('brandInput')?.value.trim() || '';
+  const systemPrompt = `あなたは日本のショッピング比較をサポートするAIアドバイザーです。
+ユーザーが商品を比較・購入する際のアドバイスをします。
+${kw ? `現在検索中の商品：「${kw}」` : ''}
+${brand ? `ブランド：${brand}` : ''}
+以下の点を意識してください：
+- どのサイトで買うべきか（Amazon・楽天・Yahoo・ヨドバシなど）
+- 正規品かどうかの見分け方
+- 怪しい商品・出品者の特徴
+- 価格が安すぎる商品への注意
+- 支払い方法（PayPay・d払い・楽天Pay）の使い分け
+回答は日本語で、わかりやすく短く答えてください。`;
+
+  try {
+    const res = await fetch('/.netlify/functions/ai-chat', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ system: systemPrompt, messages: aiChatHistory })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'エラーが発生しました');
+    const reply = data.content?.[0]?.text || '返答を取得できませんでした';
+    loading.remove();
+    appendMsg(reply, 'bot');
+    aiChatHistory.push({ role: 'assistant', content: reply });
+    if (aiChatHistory.length > 20) aiChatHistory = aiChatHistory.slice(-20);
+  } catch (e) {
+    loading.remove();
+    appendMsg('❌ ' + e.message, 'bot');
+  }
+  document.getElementById('aiChatSend').disabled = false;
+}
+
 /* ===== SITES ===== */
 const enc = encodeURIComponent;
 const SITES = [
   {
     id: 'amazon', name: 'Amazon', emoji: '🛒',
+    type: 'online', official: true, payment: ['credit','amazon_pay','convenience','dpay'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://www.amazon.co.jp/s?k=${enc(kw)}`;
@@ -775,6 +1036,7 @@ const SITES = [
   },
   {
     id: 'rakuten', name: '楽天市場', emoji: '🛍',
+    type: 'online', official: true, payment: ['credit','rakutenpay','convenience','paypay'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://search.rakuten.co.jp/search/mall/${enc(kw)}/`;
@@ -797,6 +1059,7 @@ const SITES = [
   },
   {
     id: 'yahoo', name: 'Yahoo!ショッピング', emoji: '🏪',
+    type: 'online', official: true, payment: ['credit','paypay','convenience','softbank'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://shopping.yahoo.co.jp/search?p=${enc(kw)}`;
@@ -817,6 +1080,7 @@ const SITES = [
   },
   {
     id: 'kakaku', name: '価格.com', emoji: '💴',
+    type: 'online', official: true, payment: ['credit'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://kakaku.com/search_results/${enc(kw)}/`;
@@ -831,6 +1095,7 @@ const SITES = [
   },
   {
     id: 'yodobashi', name: 'ヨドバシ.com', emoji: '📺',
+    type: 'store', official: true, payment: ['credit','paypay','rakutenpay','dpay','convenience'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://www.yodobashi.com/?word=${enc(kw)}`;
@@ -843,6 +1108,7 @@ const SITES = [
   },
   {
     id: 'mercari', name: 'メルカリ', emoji: '📦',
+    type: 'online', official: false, payment: ['credit','convenience','paypay'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://jp.mercari.com/search?keyword=${enc(kw)}&status=on_sale`;
@@ -859,6 +1125,7 @@ const SITES = [
   },
   {
     id: 'qoo10', name: 'Qoo10', emoji: '🛍️',
+    type: 'online', official: false, payment: ['credit','paypay','convenience'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://www.qoo10.jp/search/?keyword=${enc(kw)}`;
@@ -870,6 +1137,7 @@ const SITES = [
   },
   {
     id: 'zozo', name: 'ZOZOTOWN', emoji: '👗',
+    type: 'online', official: true, payment: ['credit','paypay','convenience'],
     url: (q, mn, mx, f) => {
       const kw = f.brand ? `${q} ${f.brand}` : q;
       let u = `https://zozo.jp/search/?keyword=${enc(kw)}`;
@@ -933,7 +1201,10 @@ const filters = {
   condition: 'all', review: 'all',
   guarantee: false, bulk: false, points: false,
   corporate: false, estimate: false, quantity: false,
-  brand: ''
+  brand: '',
+  storeType: 'all',   // 'all' | 'online' | 'store'
+  officialOnly: false,
+  payment: 'all'      // 'all' | 'paypay' | 'dpay' | 'rakutenpay' | 'credit' | 'convenience'
 };
 
 /* ===== FILTER HANDLER ===== */
@@ -955,7 +1226,10 @@ function toggleMulti(key, el) {
 
 /* ===== BUILD SITE CHIPS (ordered-tap) ===== */
 function buildChips() {
-  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  let allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  if (filters.storeType !== 'all') allSites = allSites.filter(s => s.type === filters.storeType);
+  if (filters.officialOnly) allSites = allSites.filter(s => s.official);
+  if (filters.payment !== 'all') allSites = allSites.filter(s => s.payment && s.payment.includes(filters.payment));
   orderedSites = orderedSites.filter(id => allSites.some(s => s.id === id));
   const el = document.getElementById('siteChips');
   el.innerHTML = allSites.map(s => {
@@ -993,7 +1267,10 @@ function renderOrderDisplay() {
 }
 
 function selectAll() {
-  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  let allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  if (filters.storeType !== 'all') allSites = allSites.filter(s => s.type === filters.storeType);
+  if (filters.officialOnly) allSites = allSites.filter(s => s.official);
+  if (filters.payment !== 'all') allSites = allSites.filter(s => s.payment && s.payment.includes(filters.payment));
   allSites.forEach(s => { if (!orderedSites.includes(s.id)) orderedSites.push(s.id); });
   buildChips();
 }
@@ -1022,6 +1299,16 @@ function openAll() {
 
   if (!kw) { document.getElementById('kwInput').focus(); return; }
   if (orderedSites.length === 0) { alert('サイトを1つ以上選んでください'); return; }
+
+  // ブランド名チェック
+  if (!filters.brand) {
+    const warn = document.getElementById('brand-warn');
+    if (warn) {
+      warn.style.display = 'flex';
+      setTimeout(() => { warn.style.display = 'none'; }, 5000);
+    }
+  }
+
   saveHikakuHist(kw);
 
   const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
