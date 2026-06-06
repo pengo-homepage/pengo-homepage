@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>かんたん比較ツール | 業務改善のペンギン</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563EB">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="比較ツール">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    /* ===== COPY PROTECTION ===== */
+    *,*::before,*::after{user-select:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;}
+    input,textarea{user-select:text;-webkit-user-select:text;}
+
+    /* ===== BASE ===== */
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      background:#F8FAFC;
+      color:#334155;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+      min-height:100vh;
+    }
+
+    /* ===== WATERMARK ===== */
+    body::before{
+      content:'© 業務改善のペンギン';
+      position:fixed;bottom:60px;right:16px;font-size:11px;
+      color:rgba(0,0,0,.04);letter-spacing:1px;pointer-events:none;z-index:0;white-space:nowrap;
+    }
+
+    /* ===== HEADER ===== */
+    .header{
+      background:#fff;
+      border-bottom:1px solid #E2E8F0;
+      padding:12px 20px;
+      display:flex;align-items:center;justify-content:space-between;
+      position:sticky;top:0;z-index:200;
+      transition:box-shadow .25s;
+    }
+    .header.scrolled{border-bottom-color:transparent;box-shadow:0 2px 16px rgba(0,0,0,.08);}
+    .header-logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:800;color:#0F172A;text-decoration:none;}
+    .header-logo .logo-icon{font-size:24px;}
+    .header-actions{display:flex;gap:8px;align-items:center;}
+    .header-btn{
+      display:inline-flex;align-items:center;gap:5px;
+      background:none;border:1.5px solid #E2E8F0;color:#64748B;
+      padding:7px 14px;border-radius:10px;cursor:pointer;
+      font-size:13px;font-weight:600;text-decoration:none;
+      transition:all .2s ease;
+    }
+    .header-btn:hover{border-color:#2563EB;color:#2563EB;background:#EFF6FF;}
+
+    /* ===== HISTORY PANEL ===== */
+    .hikaku-hist-panel{
+      background:#fff;border:1.5px solid #E2E8F0;border-radius:18px;
+      padding:18px;margin-top:14px;display:none;
+      box-shadow:0 8px 32px rgba(0,0,0,.07);
+    }
+    .hikaku-hist-panel.open{display:block;}
+    .hikaku-hist-search{
+      width:100%;background:#F8FAFC;border:1.5px solid #E2E8F0;
+      color:#334155;border-radius:10px;padding:10px 14px;
+      font-size:14px;margin-bottom:12px;outline:none;transition:all .2s;
+    }
+    .hikaku-hist-search:focus{border-color:#2563EB;background:#fff;}
+    .hikaku-hist-item{
+      background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;
+      padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px;
+      transition:all .2s;
+    }
+    .hikaku-hist-item:hover{border-color:#BFDBFE;background:#EFF6FF;}
+    .hikaku-hist-info{flex:1;}
+    .hikaku-hist-kw{font-size:14px;font-weight:700;color:#0F172A;}
+    .hikaku-hist-date{font-size:12px;color:#94A3B8;margin-top:2px;}
+    .hikaku-hist-retry{
+      background:#DBEAFE;color:#2563EB;border:none;border-radius:8px;
+      padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;
+      transition:all .2s;
+    }
+    .hikaku-hist-retry:hover{background:#2563EB;color:#fff;}
+    .hikaku-hist-del{
+      background:#FEF2F2;color:#EF4444;border:none;border-radius:8px;
+      padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;
+    }
+    .hikaku-hist-del:hover{background:#EF4444;color:#fff;}
+    .hikaku-hist-empty{text-align:center;color:#94A3B8;padding:28px 0;font-size:14px;line-height:2.2;}
+    .hikaku-hist-footer{display:flex;gap:8px;margin-top:12px;}
+    .hikaku-hist-clearall{
+      flex:1;padding:11px;background:#FEF2F2;color:#EF4444;
+      border:1.5px solid #FECACA;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+    }
+    .hikaku-hist-clearall:hover{background:#EF4444;color:#fff;border-color:#EF4444;}
+    .hikaku-hist-closebtn{
+      flex:1;padding:11px;background:#F1F5F9;color:#64748B;
+      border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+    }
+    .hikaku-hist-closebtn:hover{background:#E2E8F0;color:#334155;}
+
+    /* ===== HERO ===== */
+    .hero{
+      background:linear-gradient(135deg,#EFF6FF 0%,#FFFFFF 60%,#F0FDF4 100%);
+      padding:52px 20px 44px;
+      text-align:center;
+      border-bottom:1px solid #E2E8F0;
+    }
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:6px;
+      background:#DBEAFE;color:#2563EB;
+      font-size:13px;font-weight:700;
+      padding:7px 18px;border-radius:24px;
+      margin-bottom:22px;letter-spacing:.3px;
+      border:1px solid #BFDBFE;
+    }
+    .hero-title{
+      font-size:clamp(28px,6vw,44px);
+      font-weight:800;color:#0F172A;
+      line-height:1.25;margin-bottom:16px;
+      letter-spacing:-.5px;
+    }
+    .hero-title em{
+      font-style:normal;
+      background:linear-gradient(90deg,#2563EB 0%,#60A5FA 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .hero-sub{
+      font-size:15px;color:#64748B;line-height:1.85;
+      max-width:480px;margin:0 auto;
+    }
+
+    /* ===== TOOL SECTION ===== */
+    #tool{max-width:720px;margin:0 auto;padding:28px 16px 52px;}
+
+    .card{
+      background:#fff;border:1.5px solid #E2E8F0;border-radius:20px;
+      padding:22px;margin-bottom:16px;
+      box-shadow:0 4px 20px rgba(0,0,0,.04);
+      transition:box-shadow .2s;
+    }
+    .card:hover{box-shadow:0 6px 28px rgba(0,0,0,.07);}
+    .field-label{font-size:13px;color:#334155;font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+
+    /* search input */
+    .input-main{
+      width:100%;height:56px;padding:0 18px;
+      background:#F8FAFC;border:2px solid #E2E8F0;border-radius:16px;
+      color:#0F172A;font-size:16px;outline:none;transition:all .2s;
+    }
+    .input-main:focus{border-color:#2563EB;background:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.1);}
+    .input-main::placeholder{color:#94A3B8;}
+
+    /* price */
+    .price-row{display:flex;align-items:center;gap:8px;margin-top:10px;}
+    .price-input{
+      flex:1;padding:11px 14px;
+      background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;
+      color:#334155;font-size:14px;outline:none;transition:all .2s;min-width:0;
+    }
+    .price-input:focus{border-color:#2563EB;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+    .price-input::placeholder{color:#94A3B8;}
+    .price-sep{color:#94A3B8;font-size:16px;flex-shrink:0;}
+
+    /* price chips */
+    .price-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+    .price-chip{
+      padding:6px 14px;border-radius:20px;
+      border:1.5px solid #E2E8F0;background:#F8FAFC;
+      color:#64748B;cursor:pointer;font-size:12px;font-weight:600;
+      transition:all .2s ease;
+    }
+    .price-chip:hover{border-color:#2563EB;color:#2563EB;background:#EFF6FF;}
+    .price-chip.on{border-color:#2563EB;color:#2563EB;background:#DBEAFE;}
+
+    /* site chips */
+    .site-chips{display:flex;flex-wrap:wrap;gap:8px;}
+    .site-chip{
+      padding:9px 16px;border-radius:22px;
+      border:2px solid #E2E8F0;background:#F8FAFC;
+      color:#64748B;cursor:pointer;font-size:13px;font-weight:600;
+      transition:all .2s ease;position:relative;
+    }
+    .site-chip:hover{border-color:#2563EB;color:#2563EB;background:#EFF6FF;}
+    .site-chip.on{border-color:#2563EB;background:#DBEAFE;color:#2563EB;}
+    .chip-badge{
+      position:absolute;top:-7px;right:-7px;
+      width:20px;height:20px;border-radius:50%;
+      background:#2563EB;color:#fff;font-size:10px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+      pointer-events:none;border:2px solid #fff;
+      box-shadow:0 1px 4px rgba(37,99,235,.35);
+    }
+
+    .select-row{display:flex;gap:8px;margin-bottom:10px;}
+    .btn-reset-order{
+      font-size:12px;font-weight:600;color:#EF4444;
+      background:#FEF2F2;border:1.5px solid #FECACA;
+      border-radius:8px;padding:6px 14px;cursor:pointer;transition:all .2s;
+    }
+    .btn-reset-order:hover{background:#EF4444;color:#fff;border-color:#EF4444;}
+
+    .order-display{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;min-height:24px;}
+    .order-tag{
+      display:inline-flex;align-items:center;gap:4px;
+      background:#DBEAFE;color:#2563EB;
+      font-size:12px;font-weight:700;
+      padding:3px 10px;border-radius:14px;
+      border:1px solid #BFDBFE;
+    }
+    .order-empty{font-size:12px;color:#94A3B8;}
+
+    /* step flow */
+    .progress-wrap{margin:12px 0 4px;}
+    .progress-label{font-size:12px;color:#64748B;font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between;}
+    .progress-track{height:8px;background:#E2E8F0;border-radius:8px;overflow:hidden;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#2563EB,#60A5FA);border-radius:8px;transition:width .4s ease;}
+    .btn-step{
+      width:100%;padding:16px 20px;margin-top:12px;
+      background:#2563EB;color:#fff;border:none;border-radius:14px;
+      font-size:16px;font-weight:700;cursor:pointer;
+      transition:all .2s;display:flex;align-items:center;gap:10px;text-align:left;
+    }
+    .btn-step:hover{background:#1D4ED8;transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.35);}
+    .btn-step:active{transform:none;}
+    .btn-step .step-label{flex:1;}
+    .btn-step .step-arrow{font-size:20px;flex-shrink:0;}
+    .step-queue{margin-top:10px;display:flex;flex-direction:column;gap:5px;}
+    .step-queue-item{
+      display:flex;align-items:center;gap:10px;
+      padding:9px 14px;background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:10px;
+      font-size:13px;font-weight:600;color:#64748B;transition:all .2s;
+    }
+    .step-queue-item.done{border-color:#BBF7D0;background:#F0FDF4;color:#16A34A;}
+    .step-num{
+      width:22px;height:22px;border-radius:50%;flex-shrink:0;
+      background:#E2E8F0;color:#64748B;font-size:10px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .step-queue-item.done .step-num{background:#BBF7D0;color:#16A34A;}
+    .step-done-wrap{text-align:center;padding:14px 0 6px;}
+    .step-done-icon{font-size:42px;margin-bottom:8px;}
+    .step-done-msg{font-size:17px;font-weight:800;color:#0F172A;margin-bottom:4px;}
+    .step-done-sub{font-size:13px;color:#64748B;margin-bottom:16px;}
+    .btn-retry{
+      padding:10px 28px;background:#EFF6FF;color:#2563EB;
+      border:1.5px solid #BFDBFE;border-radius:12px;
+      font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;
+    }
+    .btn-retry:hover{background:#2563EB;color:#fff;border-color:#2563EB;}
+
+    /* search button */
+    .btn-search{
+      width:100%;height:56px;
+      background:#2563EB;color:#fff;border:none;border-radius:16px;
+      font-size:18px;font-weight:600;cursor:pointer;
+      transition:all .2s ease;margin-top:4px;letter-spacing:.2px;
+    }
+    .btn-search:hover{background:#1D4ED8;transform:translateY(-1px);box-shadow:0 6px 24px rgba(37,99,235,.35);}
+    .btn-search:active{transform:none;box-shadow:none;}
+    .btn-search:disabled{background:#94A3B8;cursor:not-allowed;transform:none;box-shadow:none;}
+
+    /* status */
+    .status-box{
+      background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:16px;
+      padding:16px;margin-top:14px;font-size:14px;color:#334155;min-height:52px;display:none;
+    }
+    .status-box.visible{display:block;}
+    .status-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+    .status-header #statusText{flex:1;padding-top:2px;}
+    .status-btns{display:flex;gap:6px;flex-shrink:0;}
+    .btn-close-tabs{
+      background:#FEF3C7;border:1.5px solid #FDE68A;color:#92400E;
+      border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;
+      transition:all .2s;white-space:nowrap;
+    }
+    .btn-close-tabs:hover{background:#F59E0B;color:#fff;border-color:#F59E0B;}
+    .btn-close-status{
+      flex-shrink:0;background:#fff;border:1.5px solid #BFDBFE;color:#64748B;
+      border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;
+      transition:all .2s;white-space:nowrap;
+    }
+    .btn-close-status:hover{border-color:#EF4444;color:#EF4444;background:#FEF2F2;}
+    .link-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+    .site-link{
+      display:flex;align-items:center;gap:12px;
+      padding:13px 16px;background:#fff;border:1.5px solid #E2E8F0;border-radius:12px;
+      color:#334155;text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;
+    }
+    .site-link:hover{border-color:#2563EB;background:#EFF6FF;color:#2563EB;}
+
+    /* ===== FILTER CHIPS ===== */
+    .filter-label{font-size:12px;color:#64748B;font-weight:700;margin-bottom:8px;letter-spacing:.3px;}
+    .filter-group{margin-bottom:14px;}
+    .filter-group:last-child{margin-bottom:0;}
+    .fltr-chip{
+      padding:6px 14px;border-radius:20px;
+      border:1.5px solid #E2E8F0;background:#F8FAFC;
+      color:#64748B;cursor:pointer;font-size:12px;font-weight:600;
+      transition:all .2s ease;display:inline-block;
+    }
+    .fltr-chip:hover{border-color:#2563EB;color:#2563EB;background:#EFF6FF;}
+    .fltr-chip.on{border-color:#2563EB;color:#2563EB;background:#DBEAFE;}
+    .fltr-row{display:flex;flex-wrap:wrap;gap:7px;}
+    .overseas-row{display:none;flex-wrap:wrap;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid #E2E8F0;}
+    .overseas-row.visible{display:flex;}
+    .tool-divider{height:1px;background:#F1F5F9;margin:14px 0;}
+    .input-brand{
+      width:100%;background:#F8FAFC;border:1.5px solid #E2E8F0;color:#334155;
+      border-radius:10px;padding:10px 14px;font-size:14px;margin-top:8px;outline:none;transition:all .2s;
+    }
+    .input-brand:focus{border-color:#2563EB;background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.08);}
+    .input-brand::placeholder{color:#94A3B8;}
+
+    /* ===== LP SECTION ===== */
+    #lp{border-top:1px solid #E2E8F0;padding-top:0;}
+
+    .lp-hero{
+      background:linear-gradient(180deg,#EFF6FF 0%,#F8FAFC 100%);
+      text-align:center;padding:60px 20px 48px;
+    }
+    .lp-badge{
+      display:inline-block;background:#DBEAFE;border:1px solid #BFDBFE;color:#2563EB;
+      font-size:12px;font-weight:700;padding:5px 16px;border-radius:20px;
+      margin-bottom:16px;letter-spacing:.5px;
+    }
+    .lp-hero h1{font-size:clamp(22px,5vw,36px);font-weight:800;line-height:1.4;margin-bottom:14px;color:#0F172A;}
+    .lp-hero h1 em{
+      font-style:normal;
+      background:linear-gradient(90deg,#2563EB,#60A5FA);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .lp-hero p{color:#64748B;font-size:15px;line-height:1.8;max-width:480px;margin:0 auto 28px;}
+    .btn-hero{
+      display:inline-block;background:#2563EB;color:#fff;
+      padding:14px 36px;border-radius:14px;font-size:16px;font-weight:700;
+      text-decoration:none;cursor:pointer;border:none;transition:all .2s;
+    }
+    .btn-hero:hover{background:#1D4ED8;transform:translateY(-2px);box-shadow:0 6px 24px rgba(37,99,235,.35);}
+
+    .lp-features{max-width:720px;margin:0 auto;padding:48px 20px;}
+    .section-label{text-align:center;margin-bottom:32px;}
+    .section-label h2{font-size:22px;font-weight:800;margin-bottom:6px;color:#0F172A;}
+    .section-label p{color:#64748B;font-size:14px;}
+    .features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+    .feature-card{
+      background:#fff;border:1.5px solid #E2E8F0;border-radius:20px;padding:24px;
+      box-shadow:0 4px 20px rgba(0,0,0,.04);transition:all .2s;
+    }
+    .feature-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.08);}
+    .feature-icon{font-size:30px;margin-bottom:12px;}
+    .feature-card h3{font-size:14px;font-weight:700;margin-bottom:6px;color:#0F172A;}
+    .feature-card p{font-size:13px;color:#64748B;line-height:1.75;}
+
+    .lp-sites{background:#fff;border-top:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0;padding:36px 20px;text-align:center;}
+    .lp-sites h3{font-size:14px;color:#64748B;margin-bottom:16px;font-weight:600;}
+    .site-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+    .site-badge{
+      padding:7px 18px;background:#F8FAFC;border:1.5px solid #E2E8F0;
+      border-radius:20px;font-size:13px;font-weight:600;color:#334155;transition:all .2s;
+    }
+
+    .lp-pricing{max-width:720px;margin:0 auto;padding:48px 20px;}
+    .pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;}
+    .price-card{
+      background:#fff;border:1.5px solid #E2E8F0;border-radius:20px;padding:28px 22px;
+      text-align:center;position:relative;box-shadow:0 4px 20px rgba(0,0,0,.04);transition:all .2s;
+    }
+    .price-card:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.08);}
+    .price-card.featured{border-color:#2563EB;background:linear-gradient(135deg,#EFF6FF,#fff);}
+    .price-card-badge{
+      position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+      background:#2563EB;color:#fff;font-size:11px;font-weight:700;
+      padding:4px 16px;border-radius:12px;white-space:nowrap;
+    }
+    .price-card h3{font-size:15px;font-weight:700;margin-bottom:4px;color:#0F172A;}
+    .price-label{font-size:12px;color:#64748B;margin-bottom:14px;}
+    .price-amount{font-size:32px;font-weight:800;color:#0F172A;margin-bottom:4px;}
+    .price-unit{font-size:13px;color:#64748B;margin-bottom:18px;}
+    .price-features{text-align:left;margin-bottom:20px;}
+    .price-feat{font-size:13px;color:#64748B;line-height:2.1;display:flex;align-items:flex-start;gap:6px;}
+    .price-feat::before{content:'✓';color:#22C55E;flex-shrink:0;font-weight:700;}
+    .btn-buy{
+      display:block;padding:12px;border-radius:12px;
+      font-size:14px;font-weight:700;text-decoration:none;
+      text-align:center;cursor:pointer;border:none;transition:all .2s;
+    }
+    .btn-buy-primary{background:#2563EB;color:#fff;}
+    .btn-buy-primary:hover{background:#1D4ED8;box-shadow:0 4px 16px rgba(37,99,235,.35);}
+    .btn-buy-outline{background:none;border:1.5px solid #E2E8F0;color:#334155;}
+    .btn-buy-outline:hover{border-color:#2563EB;color:#2563EB;background:#EFF6FF;}
+
+    .lp-faq{max-width:680px;margin:0 auto;padding:0 20px 48px;}
+    .faq-item{border-bottom:1px solid #E2E8F0;padding:18px 0;}
+    .faq-q{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;gap:10px;color:#0F172A;}
+    .faq-q::before{content:'Q.';color:#2563EB;flex-shrink:0;}
+    .faq-a{font-size:13px;color:#64748B;line-height:1.85;padding-left:22px;}
+
+    .footer{
+      background:#fff;border-top:1px solid #E2E8F0;padding:24px 20px;
+      text-align:center;font-size:12px;color:#94A3B8;line-height:2.2;
+    }
+    .footer a{color:#94A3B8;text-decoration:none;}
+    .footer a:hover{color:#2563EB;}
+
+    .fab-tool{
+      position:fixed;bottom:20px;right:16px;
+      background:#2563EB;color:#fff;border:none;border-radius:28px;
+      padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;
+      box-shadow:0 4px 20px rgba(37,99,235,.35);z-index:100;display:none;transition:all .2s;
+    }
+    .fab-tool:hover{background:#1D4ED8;transform:translateY(-1px);}
+    .fab-tool.visible{display:block;}
+
+    @media(max-width:480px){
+      .hero{padding:36px 16px 30px;}
+      .hero-title{letter-spacing:-.3px;}
+      .card{padding:18px;}
+      .btn-search{font-size:16px;}
+      .price-amount{font-size:26px;}
+      .lp-hero{padding:44px 16px 36px;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ©2025 業務改善のペンギン. Licensed to single user. Unauthorized copying or redistribution prohibited. -->
+
+<!-- ===== HEADER ===== -->
+<header class="header" id="mainHeader">
+  <div class="header-logo">
+    <span class="logo-icon">🐧</span>
+    <span>かんたん比較ツール</span>
+  </div>
+  <div class="header-actions">
+    <button type="button" class="header-btn" onclick="toggleHikakuHist()">🕐 履歴</button>
+    <a href="#lp" class="header-btn">詳細・購入</a>
+  </div>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-badge">🐧 最安値探しをお手伝いします</div>
+  <h1 class="hero-title">最安値を<em>かんたん比較</em></h1>
+  <p class="hero-sub">Amazon・楽天・Yahooの商品をまとめて検索して<br>価格や送料を一目で比較できます</p>
+</section>
+
+<!-- ===== TOOL SECTION ===== -->
+<section id="tool">
+
+  <!-- keyword -->
+  <div class="card">
+    <div class="field-label">🔍 商品名・キーワード</div>
+    <input id="kwInput" class="input-main" type="search" placeholder="商品名を入力（例：iPhone 16、電動ドライバー、ゲーミングチェア）" autocomplete="off">
+  </div>
+
+  <!-- price filter -->
+  <div class="card">
+    <div class="field-label">💰 価格フィルター（任意）</div>
+    <div class="price-row">
+      <input id="priceMin" class="price-input" type="number" placeholder="下限（円）" min="0">
+      <span class="price-sep">〜</span>
+      <input id="priceMax" class="price-input" type="number" placeholder="上限（円）" min="0">
+    </div>
+    <div class="price-chips" id="priceChips">
+      <div class="price-chip" onclick="setPriceRange(0,1000)">〜1,000円</div>
+      <div class="price-chip" onclick="setPriceRange(0,3000)">〜3,000円</div>
+      <div class="price-chip" onclick="setPriceRange(0,10000)">〜1万円</div>
+      <div class="price-chip" onclick="setPriceRange(0,30000)">〜3万円</div>
+      <div class="price-chip" onclick="setPriceRange(0,100000)">〜10万円</div>
+      <div class="price-chip" onclick="setPriceRange(0,0)">指定なし</div>
+    </div>
+  </div>
+
+  <!-- filters -->
+  <div class="card">
+    <div class="field-label">⚙ 絞り込み・並び替え</div>
+
+    <div class="filter-group">
+      <div class="filter-label">🔀 並び替え</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('sort','default',this)">関連度順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','cheap',this)">安い順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','expensive',this)">高い順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','review',this)">評価順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','points',this)">ポイント還元率順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','reviewCount',this)">レビュー件数順</div>
+        <div class="fltr-chip" onclick="setFilter('sort','new',this)">新着順</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🚚 配送</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('shipping','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('shipping','free',this)">送料無料のみ</div>
+        <div class="fltr-chip" onclick="setFilter('shipping','actual',this)">送料込み実質価格順</div>
+        <div class="fltr-chip" onclick="setFilter('shipping','express',this)">翌日配送あり</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">📦 在庫</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('stock','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('stock','instock',this)">在庫あり優先</div>
+        <div class="fltr-chip" onclick="setFilter('stock','instockonly',this)">在庫あり限定</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🏷️ 商品の状態</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('condition','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('condition','new',this)">新品のみ</div>
+        <div class="fltr-chip" onclick="setFilter('condition','used',this)">中古も含む</div>
+        <div class="fltr-chip" onclick="setFilter('condition','sale',this)">セール品のみ</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">⭐ レビュー</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('review','all',this)">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('review','star4',this)">星4以上のみ</div>
+        <div class="fltr-chip" onclick="setFilter('review','star3',this)">星3以上のみ</div>
+        <div class="fltr-chip" onclick="setFilter('review','count100',this)">レビュー100件以上</div>
+        <div class="fltr-chip" onclick="setFilter('review','count50',this)">レビュー50件以上</div>
+        <div class="fltr-chip" onclick="setFilter('review','count10',this)">レビュー10件以上</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🛡️ 購入・保証 <span style="font-size:11px;color:#94A3B8;">（複数選択OK）</span></div>
+      <div class="fltr-row">
+        <div class="fltr-chip" onclick="toggleMulti('guarantee',this)">保証あり優先</div>
+        <div class="fltr-chip" onclick="toggleMulti('bulk',this)">まとめ買い割引あり</div>
+        <div class="fltr-chip" onclick="toggleMulti('points',this)">ポイント対応</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🏢 法人・業者向け <span style="font-size:11px;color:#94A3B8;">（複数選択OK）</span></div>
+      <div class="fltr-row">
+        <div class="fltr-chip" onclick="toggleMulti('corporate',this)">法人購入可のみ</div>
+        <div class="fltr-chip" onclick="toggleMulti('estimate',this)">見積もり対応あり</div>
+        <div class="fltr-chip" onclick="toggleMulti('quantity',this)">数量割引あり</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🌏 サイト地域</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('region','japan',this)">🇯🇵 日本のみ</div>
+        <div class="fltr-chip" onclick="setFilter('region','global',this)">🌐 海外も表示</div>
+      </div>
+      <div class="overseas-row" id="overseasRow">
+        <span style="font-size:12px;color:#94A3B8;width:100%;margin-bottom:4px;">追加表示されるサイト：</span>
+        <span style="font-size:12px;background:#F8FAFC;border:1px solid #E2E8F0;padding:4px 12px;border-radius:14px;font-weight:600;">🌐 Amazon.com</span>
+        <span style="font-size:12px;background:#F8FAFC;border:1px solid #E2E8F0;padding:4px 12px;border-radius:14px;font-weight:600;">🛍 eBay</span>
+        <span style="font-size:12px;background:#F8FAFC;border:1px solid #E2E8F0;padding:4px 12px;border-radius:14px;font-weight:600;">🌏 AliExpress</span>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">🏪 購入場所</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" onclick="setFilter('storeType','all',this);buildChips()">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('storeType','online',this);buildChips()">🌐 ネットのみ</div>
+        <div class="fltr-chip" onclick="setFilter('storeType','store',this);buildChips()">🏪 実店舗あり</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">✅ 正規販売店</div>
+      <div class="fltr-row">
+        <div class="fltr-chip on" id="chip-official-all" onclick="filters.officialOnly=false;document.getElementById('chip-official-all').classList.add('on');document.getElementById('chip-official-only').classList.remove('on');buildChips()">すべて</div>
+        <div class="fltr-chip" id="chip-official-only" onclick="filters.officialOnly=true;document.getElementById('chip-official-only').classList.add('on');document.getElementById('chip-official-all').classList.remove('on');buildChips()">正規店のみ</div>
+      </div>
+      <div style="font-size:11px;color:#94A3B8;margin-top:4px;">※ フリマ・並行輸入サイトを除外します</div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group">
+      <div class="filter-label">💳 支払い方法</div>
+      <div class="fltr-row" style="flex-wrap:wrap;">
+        <div class="fltr-chip on" onclick="setFilter('payment','all',this);buildChips()">すべて</div>
+        <div class="fltr-chip" onclick="setFilter('payment','paypay',this);buildChips()">🟡 PayPay</div>
+        <div class="fltr-chip" onclick="setFilter('payment','dpay',this);buildChips()">🔴 d払い</div>
+        <div class="fltr-chip" onclick="setFilter('payment','rakutenpay',this);buildChips()">🛍 楽天Pay</div>
+        <div class="fltr-chip" onclick="setFilter('payment','credit',this);buildChips()">💳 クレカ</div>
+        <div class="fltr-chip" onclick="setFilter('payment','convenience',this);buildChips()">🏪 コンビニ払い</div>
+      </div>
+    </div>
+
+    <div class="tool-divider"></div>
+
+    <div class="filter-group" style="margin-bottom:0;">
+      <div class="filter-label">🏭 ブランド・メーカー</div>
+      <input type="text" id="brandInput" class="input-brand" placeholder="例：ダイソン、パナソニック...">
+    </div>
+  </div>
+
+  <!-- site selection -->
+  <div class="card">
+    <div class="field-label">🌐 比較するサイトを選ぶ <span style="font-size:11px;color:#94A3B8;font-weight:400;">（タップした順番で開きます）</span></div>
+    <div class="select-row">
+      <button class="btn-reset-order" onclick="clearAll()" type="button">🔄 順番をリセット</button>
+    </div>
+    <div class="site-chips" id="siteChips"></div>
+    <div class="order-display" id="orderDisplay"><span class="order-empty">サイトをタップして選択・順番を決めてください</span></div>
+  </div>
+
+  <!-- ブランド名警告 -->
+  <div id="brand-warn" style="display:none;align-items:center;gap:10px;background:#FEF9C3;border:1.5px solid #FDE047;border-radius:12px;padding:10px 14px;margin-bottom:8px;font-size:13px;color:#854D0E;">
+    <span style="font-size:18px;">⚠️</span>
+    <span>ブランド名・メーカー名を入力すると、正規品を見つけやすくなります。「絞り込み」の「ブランド・メーカー」欄からどうぞ。</span>
+  </div>
+
+  <!-- search button -->
+  <button id="searchBtn" class="btn-search" onclick="openAll()" type="button">
+    🔍 比較する
+  </button>
+
+  <!-- status / step flow -->
+  <div id="statusBox" class="status-box">
+    <div class="status-header">
+      <div id="statusText"></div>
+      <div class="status-btns">
+        <button type="button" class="btn-close-status" onclick="closeStatus()">✕ 閉じる</button>
+      </div>
+    </div>
+    <div id="stepContent"></div>
+  </div>
+
+  <!-- 検索履歴パネル -->
+  <div class="hikaku-hist-panel" id="hikaku-hist-panel">
+    <div style="font-size:15px;font-weight:700;color:#0F172A;margin-bottom:12px;">🕐 検索・発注履歴</div>
+    <input type="text" class="hikaku-hist-search" id="hikaku-hist-q" placeholder="🔍 キーワードで検索..." oninput="renderHikakuHist(this.value)">
+    <div id="hikaku-hist-list"></div>
+    <div class="hikaku-hist-footer">
+      <button type="button" class="hikaku-hist-clearall" onclick="clearHikakuHist()">🗑️ 全削除</button>
+      <button type="button" class="hikaku-hist-closebtn" onclick="toggleHikakuHist()">閉じる</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== LP SECTION ===== -->
+<section id="lp">
+
+  <!-- hero -->
+  <div class="lp-hero">
+    <div class="lp-badge">📊 ショッピング比較ツール</div>
+    <h1>好きなサイトを<br><em>順番に比較。</em><br>最安値がすぐ見つかる。</h1>
+    <p>見たい順にサイトをタップして選ぶだけ。Amazon・楽天・Yahoo!など8サイトを1つずつ丁寧に比較できます。</p>
+    <button class="btn-hero" onclick="scrollToTool()">▲ ツールを使ってみる</button>
+  </div>
+
+  <!-- features -->
+  <div class="lp-features">
+    <div class="section-label">
+      <h2>選ばれる理由</h2>
+      <p>初心者でも使いやすく、毎日の価格比較が楽になります</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>順番タップで最大8サイト比較</h3>
+        <p>見たい順にサイトを選んで「比較する」を押すだけ。1つずつ確認しながら丁寧に比較できます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>価格フィルター付き</h3>
+        <p>「〜1万円」など上限・下限を指定して検索。予算内の商品だけを効率よく比較できます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <h3>スマホ・タブレットも対応</h3>
+        <p>ホーム画面に追加してアプリのように使えます（PWA対応）。外出先でも使えます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>インストール不要・クラウド不要</h3>
+        <p>HTMLファイル1つ。ブラウザで開くだけ。個人情報の入力は一切不要です。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- sites -->
+  <div class="lp-sites">
+    <h3>対応している比較サイト（8サイト）</h3>
+    <div class="site-badges">
+      <div class="site-badge">🛒 Amazon</div>
+      <div class="site-badge">🛍 楽天市場</div>
+      <div class="site-badge">🏪 Yahoo!ショッピング</div>
+      <div class="site-badge">💴 価格.com</div>
+      <div class="site-badge">📺 ヨドバシ.com</div>
+      <div class="site-badge">📦 メルカリ</div>
+      <div class="site-badge">🛍️ Qoo10</div>
+      <div class="site-badge">👗 ZOZOTOWN</div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="lp-faq">
+    <div class="section-label">
+      <h2>よくある質問</h2>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">購入後すぐ使えますか？</div>
+      <div class="faq-a">購入後すぐにHTMLファイルをダウンロードできます。ブラウザで開くだけで使えます。インストール不要です。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">スマホでも使えますか？</div>
+      <div class="faq-a">はい。スマホのブラウザで開けます。またホーム画面に追加するとアプリのように使えます（Android・iPhone対応）。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">会社の複数人で使いたい場合は？</div>
+      <div class="faq-a">複数ユーザーの場合はカスタム発注プランをご相談ください。人数に応じた対応が可能です。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">自社のサイトに対応してもらえますか？</div>
+      <div class="faq-a">対応可能です。モノタロウ・アスクル・Misumi等の業務向けサイトへの対応もカスタム発注で承ります。</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q">返金対応はありますか？</div>
+      <div class="faq-a">購入前にこのページ上部のデモで動作確認ができます。デジタルコンテンツのため、購入後の返金は対応していません。</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- footer -->
+<footer class="footer">
+  <div>© 2025 業務改善のペンギン. All rights reserved.</div>
+  <div>このツールは購入者本人のみ使用可能です。複製・再配布・転売を禁じます。</div>
+  <div style="margin-top:8px;">
+    <a href="mailto:tokyoribengi@gmail.com">お問い合わせ</a>
+  </div>
+</footer>
+
+<!-- scroll to tool FAB -->
+<button id="fabTool" class="fab-tool" onclick="scrollToTool()" type="button">
+  ▲ ツールを使う
+</button>
+
+<script>
+'use strict';
+
+/* ===== COPY PROTECTION ===== */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('selectstart', e => e.preventDefault());
+document.addEventListener('dragstart', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (e.ctrlKey && ['c','x','u','s','a','p'].includes(k)) { e.preventDefault(); e.stopPropagation(); return; }
+  if (e.key === 'F12') { e.preventDefault(); return; }
+  if (e.ctrlKey && e.shiftKey && ['i','j','c','k'].includes(k)) { e.preventDefault(); return; }
+});
+// allow copy in inputs
+document.addEventListener('keydown', e => {
+  if (document.activeElement.tagName === 'INPUT') {
+    if (e.ctrlKey && ['c','x','a','v'].includes(e.key.toLowerCase())) return;
+  }
+}, true);
+
+// console warning
+(function(){
+  const w = '%c⚠ このツールは業務改善のペンギンの著作物です。複製・転売を禁じます。';
+  console.log(w, 'color:#EF4444;font-size:14px;font-weight:bold;');
+})();
+
+/* ===== SITES ===== */
+const enc = encodeURIComponent;
+const SITES = [
+  {
+    id: 'amazon', name: 'Amazon', emoji: '🛒',
+    type: 'online', official: true, payment: ['credit','amazon_pay','convenience','dpay'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.amazon.co.jp/s?k=${enc(kw)}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&s=price-asc-rank';
+      else if (f.sort === 'expensive') u += '&s=price-desc-rank';
+      else if (f.sort === 'review') u += '&s=review-rank';
+      else if (f.sort === 'reviewCount') u += '&s=review-rank';
+      else if (f.sort === 'new') u += '&s=date-desc-rank';
+      const rh = [];
+      if (mn > 0 || mx > 0) rh.push(`p_36%3A${mn*100}-${mx>0?mx*100:''}`);
+      if (f.shipping === 'free') rh.push('p_76%3A2227292051');
+      if (f.stock === 'instock' || f.stock === 'instockonly') rh.push('p_n_availability%3A1248801011');
+      if (f.condition === 'new') rh.push('p_n_condition-type%3A1294423011');
+      else if (f.condition === 'used') rh.push('p_n_condition-type%3A1294424011');
+      if (f.review === 'star4') rh.push('p_72%3A4-');
+      else if (f.review === 'star3') rh.push('p_72%3A3-');
+      if (rh.length) u += `&rh=${rh.join('%2C')}`;
+      return u;
+    }
+  },
+  {
+    id: 'rakuten', name: '楽天市場', emoji: '🛍',
+    type: 'online', official: true, payment: ['credit','rakutenpay','convenience','paypay'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://search.rakuten.co.jp/search/mall/${enc(kw)}/`;
+      const p = [];
+      if (mn > 0) p.push(`min=${mn}`);
+      if (mx > 0) p.push(`max=${mx}`);
+      if (f.sort === 'cheap') p.push('sort=%2Bprice');
+      else if (f.sort === 'expensive') p.push('sort=-price');
+      else if (f.sort === 'review') p.push('sort=-reviewAverage');
+      else if (f.sort === 'reviewCount') p.push('sort=-reviewCount');
+      else if (f.sort === 'new') p.push('sort=-sellingDate');
+      else if (f.sort === 'points') p.push('sort=-pointRatio');
+      else if (f.sort === 'actual') p.push('sort=%2Bprice');
+      if (f.shipping === 'free') p.push('f=1');
+      if (f.stock === 'instock' || f.stock === 'instockonly') p.push('inStock=1');
+      if (f.review === 'star4') p.push('r=4');
+      else if (f.review === 'star3') p.push('r=3');
+      return p.length ? u + '?' + p.join('&') : u;
+    }
+  },
+  {
+    id: 'yahoo', name: 'Yahoo!ショッピング', emoji: '🏪',
+    type: 'online', official: true, payment: ['credit','paypay','convenience','softbank'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://shopping.yahoo.co.jp/search?p=${enc(kw)}`;
+      if (mn > 0) u += `&min_price=${mn}`;
+      if (mx > 0) u += `&max_price=${mx}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sor=4';
+      else if (f.sort === 'expensive') u += '&sor=8';
+      else if (f.sort === 'review') u += '&sor=16';
+      else if (f.sort === 'reviewCount') u += '&sor=20';
+      else if (f.sort === 'new') u += '&sor=14';
+      if (f.shipping === 'free') u += '&ship_from=1';
+      else if (f.shipping === 'express') u += '&next_day=1';
+      if (f.stock === 'instock' || f.stock === 'instockonly') u += '&instock=1';
+      if (f.review === 'star4') u += '&star=4';
+      else if (f.review === 'star3') u += '&star=3';
+      return u;
+    }
+  },
+  {
+    id: 'kakaku', name: '価格.com', emoji: '💴',
+    type: 'online', official: true, payment: ['credit'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://kakaku.com/search_results/${enc(kw)}/`;
+      const p = [];
+      if (mn > 0) p.push(`min=${mn}`);
+      if (mx > 0) p.push(`max=${mx}`);
+      if (f.sort === 'cheap' || f.sort === 'actual') p.push('sort=tPrice');
+      else if (f.sort === 'new') p.push('sort=Newest');
+      else if (f.sort === 'review') p.push('sort=Satisfaction');
+      return p.length ? u + '?' + p.join('&') : u;
+    }
+  },
+  {
+    id: 'yodobashi', name: 'ヨドバシ.com', emoji: '📺',
+    type: 'store', official: true, payment: ['credit','paypay','rakutenpay','dpay','convenience'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.yodobashi.com/?word=${enc(kw)}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sortKind=1';
+      else if (f.sort === 'expensive') u += '&sortKind=2';
+      else if (f.sort === 'new') u += '&sortKind=3';
+      else if (f.sort === 'review') u += '&sortKind=4';
+      return u;
+    }
+  },
+  {
+    id: 'mercari', name: 'メルカリ', emoji: '📦',
+    type: 'online', official: false, payment: ['credit','convenience','paypay'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://jp.mercari.com/search?keyword=${enc(kw)}&status=on_sale`;
+      if (mn > 0) u += `&price_min=${mn}`;
+      if (mx > 0) u += `&price_max=${mx}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sort=price_asc';
+      else if (f.sort === 'expensive') u += '&sort=price_desc';
+      else if (f.sort === 'review' || f.sort === 'reviewCount') u += '&sort=like_desc';
+      else if (f.sort === 'new') u += '&sort=created_desc';
+      if (f.shipping === 'free') u += '&shipping_payer[]=2';
+      if (f.condition === 'new') u += '&item_condition[]=1&item_condition[]=2';
+      return u;
+    }
+  },
+  {
+    id: 'qoo10', name: 'Qoo10', emoji: '🛍️',
+    type: 'online', official: false, payment: ['credit','paypay','convenience'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.qoo10.jp/search/?keyword=${enc(kw)}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sort=price_asc';
+      else if (f.sort === 'expensive') u += '&sort=price_desc';
+      else if (f.sort === 'new') u += '&sort=latest';
+      return u;
+    }
+  },
+  {
+    id: 'zozo', name: 'ZOZOTOWN', emoji: '👗',
+    type: 'online', official: true, payment: ['credit','paypay','convenience'],
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://zozo.jp/search/?keyword=${enc(kw)}`;
+      if (mn > 0) u += `&min_price=${mn}`;
+      if (mx > 0) u += `&max_price=${mx}`;
+      if (f.sort === 'cheap' || f.sort === 'actual') u += '&sort=1';
+      else if (f.sort === 'expensive') u += '&sort=2';
+      else if (f.sort === 'new') u += '&sort=3';
+      return u;
+    }
+  }
+];
+
+const OVERSEAS = [
+  {
+    id: 'amazon_us', name: 'Amazon.com', emoji: '🌐',
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.amazon.com/s?k=${enc(kw)}`;
+      if (mn > 0 || mx > 0) u += `&low-price=${mn}&high-price=${mx > 0 ? mx : ''}`;
+      if (f.sort === 'cheap') u += '&s=price-asc-rank';
+      else if (f.sort === 'expensive') u += '&s=price-desc-rank';
+      else if (f.sort === 'new') u += '&s=date-desc-rank';
+      else if (f.sort === 'review') u += '&s=review-rank';
+      return u;
+    }
+  },
+  {
+    id: 'ebay', name: 'eBay', emoji: '🛍',
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.ebay.com/sch/i.html?_nkw=${enc(kw)}`;
+      if (mn > 0) u += `&_udlo=${mn}`;
+      if (mx > 0) u += `&_udhi=${mx}`;
+      if (f.sort === 'cheap') u += '&_sop=15';
+      else if (f.sort === 'expensive') u += '&_sop=16';
+      else if (f.sort === 'new') u += '&_sop=10';
+      if (f.condition === 'new') u += '&LH_ItemCondition=3';
+      else if (f.condition === 'used') u += '&LH_ItemCondition=4';
+      return u;
+    }
+  },
+  {
+    id: 'aliexpress', name: 'AliExpress', emoji: '🌏',
+    url: (q, mn, mx, f) => {
+      const kw = f.brand ? `${q} ${f.brand}` : q;
+      let u = `https://www.aliexpress.com/wholesale?SearchText=${enc(kw)}`;
+      if (f.sort === 'cheap') u += '&SortType=price_asc';
+      else if (f.sort === 'expensive') u += '&SortType=price_desc';
+      else if (f.sort === 'new') u += '&SortType=newlyListed_desc';
+      return u;
+    }
+  }
+];
+
+let orderedSites = [];
+let stepState = { active: false, current: 0, targets: [], kw: '' };
+let priceMin = 0, priceMax = 0;
+const filters = {
+  sort: 'default', shipping: 'all', stock: 'all', region: 'japan',
+  condition: 'all', review: 'all',
+  guarantee: false, bulk: false, points: false,
+  corporate: false, estimate: false, quantity: false,
+  brand: '',
+  storeType: 'all',   // 'all' | 'online' | 'store'
+  officialOnly: false,
+  payment: 'all'      // 'all' | 'paypay' | 'dpay' | 'rakutenpay' | 'credit' | 'convenience'
+};
+
+/* ===== FILTER HANDLER ===== */
+function setFilter(group, val, el) {
+  filters[group] = val;
+  el.closest('.fltr-row').querySelectorAll('.fltr-chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  if (group === 'region') {
+    const row = document.getElementById('overseasRow');
+    row.classList.toggle('visible', val === 'global');
+    buildChips();
+  }
+}
+
+function toggleMulti(key, el) {
+  filters[key] = !filters[key];
+  el.classList.toggle('on', filters[key]);
+}
+
+/* ===== BUILD SITE CHIPS (ordered-tap) ===== */
+function buildChips() {
+  let allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  if (filters.storeType !== 'all') allSites = allSites.filter(s => s.type === filters.storeType);
+  if (filters.officialOnly) allSites = allSites.filter(s => s.official);
+  if (filters.payment !== 'all') allSites = allSites.filter(s => s.payment && s.payment.includes(filters.payment));
+  orderedSites = orderedSites.filter(id => allSites.some(s => s.id === id));
+  const el = document.getElementById('siteChips');
+  el.innerHTML = allSites.map(s => {
+    const idx = orderedSites.indexOf(s.id);
+    const on = idx !== -1;
+    const badge = on ? `<span class="chip-badge">${idx + 1}</span>` : '';
+    return `<div class="site-chip${on ? ' on' : ''}" id="chip-${s.id}" onclick="toggleSite('${s.id}')">${s.emoji} ${s.name}${badge}</div>`;
+  }).join('');
+  renderOrderDisplay();
+}
+buildChips();
+
+function toggleSite(id) {
+  const idx = orderedSites.indexOf(id);
+  if (idx !== -1) {
+    orderedSites.splice(idx, 1);
+  } else {
+    orderedSites.push(id);
+  }
+  buildChips();
+}
+
+function renderOrderDisplay() {
+  const el = document.getElementById('orderDisplay');
+  if (!el) return;
+  if (orderedSites.length === 0) {
+    el.innerHTML = '<span class="order-empty">サイトをタップして選択・順番を決めてください</span>';
+    return;
+  }
+  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  el.innerHTML = orderedSites.map((id, i) => {
+    const s = allSites.find(x => x.id === id);
+    return s ? `<span class="order-tag">${i+1}. ${s.emoji} ${s.name}</span>` : '';
+  }).join('');
+}
+
+function selectAll() {
+  let allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  if (filters.storeType !== 'all') allSites = allSites.filter(s => s.type === filters.storeType);
+  if (filters.officialOnly) allSites = allSites.filter(s => s.official);
+  if (filters.payment !== 'all') allSites = allSites.filter(s => s.payment && s.payment.includes(filters.payment));
+  allSites.forEach(s => { if (!orderedSites.includes(s.id)) orderedSites.push(s.id); });
+  buildChips();
+}
+
+function clearAll() {
+  orderedSites = [];
+  buildChips();
+}
+
+/* ===== PRICE CHIPS ===== */
+function setPriceRange(mn, mx) {
+  document.getElementById('priceMin').value = mn || '';
+  document.getElementById('priceMax').value = mx || '';
+  priceMin = mn;
+  priceMax = mx;
+  document.querySelectorAll('#priceChips .price-chip').forEach(c => c.classList.remove('on'));
+  event.target.classList.add('on');
+}
+
+/* ===== SEARCH (step-by-step) ===== */
+function openAll() {
+  const kw = document.getElementById('kwInput').value.trim();
+  priceMin = parseInt(document.getElementById('priceMin').value) || 0;
+  priceMax = parseInt(document.getElementById('priceMax').value) || 0;
+  filters.brand = document.getElementById('brandInput')?.value.trim() || '';
+
+  if (!kw) { document.getElementById('kwInput').focus(); return; }
+  if (orderedSites.length === 0) { alert('サイトを1つ以上選んでください'); return; }
+
+  // ブランド名チェック
+  if (!filters.brand) {
+    const warn = document.getElementById('brand-warn');
+    if (warn) {
+      warn.style.display = 'flex';
+      setTimeout(() => { warn.style.display = 'none'; }, 5000);
+    }
+  }
+
+  saveHikakuHist(kw);
+
+  const allSites = filters.region === 'global' ? [...SITES, ...OVERSEAS] : SITES;
+  const targets = orderedSites.map(id => allSites.find(s => s.id === id)).filter(Boolean);
+  const priceStr = priceMax > 0
+    ? `〜${priceMax.toLocaleString()}円`
+    : priceMin > 0 ? `${priceMin.toLocaleString()}円〜` : '';
+
+  stepState = { active: true, current: 0, targets, kw, priceStr };
+
+  const statusBox = document.getElementById('statusBox');
+  const statusText = document.getElementById('statusText');
+  statusBox.classList.add('visible');
+  statusText.innerHTML = `🔍 <strong>「${kw}」</strong>${priceStr ? `（${priceStr}）` : ''} を ${targets.length}サイトで比較します`;
+  renderStep();
+  statusBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderStep() {
+  const { current, targets, kw, priceStr } = stepState;
+  const el = document.getElementById('stepContent');
+  const total = targets.length;
+
+  if (current >= total) {
+    el.innerHTML = `
+      <div class="step-done-wrap">
+        <div class="step-done-icon">✅</div>
+        <div class="step-done-msg">比較完了！</div>
+        <div class="step-done-sub">${total}サイトをすべて開きました。各タブで価格を比較してください。</div>
+        <button type="button" class="btn-retry" onclick="retrySearch()">🔄 もう一度検索する</button>
+      </div>
+      <div class="step-queue">${targets.map((s, i) => `
+        <div class="step-queue-item done">
+          <span class="step-num">✓</span>
+          <span>${s.emoji} ${s.name}</span>
+        </div>`).join('')}
+      </div>`;
+    return;
+  }
+
+  const pct = Math.round((current / total) * 100);
+  const next = targets[current];
+
+  el.innerHTML = `
+    <div class="progress-wrap">
+      <div class="progress-label"><span>${current}/${total} サイト完了</span><span>${pct}%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <button type="button" class="btn-step" onclick="advanceStep()">
+      <span class="step-label">${current === 0 ? '最初のサイトを開く' : '次のサイトを開く'}<br><span style="font-size:14px;opacity:.85">${next.emoji} ${next.name}</span></span>
+      <span class="step-arrow">→</span>
+    </button>
+    <div class="step-queue">${targets.map((s, i) => `
+      <div class="step-queue-item${i < current ? ' done' : ''}">
+        <span class="step-num">${i < current ? '✓' : i + 1}</span>
+        <span>${s.emoji} ${s.name}</span>
+        ${i === current ? '<span style="margin-left:auto;font-size:11px;color:#2563EB;font-weight:700;">← 次</span>' : ''}
+      </div>`).join('')}
+    </div>`;
+}
+
+function advanceStep() {
+  const { current, targets, kw } = stepState;
+  if (current >= targets.length) return;
+  const s = targets[current];
+  window.open(s.url(kw, priceMin, priceMax, filters), '_blank');
+  stepState.current++;
+  renderStep();
+}
+
+function retrySearch() {
+  closeStatus();
+  document.getElementById('kwInput').focus();
+  document.getElementById('tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeStatus() {
+  stepState = { active: false, current: 0, targets: [], kw: '' };
+  document.getElementById('statusBox').classList.remove('visible');
+  document.getElementById('statusText').innerHTML = '';
+  document.getElementById('stepContent').innerHTML = '';
+}
+
+/* ===== 検索履歴 ===== */
+const HIKAKU_HIST_KEY = 'hikaku-history-v1';
+
+function saveHikakuHist(kw) {
+  const hist = JSON.parse(localStorage.getItem(HIKAKU_HIST_KEY) || '[]');
+  const exists = hist.findIndex(h => h.kw === kw);
+  if (exists !== -1) hist.splice(exists, 1);
+  hist.unshift({ id: Date.now(), kw, date: new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}) });
+  if (hist.length > 100) hist.length = 100;
+  localStorage.setItem(HIKAKU_HIST_KEY, JSON.stringify(hist));
+}
+
+function toggleHikakuHist() {
+  const panel = document.getElementById('hikaku-hist-panel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) renderHikakuHist('');
+}
+
+function renderHikakuHist(q) {
+  const hist = JSON.parse(localStorage.getItem(HIKAKU_HIST_KEY) || '[]');
+  const query = (q||'').trim().toLowerCase();
+  const filtered = query ? hist.filter(h => h.kw.toLowerCase().includes(query)) : hist;
+  const el = document.getElementById('hikaku-hist-list');
+  if (!filtered.length) {
+    el.innerHTML = '<div class="hikaku-hist-empty">📭 履歴がありません<br><small>検索すると自動で保存されます</small></div>';
+    return;
+  }
+  el.innerHTML = filtered.map(h => `
+    <div class="hikaku-hist-item">
+      <div class="hikaku-hist-info">
+        <div class="hikaku-hist-kw">🔍 ${h.kw}</div>
+        <div class="hikaku-hist-date">📅 ${h.date}</div>
+      </div>
+      <button type="button" class="hikaku-hist-retry" onclick="reSearch('${h.kw.replace(/'/g,"\\'")}')">再検索</button>
+      <button type="button" class="hikaku-hist-del" onclick="deleteHikakuHistItem(${h.id})">削除</button>
+    </div>`).join('');
+}
+
+function reSearch(kw) {
+  document.getElementById('kwInput').value = kw;
+  document.getElementById('hikaku-hist-panel').classList.remove('open');
+  document.getElementById('tool').scrollIntoView({ behavior:'smooth', block:'start' });
+  setTimeout(() => openAll(), 400);
+}
+
+function deleteHikakuHistItem(id) {
+  let hist = JSON.parse(localStorage.getItem(HIKAKU_HIST_KEY) || '[]');
+  hist = hist.filter(h => h.id !== id);
+  localStorage.setItem(HIKAKU_HIST_KEY, JSON.stringify(hist));
+  renderHikakuHist(document.getElementById('hikaku-hist-q')?.value || '');
+}
+
+function clearHikakuHist() {
+  if (!confirm('すべての履歴を削除しますか？')) return;
+  localStorage.removeItem(HIKAKU_HIST_KEY);
+  renderHikakuHist('');
+}
+
+/* ===== SCROLL ===== */
+function scrollToTool() {
+  document.getElementById('tool').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// header shadow on scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('mainHeader').classList.toggle('scrolled', window.scrollY > 10);
+}, { passive: true });
+
+// show FAB when scrolled into LP
+const lpEl = document.getElementById('lp');
+const fabEl = document.getElementById('fabTool');
+const obs = new IntersectionObserver(entries => {
+  fabEl.classList.toggle('visible', entries[0].isIntersecting);
+}, { threshold: 0.05 });
+obs.observe(lpEl);
+
+// Enter on keyword input
+document.getElementById('kwInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') openAll();
+});
+
+/* ===== SW ===== */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
