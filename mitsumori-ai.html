@@ -1245,19 +1245,6 @@ select.form-input option { background: #1c2535; color: #e6edf3; }
       <button type="button" class="ai-slot-btn" id="ai-slot-D" onclick="aiSelectSlot('D')">D</button>
     </div>
 
-    <div class="ai-reader-label">Anthropic APIキー
-      <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener"
-         style="font-size:11px;color:#0891B2;margin-left:8px;font-weight:400;">取得方法 →</a>
-    </div>
-    <input type="password" class="ai-reader-input" id="ai-api-key" placeholder="sk-ant-api03-..." autocomplete="off">
-    <div style="font-size:11px;color:#94a3b8;margin:-8px 0 10px;line-height:1.5;">
-      console.anthropic.com でアカウント作成 → API Keys → Create Key
-    </div>
-    <div class="ai-key-save-row">
-      <input type="checkbox" id="ai-key-save" checked>
-      <label for="ai-key-save">端末に保存する（次回省略）</label>
-    </div>
-
     <div class="ai-reader-label">見積書ファイル（写真 / PDF）</div>
     <div class="ai-file-area" id="ai-file-area" onclick="document.getElementById('ai-file-input').click()">
       <div style="font-size:36px;">📄</div>
@@ -2169,13 +2156,10 @@ document.getElementById('history-modal').addEventListener('click', e => {
 });
 
 // ===== AI読み取り =====
-const AI_KEY_STORAGE = 'ai-reader-api-key';
 let aiReaderState = { slot: 'left', fileData: null, mimeType: null, isPDF: false, result: null };
 
 function openAIReader(slot) {
   aiReaderState = { slot, fileData: null, mimeType: null, isPDF: false, result: null };
-  const savedKey = localStorage.getItem(AI_KEY_STORAGE) || '';
-  document.getElementById('ai-api-key').value = savedKey;
   document.getElementById('ai-file-area').innerHTML =
     '<div style="font-size:36px;">📄</div><div>タップして写真・PDFを選択</div><div style="font-size:11px;opacity:.7;">JPG・PNG・PDF対応｜カメラ撮影も可</div>';
   document.getElementById('ai-file-input').value = '';
@@ -2230,49 +2214,21 @@ function handleAIFile(event) {
 }
 
 async function runAIRead() {
-  const apiKey = document.getElementById('ai-api-key').value.trim();
-  if (!apiKey) { showToast('❌ APIキーを入力してください'); return; }
   if (!aiReaderState.fileData) { showToast('❌ ファイルを選択してください'); return; }
-  if (document.getElementById('ai-key-save').checked) {
-    localStorage.setItem(AI_KEY_STORAGE, apiKey);
-  }
   const readBtn = document.getElementById('ai-read-btn');
   readBtn.disabled = true; readBtn.textContent = '⏳ 読み取り中...';
   document.getElementById('ai-result-area').style.display = 'none';
   const errEl = document.getElementById('ai-error-area');
   errEl.style.display = 'none'; errEl.textContent = '';
 
-  const prompt = `この見積書から情報を抽出してJSONのみを返してください。
-
-{
-  "companyName": "業者名または会社名（不明ならnull）",
-  "items": [
-    { "name": "品番または品名", "quantity": 数量, "unitPrice": 単価 }
-  ],
-  "notes": "特記事項・備考（なければnull）"
-}
-
-ルール：数値はカンマなし数値型、税抜単価優先、合計行は不要、JSON以外返さない。`;
-
   try {
-    const headers = {
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-      'content-type': 'application/json',
-      'anthropic-dangerous-direct-browser-access': 'true'
-    };
-    if (aiReaderState.isPDF) headers['anthropic-beta'] = 'pdfs-2024-09-25';
-
-    const contentBlock = aiReaderState.isPDF
-      ? { type:'document', source:{ type:'base64', media_type:'application/pdf', data:aiReaderState.fileData } }
-      : { type:'image',    source:{ type:'base64', media_type:aiReaderState.mimeType, data:aiReaderState.fileData } };
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST', headers,
+    const res = await fetch('/.netlify/functions/ai-read', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2048,
-        messages: [{ role:'user', content:[contentBlock, { type:'text', text:prompt }] }]
+        fileData: aiReaderState.fileData,
+        mimeType: aiReaderState.mimeType,
+        isPDF: aiReaderState.isPDF
       })
     });
 
